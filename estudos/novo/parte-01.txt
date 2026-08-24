@@ -1,0 +1,902 @@
+                 │
+                 └── ENUM
+                     ├── Desenvolvedor
+                     ├── Designer
+                     ├── Gerente
+                     └── Analista
+4. Enum + match
+
+Aqui começa a ficar realmente interessante.
+
+Como um enum possui possibilidades específicas, podemos usar match para decidir o que fazer com cada uma.
+
+#[derive(Debug)]
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+    Analista,
+}
+
+fn main() {
+    let cargo = Cargo::Desenvolvedor;
+
+    match cargo {
+        Cargo::Desenvolvedor => {
+            println!("Trabalha com desenvolvimento.");
+        }
+
+        Cargo::Designer => {
+            println!("Trabalha com design.");
+        }
+
+        Cargo::Gerente => {
+            println!("Trabalha com gerenciamento.");
+        }
+
+        Cargo::Analista => {
+            println!("Trabalha com análise.");
+        }
+    }
+}
+
+Como temos:
+
+let cargo = Cargo::Desenvolvedor;
+
+o match encontra:
+
+Cargo::Desenvolvedor
+
+e executa:
+
+Trabalha com desenvolvimento.
+
+Mentalmente:
+
+cargo
+  ↓
+Cargo::Desenvolvedor
+  ↓
+match
+  │
+  ├── Desenvolvedor ✅
+  ├── Designer
+  ├── Gerente
+  └── Analista
+        ↓
+executa o braço correspondente
+5. Enum pode carregar dados
+
+Essa é uma característica muito poderosa dos enums do Rust.
+
+Você pode fazer:
+
+enum Pagamento {
+    Dinheiro,
+    Pix(String),
+    Cartao(String),
+}
+
+Agora as variantes Pix e Cartao podem carregar informações.
+
+Por exemplo:
+
+let pagamento = Pagamento::Pix(
+    "cliente@email.com".to_string()
+);
+
+Ou:
+
+let pagamento = Pagamento::Cartao(
+    "**** **** **** 1234".to_string()
+);
+
+Enquanto:
+
+let pagamento = Pagamento::Dinheiro;
+
+não precisa carregar informação.
+
+Então:
+
+Pagamento
+│
+├── Dinheiro
+│
+├── Pix(String)
+│       ↓
+│     chave Pix
+│
+└── Cartao(String)
+        ↓
+      identificação
+
+Essa capacidade diferencia bastante os enums de Rust de enumerações mais simples encontradas em algumas outras linguagens.
+
+6. Enum pode carregar tipos diferentes
+
+Podemos ir além:
+
+enum Dado {
+    Numero(i32),
+    Texto(String),
+    Booleano(bool),
+}
+
+Agora:
+
+let dado1 = Dado::Numero(10);
+
+let dado2 = Dado::Texto(
+    "Rust".to_string()
+);
+
+let dado3 = Dado::Booleano(true);
+
+Todos são:
+
+Dado
+
+mas cada variante carrega um tipo diferente:
+
+Dado
+│
+├── Numero(i32)
+│
+├── Texto(String)
+│
+└── Booleano(bool)
+7. Extraindo o valor com match
+
+Se o enum contém informação, match também consegue extrair essa informação.
+
+enum Dado {
+    Numero(i32),
+    Texto(String),
+    Booleano(bool),
+}
+
+fn main() {
+    let dado = Dado::Numero(50);
+
+    match dado {
+        Dado::Numero(numero) => {
+            println!("Número: {}", numero);
+        }
+
+        Dado::Texto(texto) => {
+            println!("Texto: {}", texto);
+        }
+
+        Dado::Booleano(valor) => {
+            println!("Booleano: {}", valor);
+        }
+    }
+}
+
+Quando temos:
+
+Dado::Numero(50)
+
+o:
+
+Dado::Numero(numero)
+
+pega o 50 e coloca temporariamente em:
+
+numero
+
+Portanto:
+
+Dado::Numero(50)
+        ↓
+      match
+        ↓
+Dado::Numero(numero)
+             ↓
+          numero = 50
+             ↓
+println!("{}", numero)
+8. Você já utilizou um enum sem perceber
+
+No código de funcionários fizemos:
+
+fn buscar_funcionario(
+    funcionarios: &[Funcionario],
+    id: u32,
+) -> Option<&Funcionario>
+
+Esse:
+
+Option
+
+é um enum da biblioteca padrão do Rust.
+
+Simplificando, ele é conceitualmente parecido com:
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+Ou seja:
+
+Option
+│
+├── Some(valor)
+│
+└── None
+
+Por isso conseguimos fazer:
+
+match buscar_funcionario(&lista, id) {
+    Some(funcionario) => {
+        println!("{}", funcionario.nome);
+    }
+
+    None => {
+        println!("Funcionário não encontrado");
+    }
+}
+
+Você já estava usando:
+
+ENUM
+ ↓
+Option
+ ↓
+Some / None
+ ↓
+match
+9. Option é a resposta para sua dúvida anterior sobre null
+
+Quando você perguntou sobre colocar o CPF como null, eu mencionei:
+
+Option<String>
+
+Agora fica mais fácil entender o motivo.
+
+Rust pode representar:
+
+struct Cliente {
+    id: u32,
+    nome: String,
+    cpf: Option<String>,
+}
+
+Cliente com CPF:
+
+let cliente = Cliente {
+    id: 1,
+    nome: "Jhonata".to_string(),
+    cpf: Some("12345678900".to_string()),
+};
+
+Sem CPF:
+
+let cliente = Cliente {
+    id: 1,
+    nome: "Jhonata".to_string(),
+    cpf: None,
+};
+
+Porque Option<T> é um enum:
+
+Option<String>
+      │
+ ┌────┴─────┐
+ ↓          ↓
+Some       None
+ ↓          ↓
+String    ausência
+
+Em vez de depender de um null, o próprio tipo informa:
+
+Esse valor pode existir ou pode estar ausente.
+
+10. Enum também pode ter impl
+
+Assim como sua struct, um enum pode possuir métodos.
+
+#[derive(Debug)]
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+    Analista,
+}
+
+impl Cargo {
+    fn descricao(&self) {
+        match self {
+            Cargo::Desenvolvedor => {
+                println!("Desenvolve sistemas.");
+            }
+
+            Cargo::Designer => {
+                println!("Trabalha com design.");
+            }
+
+            Cargo::Gerente => {
+                println!("Gerencia a equipe.");
+            }
+
+            Cargo::Analista => {
+                println!("Realiza análises.");
+            }
+        }
+    }
+}
+
+fn main() {
+    let cargo = Cargo::Desenvolvedor;
+
+    cargo.descricao();
+}
+
+Perceba novamente:
+
+&self
+
+O método está consultando a própria instância do enum.
+
+ENUM EM RUST
+
+==================================================
+1. O QUE É ENUM?
+==================================================
+
+enum significa "enumeration" (enumeração).
+
+Um enum permite criar um tipo que pode assumir UMA entre várias
+possibilidades definidas.
+
+Exemplo:
+
+enum TipoConta {
+    Corrente,
+    Poupanca,
+    Salario,
+}
+
+TipoConta agora é um novo tipo.
+
+As possibilidades dentro dele são chamadas de VARIANTES:
+
+TipoConta
+    |
+    |-- Corrente
+    |-- Poupanca
+    |-- Salario
+
+
+==================================================
+2. CRIANDO E USANDO UM ENUM
+==================================================
+
+Para selecionar uma variante usamos ::
+
+Exemplo:
+
+let conta = TipoConta::Corrente;
+
+Outro exemplo:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+    Analista,
+}
+
+let cargo = Cargo::Desenvolvedor;
+
+
+==================================================
+3. POR QUE USAR ENUM?
+==================================================
+
+Uma String aceita qualquer texto:
+
+let cargo = "Desenvolvedor";
+
+Mas também aceitaria:
+
+let cargo = "Qualquer coisa";
+
+Com enum, limitamos as possibilidades:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+Cargo::Desenvolvedor  // válido
+Cargo::Designer       // válido
+Cargo::Gerente        // válido
+
+Cargo::QualquerCoisa  // ERRO
+
+Isso torna o código mais seguro porque o compilador conhece
+todas as possibilidades válidas.
+
+
+==================================================
+4. ENUM DENTRO DE STRUCT
+==================================================
+
+Um enum pode ser utilizado como tipo de um campo de uma struct.
+
+Exemplo:
+
+#[derive(Debug)]
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+#[derive(Debug)]
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: Cargo,
+}
+
+Criando:
+
+let funcionario = Funcionario {
+    id: 1,
+    nome: "Alice".to_string(),
+    idade: 30,
+    cargo: Cargo::Desenvolvedor,
+};
+
+
+==================================================
+5. ENUM + MATCH
+==================================================
+
+match é muito utilizado com enum para tratar cada possibilidade.
+
+Exemplo:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+let cargo = Cargo::Desenvolvedor;
+
+match cargo {
+    Cargo::Desenvolvedor => {
+        println!("Trabalha com desenvolvimento.");
+    }
+
+    Cargo::Designer => {
+        println!("Trabalha com design.");
+    }
+
+    Cargo::Gerente => {
+        println!("Trabalha com gerenciamento.");
+    }
+}
+
+Visualmente:
+
+cargo
+  |
+  v
+Cargo::Desenvolvedor
+  |
+  v
+match
+  |
+  |-- Desenvolvedor -> executa
+  |-- Designer
+  |-- Gerente
+
+
+==================================================
+6. ENUM PODE ARMAZENAR DADOS
+==================================================
+
+As variantes de um enum também podem carregar informações.
+
+Exemplo:
+
+enum Pagamento {
+    Dinheiro,
+    Pix(String),
+    Cartao(String),
+}
+
+Criando:
+
+let pagamento1 = Pagamento::Dinheiro;
+
+let pagamento2 = Pagamento::Pix(
+    "chave-pix".to_string()
+);
+
+let pagamento3 = Pagamento::Cartao(
+    "1234".to_string()
+);
+
+Visualmente:
+
+Pagamento
+    |
+    |-- Dinheiro
+    |
+    |-- Pix(String)
+    |       |
+    |       -> guarda uma String
+    |
+    |-- Cartao(String)
+            |
+            -> guarda uma String
+
+
+==================================================
+7. VARIANTES PODEM TER TIPOS DIFERENTES
+==================================================
+
+Exemplo:
+
+enum Dado {
+    Numero(i32),
+    Texto(String),
+    Booleano(bool),
+}
+
+Podemos criar:
+
+let dado1 = Dado::Numero(10);
+
+let dado2 = Dado::Texto(
+    "Rust".to_string()
+);
+
+let dado3 = Dado::Booleano(true);
+
+
+==================================================
+8. EXTRAINDO DADOS COM MATCH
+==================================================
+
+match também consegue acessar o valor armazenado dentro
+da variante.
+
+Exemplo:
+
+enum Dado {
+    Numero(i32),
+    Texto(String),
+    Booleano(bool),
+}
+
+let dado = Dado::Numero(50);
+
+match dado {
+    Dado::Numero(numero) => {
+        println!("Número: {}", numero);
+    }
+
+    Dado::Texto(texto) => {
+        println!("Texto: {}", texto);
+    }
+
+    Dado::Booleano(valor) => {
+        println!("Booleano: {}", valor);
+    }
+}
+
+Nesse caso:
+
+Dado::Numero(50)
+        |
+        v
+Dado::Numero(numero)
+             |
+             v
+         numero = 50
+
+
+==================================================
+9. OPTION<T> É UM ENUM
+==================================================
+
+Option é um enum muito importante da biblioteca padrão do Rust.
+
+Conceitualmente:
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+Some significa que existe um valor.
+
+None significa ausência de valor.
+
+Exemplo:
+
+let nome: Option<String> =
+    Some("Jhonata".to_string());
+
+Ou:
+
+let nome: Option<String> = None;
+
+
+Visualmente:
+
+Option<T>
+    |
+    |-- Some(T)
+    |      |
+    |      -> existe um valor
+    |
+    |-- None
+           |
+           -> não existe valor
+
+
+==================================================
+10. OPTION NO LUGAR DE NULL
+==================================================
+
+Rust utiliza Option<T> para representar situações em que
+um valor pode ou não existir.
+
+Exemplo:
+
+struct Cliente {
+    id: u32,
+    nome: String,
+    cpf: Option<String>,
+}
+
+Cliente com CPF:
+
+let cliente = Cliente {
+    id: 1,
+    nome: "Jhonata".to_string(),
+    cpf: Some("12345678900".to_string()),
+};
+
+Cliente sem CPF:
+
+let cliente = Cliente {
+    id: 1,
+    nome: "Jhonata".to_string(),
+    cpf: None,
+};
+
+
+==================================================
+11. OPTION + MATCH
+==================================================
+
+Podemos tratar Some e None utilizando match.
+
+Exemplo:
+
+let cpf: Option<String> =
+    Some("12345678900".to_string());
+
+match cpf {
+    Some(valor) => {
+        println!("CPF: {}", valor);
+    }
+
+    None => {
+        println!("CPF não informado.");
+    }
+}
+
+
+==================================================
+12. ENUM TAMBÉM PODE TER IMPL
+==================================================
+
+Assim como struct, enum pode possuir métodos.
+
+Exemplo:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+impl Cargo {
+
+    fn descricao(&self) {
+
+        match self {
+
+            Cargo::Desenvolvedor => {
+                println!("Desenvolve sistemas.");
+            }
+
+            Cargo::Designer => {
+                println!("Trabalha com design.");
+            }
+
+            Cargo::Gerente => {
+                println!("Gerencia a equipe.");
+            }
+        }
+    }
+}
+
+Uso:
+
+let cargo = Cargo::Desenvolvedor;
+
+cargo.descricao();
+
+
+==================================================
+13. STRUCT VS ENUM
+==================================================
+
+STRUCT:
+
+Utilizada para AGRUPAR informações relacionadas.
+
+Exemplo:
+
+struct Cliente {
+    id: u32,
+    nome: String,
+    cpf: String,
+}
+
+Pergunta:
+
+"Quais dados um Cliente possui?"
+
+Cliente
+    |
+    |-- id
+    |-- nome
+    |-- cpf
+
+
+ENUM:
+
+Utilizado para representar POSSIBILIDADES.
+
+Exemplo:
+
+enum TipoConta {
+    Corrente,
+    Poupanca,
+    Salario,
+}
+
+Pergunta:
+
+"Quais valores TipoConta pode assumir?"
+
+TipoConta
+    |
+    |-- Corrente
+    |-- Poupanca
+    |-- Salario
+
+
+==================================================
+14. RESUMO PARA MEMORIZAR
+==================================================
+
+struct
+    ->
+agrupa dados relacionados
+
+
+enum
+    ->
+define um conjunto de possibilidades
+
+
+Variante
+    ->
+cada possibilidade de um enum
+
+
+::
+    ->
+acessa uma variante
+
+Cargo::Gerente
+
+
+match
+    ->
+trata as diferentes possibilidades de um enum
+
+
+Option<T>
+    ->
+representa um valor que pode existir ou não
+
+
+Some(T)
+    ->
+existe um valor
+
+
+None
+    ->
+não existe valor
+
+
+RESUMINDO:
+
+STRUCT
+"Quais informações isso possui?"
+
+ENUM
+"Quais possibilidades isso pode assumir?"
+
+MATCH
+"O que fazer em cada possibilidade?"
+
+OPTION
+"Esse valor existe ou não?"
+
+PATTERN MATCHING
+Pattern Matching significa analisar um valor e verificar com qual padrão ele corresponde para decidir o que executar.
+
+A ferramenta mais conhecida para isso é:
+
+match
+
+Pense assim:
+
+VALOR
+  ↓
+match
+  ↓
+Qual padrão combina com esse valor?
+  ↓
+Executa o código daquele padrão
+1. Exemplo básico
+fn main() {
+    let numero = 2;
+
+    match numero {
+        1 => println!("Um"),
+        2 => println!("Dois"),
+        3 => println!("Três"),
+        _ => println!("Outro número"),
+    }
+}
+
+Resultado:
+
+Dois
+
+O Rust compara:
+
+numero = 2
+
+match numero
+    |
+    |-- 1 => não corresponde
+    |
+    |-- 2 => corresponde! ✓
+    |          ↓
+    |       "Dois"
+    |
+    |-- 3
+    |
+    └-- _
