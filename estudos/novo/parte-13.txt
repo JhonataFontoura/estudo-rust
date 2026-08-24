@@ -1,0 +1,1086 @@
+Repository
+→ padrão utilizado para separar
+  acesso aos dados das regras da
+  aplicação.
+
+Exemplo:
+
+trait Repository<T> {
+    fn salvar(&self, item: T);
+    fn buscar(&self, id: i32) -> Option<T>;
+    fn remover(&self, id: i32);
+}
+
+
+Fluxo:
+
+Aplicação
+    ↓
+Repository
+    ↓
+Banco
+
+
+========================
+ORM
+========================
+
+ORM
+→ ferramenta/camada que ajuda a
+  relacionar estruturas da linguagem
+  com dados do banco.
+
+Exemplo:
+
+Struct Rust
+    ↕
+ORM
+    ↕
+Tabela
+
+
+========================
+DIESEL
+========================
+
+Diesel
+→ ORM/query builder para Rust.
+
+Pode trabalhar com bancos como:
+
+→ PostgreSQL
+→ MySQL
+→ SQLite
+
+Exemplo:
+
+#[derive(Queryable)]
+struct Usuario {
+    id: i32,
+    nome: String,
+}
+
+
+========================
+REPOSITORY + DIESEL
+========================
+
+Repository
+→ organiza acesso aos dados.
+
+Diesel
+→ realiza operações com o banco.
+
+Fluxo:
+
+Aplicação
+    ↓
+Repository
+    ↓
+Diesel
+    ↓
+Banco de dados
+
+
+========================
+SQLITE
+========================
+
+SQLite
+→ banco de dados relacional leve.
+
+Pode armazenar o banco em um
+arquivo local.
+
+Exemplo:
+
+banco.db
+
+
+========================
+RUSQLITE
+========================
+
+rusqlite
+→ crate Rust para trabalhar
+  diretamente com SQLite.
+
+Conexão:
+
+Connection::open("banco.db")
+
+Criar tabela:
+
+conn.execute(
+    "CREATE TABLE ...",
+    []
+)
+
+Inserir:
+
+conn.execute(
+    "INSERT INTO usuarios ...",
+    params![...]
+)
+
+
+========================
+PARA MEMORIZAR
+========================
+
+Persistência
+= dados continuam existindo.
+
+serde
+= serialização/deserialização.
+
+serde_json
+= trabalhar com JSON.
+
+MySQL
+= banco relacional cliente-servidor.
+
+Repository
+= separa acesso aos dados.
+
+ORM
+= relaciona código e banco.
+
+Diesel
+= ORM/query builder Rust.
+
+SQLite
+= banco relacional leve/local.
+
+rusqlite
+= acesso ao SQLite em Rust.
+
+
+MAPA GERAL:
+
+Persistência
+│
+├── Arquivo
+│     ↓
+│    JSON
+│     ↓
+│ serde + serde_json
+│
+└── Banco de dados
+      │
+      ├── MySQL
+      │
+      ├── Diesel
+      │
+      └── SQLite
+            ↓
+         rusqlite
+
+1. Iniciando API com Rocket
+
+Rocket é um framework web para Rust usado para criar APIs e aplicações web.
+
+No Cargo.toml:
+
+[dependencies]
+rocket = { version = "0.5", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+
+API básica:
+
+#[macro_use]
+extern crate rocket;
+
+#[get("/")]
+fn index() -> &'static str {
+    "API funcionando!"
+}
+
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
+        .mount("/", routes![index])
+}
+
+Temos:
+
+#[get("/")]
+→ define uma rota GET
+
+.mount()
+→ registra as rotas
+
+#[launch]
+→ inicia a aplicação Rocket
+2. Arquitetura para trabalhar com API em Rocket
+
+Conforme a aplicação cresce, é melhor não colocar tudo no main.rs.
+
+Uma organização possível:
+
+src/
+│
+├── main.rs
+│
+├── models/
+│   └── usuario.rs
+│
+├── routes/
+│   └── usuario.rs
+│
+├── services/
+│   └── usuario_service.rs
+│
+├── repositories/
+│   └── usuario_repository.rs
+│
+└── auth/
+    └── jwt.rs
+
+Responsabilidades:
+
+Routes
+→ recebe requisições HTTP
+
+Services
+→ regras de negócio
+
+Repositories
+→ acesso aos dados
+
+Models
+→ estruturas de dados
+
+Auth
+→ autenticação/JWT
+
+Fluxo:
+
+Cliente
+   ↓
+Route
+   ↓
+Service
+   ↓
+Repository
+   ↓
+Banco
+3. Criando POST para recurso em Rocket
+
+POST normalmente é usado para criar um recurso.
+
+Modelo:
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct Usuario {
+    nome: String,
+    idade: u32,
+}
+
+Rota:
+
+use rocket::serde::json::Json;
+
+#[post("/usuarios", data = "<usuario>")]
+fn criar_usuario(
+    usuario: Json<Usuario>
+) -> Json<Usuario> {
+    usuario
+}
+
+O fluxo é:
+
+POST /usuarios
+       ↓
+JSON recebido
+       ↓
+Json<Usuario>
+       ↓
+criação
+       ↓
+Resposta
+
+Exemplo de JSON:
+
+{
+    "nome": "Jhonata",
+    "idade": 24
+}
+4. Fazendo PUT API com Rocket
+
+PUT é normalmente utilizado para atualizar um recurso.
+
+#[put("/usuarios/<id>", data = "<usuario>")]
+fn atualizar_usuario(
+    id: u32,
+    usuario: Json<Usuario>
+) -> String {
+    format!(
+        "Usuário {} atualizado: {}",
+        id,
+        usuario.nome
+    )
+}
+
+Requisição:
+
+PUT /usuarios/10
+
+Com:
+
+{
+    "nome": "Jhonata",
+    "idade": 25
+}
+
+Fluxo:
+
+PUT
+ ↓
+ID do recurso
+ ↓
+Novos dados
+ ↓
+Atualização
+5. Rota show para mostrar um recurso
+
+Uma rota show normalmente corresponde a buscar um recurso específico.
+
+Exemplo:
+
+#[get("/usuarios/<id>")]
+fn mostrar_usuario(id: u32) -> String {
+    format!("Buscando usuário {}", id)
+}
+
+Requisição:
+
+GET /usuarios/10
+
+Conceitualmente:
+
+GET /usuarios/10
+        ↓
+       id=10
+        ↓
+buscar usuário
+        ↓
+retornar recurso
+
+Em um CRUD:
+
+GET /usuarios
+→ listar todos
+
+GET /usuarios/<id>
+→ mostrar um
+
+POST /usuarios
+→ criar
+
+PUT /usuarios/<id>
+→ atualizar
+
+DELETE /usuarios/<id>
+→ excluir
+6. Criando rota DELETE no Rocket
+
+DELETE é utilizado para remover um recurso.
+
+#[delete("/usuarios/<id>")]
+fn deletar_usuario(id: u32) -> String {
+    format!("Usuário {} removido", id)
+}
+
+Exemplo:
+
+DELETE /usuarios/10
+
+Fluxo:
+
+DELETE
+   ↓
+recebe ID
+   ↓
+localiza recurso
+   ↓
+remove recurso
+7. Gerando Token JWT para login
+
+JWT significa:
+
+JSON Web Token
+
+É muito utilizado para autenticação de APIs.
+
+O fluxo básico é:
+
+Usuário
+   ↓
+POST /login
+   ↓
+email + senha
+   ↓
+Servidor valida
+   ↓
+JWT gerado
+   ↓
+Token enviado ao cliente
+
+Um JWT normalmente possui:
+
+HEADER
+.
+PAYLOAD
+.
+SIGNATURE
+
+Conceitualmente:
+
+xxxxx.yyyyy.zzzzz
+
+Para trabalhar com JWT em Rust, pode-se utilizar uma crate como jsonwebtoken.
+
+[dependencies]
+jsonwebtoken = "10"
+serde = { version = "1", features = ["derive"] }
+
+Claims:
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    sub: String,
+    exp: usize,
+}
+
+O sub identifica o sujeito/usuário e exp representa a expiração.
+
+Importante: JWT normalmente é assinado, não criptografado. O payload de um JWT comum não deve ser tratado como secreto.
+
+8. Middleware para validar JWT
+
+Depois do login, o cliente envia o token nas próximas requisições.
+
+Normalmente:
+
+Authorization: Bearer <token>
+
+O servidor precisa verificar esse token antes de liberar uma rota protegida.
+
+No Rocket, uma forma comum de implementar isso é com um Request Guard.
+
+Conceitualmente:
+
+struct UsuarioAutenticado {
+    usuario_id: String,
+}
+
+Depois uma rota protegida pode exigir esse tipo:
+
+#[get("/perfil")]
+fn perfil(
+    usuario: UsuarioAutenticado
+) -> String {
+    format!(
+        "Usuário autenticado: {}",
+        usuario.usuario_id
+    )
+}
+
+A ideia é:
+
+Requisição
+    ↓
+Authorization: Bearer JWT
+    ↓
+Request Guard
+    ↓
+Token existe?
+    ↓
+Assinatura válida?
+    ↓
+Token expirou?
+    ↓
+Claims válidas?
+    ↓
+SIM → libera rota
+NÃO → 401 Unauthorized
+Resumo para copiar e colar
+API REST COM ROCKET — RUST
+
+
+========================
+ROCKET
+========================
+
+Rocket
+→ framework web para Rust.
+
+Usado para:
+
+→ APIs REST
+→ aplicações web
+→ rotas HTTP
+→ recebimento de JSON
+→ autenticação
+
+
+========================
+ROTA
+========================
+
+Rota
+→ endereço da API associado
+  a uma operação.
+
+Exemplo:
+
+#[get("/usuarios")]
+fn usuarios() {
+}
+
+
+========================
+GET
+========================
+
+GET
+→ buscar dados.
+
+GET /usuarios
+→ listar usuários.
+
+GET /usuarios/10
+→ buscar usuário 10.
+
+
+========================
+POST
+========================
+
+POST
+→ criar recurso.
+
+Exemplo:
+
+#[post("/usuarios", data = "<usuario>")]
+fn criar(usuario: Json<Usuario>) {
+}
+
+
+Fluxo:
+
+Cliente
+ ↓
+POST
+ ↓
+JSON
+ ↓
+API
+ ↓
+Novo recurso
+
+
+========================
+PUT
+========================
+
+PUT
+→ atualizar recurso.
+
+Exemplo:
+
+#[put("/usuarios/<id>", data = "<usuario>")]
+fn atualizar(
+    id: u32,
+    usuario: Json<Usuario>
+) {
+}
+
+
+========================
+SHOW
+========================
+
+Show
+→ mostrar um recurso específico.
+
+Normalmente:
+
+GET /usuarios/<id>
+
+
+Exemplo:
+
+#[get("/usuarios/<id>")]
+fn mostrar(id: u32) {
+}
+
+
+========================
+DELETE
+========================
+
+DELETE
+→ remover recurso.
+
+Exemplo:
+
+#[delete("/usuarios/<id>")]
+fn deletar(id: u32) {
+}
+
+
+========================
+CRUD
+========================
+
+CREATE
+→ POST
+
+READ
+→ GET
+
+UPDATE
+→ PUT
+
+DELETE
+→ DELETE
+
+
+========================
+ARQUITETURA
+========================
+
+Uma organização possível:
+
+Routes
+→ requisições HTTP.
+
+Services
+→ regras de negócio.
+
+Repositories
+→ acesso aos dados.
+
+Models
+→ estruturas da aplicação.
+
+Auth
+→ autenticação.
+
+
+Fluxo:
+
+Cliente
+ ↓
+Route
+ ↓
+Service
+ ↓
+Repository
+ ↓
+Banco
+
+
+========================
+JWT
+========================
+
+JWT
+→ JSON Web Token.
+
+Utilizado para autenticação
+e transporte de claims.
+
+Estrutura:
+
+HEADER
+.
+PAYLOAD
+.
+SIGNATURE
+
+
+IMPORTANTE:
+
+JWT normalmente é assinado,
+não criptografado.
+
+Não colocar informações secretas
+no payload.
+
+
+========================
+LOGIN
+========================
+
+Fluxo:
+
+email + senha
+     ↓
+POST /login
+     ↓
+Servidor valida
+     ↓
+Gera JWT
+     ↓
+Cliente recebe token
+
+
+========================
+BEARER TOKEN
+========================
+
+O cliente pode enviar:
+
+Authorization:
+Bearer <token>
+
+
+========================
+VALIDAÇÃO JWT
+========================
+
+Requisição
+     ↓
+Token JWT
+     ↓
+Validação
+     ↓
+Assinatura
+     ↓
+Expiração
+     ↓
+Claims
+     ↓
+Rota protegida
+
+
+Token válido
+→ acesso permitido.
+
+Token inválido
+→ acesso negado.
+
+
+========================
+MIDDLEWARE / REQUEST GUARD
+========================
+
+No Rocket, Request Guards podem
+ser usados para proteger rotas.
+
+Eles verificam a requisição antes
+da execução da rota.
+
+Exemplo conceitual:
+
+#[get("/perfil")]
+fn perfil(
+    usuario: UsuarioAutenticado
+) {
+}
+
+
+========================
+PARA MEMORIZAR
+========================
+
+Rocket
+= framework web Rust.
+
+Route
+= endpoint da API.
+
+GET
+= buscar.
+
+POST
+= criar.
+
+PUT
+= atualizar.
+
+DELETE
+= excluir.
+
+CRUD
+= Create, Read, Update, Delete.
+
+JSON
+= formato comum para enviar dados.
+
+JWT
+= token de autenticação/autorização.
+
+Bearer
+= forma comum de enviar o token.
+
+Request Guard
+= valida uma requisição antes
+  de permitir acesso à rota.
+
+
+MAPA GERAL:
+
+Cliente
+   ↓
+API Rocket
+   │
+   ├── GET
+   ├── POST
+   ├── PUT
+   └── DELETE
+        ↓
+     Service
+        ↓
+   Repository
+        ↓
+      Banco
+
+
+AUTENTICAÇÃO:
+
+Login
+  ↓
+Validação
+  ↓
+JWT
+  ↓
+Cliente
+  ↓
+Bearer Token
+  ↓
+Request Guard
+  ↓
+Rota protegida
+
+
+Iniciando App Web com Rocket
+
+Antes estávamos usando Rocket principalmente como API. Agora podemos usá-lo para servir páginas HTML.
+
+Uma estrutura inicial:
+
+meu_app/
+├── Cargo.toml
+├── src/
+│   └── main.rs
+├── templates/
+│   └── index.html.tera
+└── static/
+    ├── css/
+    └── js/
+
+Dependências:
+
+[dependencies]
+rocket = "0.5"
+rocket_dyn_templates = { version = "0.2", features = ["tera"] }
+
+Exemplo:
+
+#[macro_use]
+extern crate rocket;
+
+use rocket_dyn_templates::{context, Template};
+
+#[get("/")]
+fn index() -> Template {
+    Template::render(
+        "index",
+        context! {
+            titulo: "Minha aplicação"
+        },
+    )
+}
+
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
+        .mount("/", routes![index])
+        .attach(Template::fairing())
+}
+
+Aqui:
+
+GET /
+ ↓
+index()
+ ↓
+Template::render()
+ ↓
+index.html.tera
+ ↓
+HTML
+ ↓
+Navegador
+2. Templates dinâmicos com Rocket
+
+Templates permitem gerar HTML usando dados vindos do Rust.
+
+Por exemplo:
+
+#[get("/usuario/<nome>")]
+fn usuario(nome: &str) -> Template {
+    Template::render(
+        "usuario",
+        context! {
+            nome: nome
+        },
+    )
+}
+
+Template:
+
+<h1>Olá, {{ nome }}!</h1>
+
+Acessando:
+
+/usuario/Jhonata
+
+o navegador recebe algo equivalente a:
+
+<h1>Olá, Jhonata!</h1>
+
+Fluxo:
+
+Rust
+ ↓
+context!
+ ↓
+Template
+ ↓
+HTML dinâmico
+3. Arquitetura com Controllers
+
+Quando o projeto aumenta, colocar todas as rotas no main.rs deixa o código difícil de manter.
+
+Podemos separar:
+
+src/
+├── main.rs
+├── controllers/
+│   ├── mod.rs
+│   └── usuario_controller.rs
+├── models/
+│   ├── mod.rs
+│   └── usuario.rs
+└── repositories/
+    ├── mod.rs
+    └── usuario_repository.rs
+
+No:
+
+controllers/mod.rs
+
+podemos declarar:
+
+pub mod usuario_controller;
+
+E em usuario_controller.rs:
+
+use rocket_dyn_templates::{context, Template};
+
+#[get("/usuarios")]
+pub fn index() -> Template {
+    Template::render(
+        "usuarios/index",
+        context! {},
+    )
+}
+
+No main.rs:
+
+mod controllers;
+
+E registramos:
+
+.mount(
+    "/",
+    routes![
+        controllers::usuario_controller::index
+    ],
+)
+
+A arquitetura fica:
+
+Request
+   ↓
+Controller
+   ↓
+Service / Repository
+   ↓
+Dados
+   ↓
+Controller
+   ↓
+Template
+   ↓
+HTML
+4. Application Layout
+
+Um layout evita repetir a mesma estrutura HTML em todas as páginas.
+
+Por exemplo:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Minha aplicação{% endblock %}</title>
+</head>
+
+<body>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/usuarios">Usuários</a>
+    </nav>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
+
+Uma página pode estender esse layout:
+
+{% extends "layout" %}
+
+{% block title %}
+Usuários
+{% endblock %}
+
+{% block content %}
+
+<h1>Usuários</h1>
+
+{% endblock %}
+
+Assim:
+
+layout
+├── HTML
+├── head
+├── navbar
+├── main
+└── estrutura comum
+
+Página
+└── conteúdo específico
+
+Isso reduz repetição.
+
+5. Trabalhando com arquivos estáticos
+
+Arquivos estáticos são recursos que normalmente não precisam ser processados como templates:
+
+CSS
+JavaScript
