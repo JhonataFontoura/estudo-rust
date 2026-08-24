@@ -1,0 +1,971 @@
+Cada lado esquerdo do => é um padrão.
+
+2. O _ no Pattern Matching
+
+No exemplo:
+
+_ => println!("Outro número"),
+
+_ significa:
+
+qualquer outro valor que não tenha correspondido aos padrões anteriores.
+
+Exemplo:
+
+let numero = 50;
+
+match numero {
+    1 => println!("Um"),
+    2 => println!("Dois"),
+    _ => println!("Outro"),
+}
+
+Resultado:
+
+Outro
+
+É parecido com o default de um switch em outras linguagens.
+
+3. Pattern Matching com Enum
+
+Aqui está uma das aplicações mais importantes.
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+fn main() {
+    let cargo = Cargo::Gerente;
+
+    match cargo {
+        Cargo::Desenvolvedor => {
+            println!("Desenvolvedor");
+        }
+
+        Cargo::Designer => {
+            println!("Designer");
+        }
+
+        Cargo::Gerente => {
+            println!("Gerente");
+        }
+    }
+}
+
+Temos:
+
+cargo
+  ↓
+Cargo::Gerente
+  ↓
+match
+  │
+  ├── Cargo::Desenvolvedor ❌
+  ├── Cargo::Designer      ❌
+  └── Cargo::Gerente       ✅
+                ↓
+        println!("Gerente")
+4. Match precisa tratar todas as possibilidades
+
+Essa característica é muito importante em Rust.
+
+Se temos:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+não é suficiente fazer:
+
+match cargo {
+    Cargo::Desenvolvedor => println!("Dev"),
+}
+
+Rust reclama porque ainda existem:
+
+Designer
+Gerente
+
+sem tratamento.
+
+Você pode tratar todas:
+
+match cargo {
+    Cargo::Desenvolvedor => println!("Dev"),
+    Cargo::Designer => println!("Designer"),
+    Cargo::Gerente => println!("Gerente"),
+}
+
+Ou usar:
+
+match cargo {
+    Cargo::Desenvolvedor => println!("Dev"),
+
+    _ => println!("Outro cargo"),
+}
+
+Agora _ cobre todas as outras possibilidades.
+
+5. Pattern Matching pode extrair valores
+
+Lembra que um enum pode carregar informações?
+
+enum Dado {
+    Numero(i32),
+    Texto(String),
+}
+
+Podemos criar:
+
+let dado = Dado::Numero(50);
+
+E usar Pattern Matching:
+
+match dado {
+    Dado::Numero(numero) => {
+        println!("Número encontrado: {}", numero);
+    }
+
+    Dado::Texto(texto) => {
+        println!("Texto encontrado: {}", texto);
+    }
+}
+
+Aqui acontece algo interessante:
+
+Dado::Numero(50)
+        ↓
+match
+        ↓
+Dado::Numero(numero)
+             ↓
+          numero = 50
+
+O Pattern Matching não apenas descobriu que era Numero.
+
+Ele também extraiu o 50.
+
+6. Você já usou Pattern Matching
+
+No seu código dos funcionários você fez:
+
+match buscar_funcionario(&lista_de_funcionarios, id_procurado) {
+    Some(funcionario) => {
+        println!("Funcionário encontrado!");
+        println!("{:#?}", funcionario);
+    }
+
+    None => {
+        println!("Funcionário não encontrado.");
+    }
+}
+
+Isso é Pattern Matching.
+
+Sua função retorna:
+
+Option<&Funcionario>
+
+E Option possui duas variantes:
+
+Some(valor)
+None
+
+Então:
+
+buscar_funcionario()
+        ↓
+Option<&Funcionario>
+        ↓
+      match
+      /   \
+     /     \
+Some(...)   None
+   ↓         ↓
+achou      não achou
+
+Mais importante ainda:
+
+Some(funcionario)
+
+é um padrão.
+
+Se o resultado for:
+
+Some(Funcionario)
+
+o Pattern Matching extrai a referência e coloca em:
+
+funcionario
+7. Pattern Matching com vários valores
+
+Você pode combinar padrões usando:
+
+|
+
+que significa OU.
+
+let numero = 2;
+
+match numero {
+    1 | 2 => {
+        println!("Um ou dois");
+    }
+
+    3 | 4 => {
+        println!("Três ou quatro");
+    }
+
+    _ => {
+        println!("Outro");
+    }
+}
+
+Se:
+
+numero = 2
+
+então:
+
+1 | 2
+    ↑
+corresponde
+8. Pattern Matching com intervalos
+
+Também podemos usar:
+
+..=
+
+Exemplo:
+
+let idade = 24;
+
+match idade {
+    0..=12 => println!("Criança"),
+
+    13..=17 => println!("Adolescente"),
+
+    18..=59 => println!("Adulto"),
+
+    _ => println!("Idoso"),
+}
+
+Como:
+
+idade = 24
+
+temos:
+
+0..=12   ❌
+13..=17  ❌
+18..=59  ✅
+           ↓
+         Adulto
+9. Pattern Matching com tuplas
+
+Também funciona com tuplas:
+
+let coordenada = (0, 10);
+
+match coordenada {
+    (0, 0) => {
+        println!("Origem");
+    }
+
+    (0, y) => {
+        println!("Está no eixo Y: {}", y);
+    }
+
+    (x, 0) => {
+        println!("Está no eixo X: {}", x);
+    }
+
+    (x, y) => {
+        println!("X: {} | Y: {}", x, y);
+    }
+}
+
+Se temos:
+
+(0, 10)
+
+corresponde a:
+
+(0, y)
+
+E o Pattern Matching extrai:
+
+(0, 10)
+    ↓
+ (0, y)
+     ↓
+   y = 10
+10. Pattern Matching com Struct
+
+Também podemos desestruturar uma struct.
+
+struct Cliente {
+    id: u32,
+    nome: String,
+}
+
+fn main() {
+    let cliente = Cliente {
+        id: 1,
+        nome: "Jhonata".to_string(),
+    };
+
+    let Cliente { id, nome } = cliente;
+
+    println!("ID: {}", id);
+    println!("Nome: {}", nome);
+}
+
+O padrão:
+
+Cliente { id, nome }
+
+extrai os campos:
+
+Cliente
+├── id: 1 ───────→ id
+└── nome: Jhonata → nome
+
+Isso também é Pattern Matching.
+
+11. if let
+
+Às vezes você quer verificar apenas um padrão.
+
+Em vez de:
+
+match resultado {
+    Some(funcionario) => {
+        println!("{}", funcionario.nome);
+    }
+
+    None => {}
+}
+
+podemos usar:
+
+if let Some(funcionario) = resultado {
+    println!("{}", funcionario.nome);
+}
+
+Leia como:
+
+Se resultado corresponder ao padrão Some(funcionario), execute o código.
+
+12. while let
+
+Também existe:
+
+while let
+
+Exemplo:
+
+let mut numeros = vec![10, 20, 30];
+
+while let Some(numero) = numeros.pop() {
+    println!("{}", numero);
+}
+
+pop() retorna:
+
+Option<T>
+
+Enquanto existir:
+
+Some(numero)
+
+o while continua.
+
+Quando chegar:
+
+None
+
+ele termina.
+
+Resumo para copiar
+PATTERN MATCHING EM RUST
+
+Pattern Matching significa comparar um valor com padrões
+e executar uma ação quando um padrão corresponde.
+
+Principal ferramenta:
+
+match
+
+Exemplo:
+
+match numero {
+    1 => println!("Um"),
+    2 => println!("Dois"),
+    _ => println!("Outro"),
+}
+
+Cada parte antes de => é um PADRÃO.
+
+------------------------------------------
+
+_ 
+→ representa qualquer outro valor.
+
+------------------------------------------
+
+|
+→ significa OU entre padrões.
+
+Exemplo:
+
+1 | 2 => println!("Um ou dois")
+
+------------------------------------------
+
+..=
+→ pode representar um intervalo inclusivo.
+
+Exemplo:
+
+18..=59 => println!("Adulto")
+
+------------------------------------------
+
+ENUM + MATCH
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+}
+
+match cargo {
+    Cargo::Desenvolvedor => println!("Dev"),
+    Cargo::Designer => println!("Designer"),
+    Cargo::Gerente => println!("Gerente"),
+}
+
+------------------------------------------
+
+Pattern Matching também pode EXTRAIR valores.
+
+enum Dado {
+    Numero(i32),
+    Texto(String),
+}
+
+match dado {
+    Dado::Numero(numero) => println!("{}", numero),
+    Dado::Texto(texto) => println!("{}", texto),
+}
+
+Dado::Numero(50)
+        ↓
+Dado::Numero(numero)
+             ↓
+          numero = 50
+
+------------------------------------------
+
+OPTION + PATTERN MATCHING
+
+Option<T> possui:
+
+Some(T)
+None
+
+Exemplo:
+
+match resultado {
+    Some(valor) => println!("{}", valor),
+    None => println!("Sem valor"),
+}
+
+------------------------------------------
+
+if let
+
+Usado quando queremos tratar principalmente um padrão:
+
+if let Some(valor) = resultado {
+    println!("{}", valor);
+}
+
+------------------------------------------
+
+while let
+
+Repete enquanto determinado padrão corresponder:
+
+while let Some(valor) = lista.pop() {
+    println!("{}", valor);
+}
+
+------------------------------------------
+
+RESUMO:
+
+enum
+→ define as possibilidades
+
+pattern
+→ descreve o formato que estamos procurando
+
+match
+→ compara o valor com os padrões
+
+=>
+→ define o que executar quando o padrão corresponder
+
+_
+→ qualquer outro valor
+
+|
+→ OU
+
+Some(valor)
+→ existe um valor e podemos extraí-lo
+
+None
+→ ausência de valor
+
+if let
+→ testa um padrão específico
+
+while let
+→ repete enquanto o padrão corresponder
+
+Destructuring (desestruturação) é a técnica de separar os valores que estão dentro de uma estrutura e colocá-los em variáveis individuais.
+
+Você já encontra esse conceito naturalmente quando trabalha com tuplas, arrays e structs.
+
+A ideia principal é:
+
+Estrutura com vários valores
+        ↓
+Destructuring
+        ↓
+Variáveis separadas
+
+Por exemplo:
+
+let pessoa = ("Jhonata", 24, true);
+
+let (nome, idade, ativo) = pessoa;
+
+Agora:
+
+pessoa
+("Jhonata", 24, true)
+      │
+      ↓ destructuring
+      │
+      ├── nome  = "Jhonata"
+      ├── idade = 24
+      └── ativo = true
+1. Destructuring de tuplas
+
+Considere:
+
+fn main() {
+    let pessoa = ("Jhonata", 24, 1.68);
+
+    let (nome, idade, altura) = pessoa;
+
+    println!("Nome: {}", nome);
+    println!("Idade: {}", idade);
+    println!("Altura: {}", altura);
+}
+
+Resultado:
+
+Nome: Jhonata
+Idade: 24
+Altura: 1.68
+
+Aqui:
+
+let (nome, idade, altura) = pessoa;
+
+é o destructuring.
+
+O padrão:
+
+(nome, idade, altura)
+
+é comparado com:
+
+("Jhonata", 24, 1.68)
+
+Então:
+
+nome   ← "Jhonata"
+idade  ← 24
+altura ← 1.68
+2. Destructuring diretamente
+
+Você nem precisa criar a tupla primeiro.
+
+Pode fazer:
+
+fn main() {
+    let (nome, idade) = ("Jhonata", 24);
+
+    println!("{}", nome);
+    println!("{}", idade);
+}
+
+O Rust já distribui os valores.
+
+3. Ignorando valores com _
+
+Às vezes você não precisa de todos os valores.
+
+fn main() {
+    let pessoa = ("Jhonata", 24, 1.68);
+
+    let (nome, _, altura) = pessoa;
+
+    println!("{}", nome);
+    println!("{}", altura);
+}
+
+O:
+
+_
+
+significa:
+
+Existe um valor aqui, mas eu não quero utilizá-lo.
+
+Então:
+
+("Jhonata", 24, 1.68)
+     ↓      ↓     ↓
+   nome     _   altura
+
+O 24 foi ignorado.
+
+4. Destructuring de arrays
+
+Também podemos desestruturar arrays.
+
+fn main() {
+    let numeros = [10, 20, 30];
+
+    let [a, b, c] = numeros;
+
+    println!("{}", a);
+    println!("{}", b);
+    println!("{}", c);
+}
+
+Resultado:
+
+10
+20
+30
+
+Visualmente:
+
+[10, 20, 30]
+ ↓   ↓   ↓
+ a   b   c
+5. Destructuring de Struct
+
+Agora isso fica especialmente interessante com o assunto que você acabou de estudar.
+
+Temos:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+Criamos:
+
+let pessoa = Pessoa {
+    nome: String::from("Jhonata"),
+    idade: 24,
+};
+
+Podemos desestruturar:
+
+let Pessoa { nome, idade } = pessoa;
+
+Exemplo completo:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    };
+
+    let Pessoa { nome, idade } = pessoa;
+
+    println!("Nome: {}", nome);
+    println!("Idade: {}", idade);
+}
+
+Resultado:
+
+Nome: Jhonata
+Idade: 24
+
+Observe a sintaxe:
+
+let Pessoa { nome, idade } = pessoa;
+
+Temos:
+
+Pessoa
+│
+├── nome: "Jhonata"
+└── idade: 24
+
+       ↓ destructuring
+
+nome  = "Jhonata"
+idade = 24
+6. Renomeando campos durante o destructuring
+
+Você não precisa manter o mesmo nome.
+
+let Pessoa {
+    nome: nome_pessoa,
+    idade: idade_pessoa,
+} = pessoa;
+
+Agora temos:
+
+campo da struct       variável
+
+nome        ───────→ nome_pessoa
+idade       ───────→ idade_pessoa
+
+Exemplo:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    };
+
+    let Pessoa {
+        nome: nome_pessoa,
+        idade: idade_pessoa,
+    } = pessoa;
+
+    println!("{}", nome_pessoa);
+    println!("{}", idade_pessoa);
+}
+7. Ignorando campos de Struct
+
+Imagine:
+
+struct Usuario {
+    nome: String,
+    idade: u32,
+    ativo: bool,
+}
+
+Se queremos somente nome:
+
+let Usuario { nome, .. } = usuario;
+
+O:
+
+..
+
+significa:
+
+ignore os outros campos.
+
+Então:
+
+Usuario
+├── nome  → nome
+├── idade ─┐
+└── ativo ─┴→ ignorados
+
+Exemplo:
+
+fn main() {
+    let usuario = Usuario {
+        nome: String::from("Jhonata"),
+        idade: 24,
+        ativo: true,
+    };
+
+    let Usuario { nome, .. } = usuario;
+
+    println!("{}", nome);
+}
+8. Destructuring em parâmetros de funções
+
+Isso é muito interessante.
+
+Normalmente:
+
+fn mostrar(ponto: (i32, i32)) {
+    println!("X: {}", ponto.0);
+    println!("Y: {}", ponto.1);
+}
+
+Podemos desestruturar diretamente no parâmetro:
+
+fn mostrar((x, y): (i32, i32)) {
+    println!("X: {}", x);
+    println!("Y: {}", y);
+}
+
+Uso:
+
+fn main() {
+    let ponto = (10, 20);
+
+    mostrar(ponto);
+}
+
+O Rust faz:
+
+(10, 20)
+  ↓   ↓
+  x   y
+9. Destructuring dentro do match
+
+Aqui destructuring começa a mostrar todo o seu poder.
+
+fn main() {
+    let ponto = (0, 10);
+
+    match ponto {
+        (0, y) => println!("Está no eixo Y: {}", y),
+        (x, 0) => println!("Está no eixo X: {}", x),
+        (x, y) => println!("X: {}, Y: {}", x, y),
+    }
+}
+
+O match não está apenas verificando o valor.
+
+Ele também está desestruturando a tupla.
+
+Para:
+
+let ponto = (0, 10);
+
+este padrão:
+
+(0, y)
+
+combina.
+
+Então:
+
+(0, 10)
+ ↓   ↓
+ 0   y
+
+y = 10
+
+Resultado:
+
+Está no eixo Y: 10
+10. Struct + match + destructuring
+
+Também podemos fazer:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    };
+
+    match pessoa {
+        Pessoa { nome, idade } => {
+            println!("{} tem {} anos.", nome, idade);
+        }
+    }
+}
+
+O padrão:
+
+Pessoa { nome, idade }
+
+desestrutura a Pessoa.
+
+11. Destructuring e Ownership
+
+Aqui existe uma ligação muito importante com o que você já estudou.
+
+Considere:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+Agora:
+
+let pessoa = Pessoa {
+    nome: String::from("Jhonata"),
+    idade: 24,
+};
+
+let Pessoa { nome, idade } = pessoa;
+
+nome é uma String.
+
+Portanto, ela não possui Copy.
+
+Ao desestruturar dessa maneira, o campo pode ser movido para a nova variável.
+
+Mentalmente:
+
+pessoa.nome
+    │
+    │ MOVE
+    ▼
+  nome
+
+Isso é importante porque destructuring não significa automaticamente copiar os dados.
+
+As regras de:
+
+Ownership
+Move
+Copy
+Borrowing
+
+continuam valendo.
+
+12. Destructuring usando referência
+
+Se você não quiser mover a String, pode trabalhar através de referência.
+
+Um exemplo simples:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
