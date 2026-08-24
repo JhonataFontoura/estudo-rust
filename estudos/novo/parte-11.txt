@@ -1,0 +1,903 @@
+    ($valor:expr) => {
+        println!("{}", $valor);
+    };
+}
+
+Uso:
+
+mostrar!(10);
+
+
+FRAGMENTOS COMUNS:
+
+expr
+→ expressão
+
+ident
+→ identificador
+
+ty
+→ tipo
+
+stmt
+→ statement
+
+pat
+→ pattern
+
+literal
+→ literal
+
+
+========================
+GERAÇÃO DE CÓDIGO
+========================
+
+Uma macro pode gerar:
+
+→ expressões
+→ funções
+→ structs
+→ impl
+→ métodos
+→ outros elementos de código
+
+
+Exemplo:
+
+macro_rules! criar_struct {
+    ($nome:ident) => {
+        struct $nome {
+            id: u32,
+        }
+    };
+}
+
+criar_struct!(Usuario);
+
+
+========================
+MACROS EM ARQUIVOS
+========================
+
+Macros podem ser organizadas
+em arquivos/módulos separados.
+
+src/
+├── main.rs
+└── macros.rs
+
+
+========================
+MACRO EM CRATE
+========================
+
+#[macro_export]
+macro_rules! minha_macro {
+    ...
+}
+
+#[macro_export]
+→ permite exportar uma macro declarativa
+  para uso externo.
+
+
+========================
+MACROS E SQL
+========================
+
+Macros podem gerar código relacionado a:
+
+Struct
+↓
+Modelo
+↓
+SQL
+↓
+CREATE
+READ
+UPDATE
+DELETE
+
+Isso reduz código repetitivo,
+mas macros complexas exigem cuidado.
+
+
+========================
+DERIVE
+========================
+
+#[derive(...)]
+→ utiliza macros derive.
+
+Exemplo:
+
+#[derive(Debug, Clone)]
+struct Pessoa {
+    nome: String,
+}
+
+
+Debug e Clone podem ser implementados
+automaticamente através de derive.
+
+
+========================
+MACRO PROCEDURAL
+========================
+
+Macros derive personalizadas são
+macros procedurais.
+
+Configuração:
+
+[lib]
+proc-macro = true
+
+Estrutura:
+
+#[proc_macro_derive(MinhaMacro)]
+pub fn minha_macro(
+    input: TokenStream
+) -> TokenStream {
+    ...
+}
+
+
+========================
+TRAIT + DERIVE
+========================
+
+Trait
+→ define comportamento.
+
+Derive Macro
+→ pode gerar automaticamente
+  implementações de comportamento.
+
+Polimorfismo
+→ diferentes tipos podem compartilhar
+  a mesma Trait.
+
+
+RELAÇÃO:
+
+Trait
+      ↓
+comportamento
+      ↓
+Derive Macro
+      ↓
+gera impl Trait for Tipo
+      ↓
+Structs diferentes
+      ↓
+mesmo comportamento compartilhado
+
+
+========================
+DIFERENÇA PRINCIPAL
+========================
+
+macro_rules!
+→ macro declarativa
+→ trabalha com padrões
+→ gera código a partir desses padrões.
+
+#[derive(...)]
+→ macro procedural derive
+→ recebe/análise tokens do código
+→ gera código durante compilação.
+
+
+FORMA PARA MEMORIZAR:
+
+macro_rules!
+= "Reconheça este padrão e gere isto."
+
+derive
+= "Analise este tipo e gere uma implementação."
+
+
+RESUMO FINAL:
+
+Macros
+→ metaprogramação.
+
+macro_rules!
+→ macros declarativas.
+
+#[derive(...)]
+→ macros procedurais derive.
+
+#[macro_export]
+→ exporta macro declarativa.
+
+Trait
+→ define comportamento.
+
+Derive
+→ pode gerar implementação de Trait.
+
+Macros são usadas principalmente para
+automatizar geração de código e reduzir
+repetição.
+
+1. Programação Funcional
+
+Programação funcional é um estilo de programação que dá destaque ao uso de funções, transformação de dados e composição de operações.
+
+Rust não é uma linguagem puramente funcional, mas oferece vários recursos desse paradigma:
+
+Programação Funcional em Rust
+│
+├── Closures
+├── Iterators
+├── map()
+├── filter()
+├── fold()
+├── Funções de alta ordem
+├── Pattern Matching
+└── Recursividade
+
+Exemplo:
+
+fn main() {
+    let numeros = vec![1, 2, 3, 4, 5];
+
+    let dobrados: Vec<i32> = numeros
+        .iter()
+        .map(|x| x * 2)
+        .collect();
+
+    println!("{:?}", dobrados);
+}
+
+Resultado:
+
+[2, 4, 6, 8, 10]
+
+Aqui:
+
+iter()
+   ↓
+map()
+   ↓
+closure |x| x * 2
+   ↓
+collect()
+   ↓
+novo Vec
+2. Código Imperativo vs Código Funcional
+
+No estilo imperativo, descrevemos mais diretamente os passos que devem acontecer.
+
+fn main() {
+    let numeros = vec![1, 2, 3, 4, 5];
+    let mut dobrados = Vec::new();
+
+    for numero in numeros {
+        dobrados.push(numero * 2);
+    }
+
+    println!("{:?}", dobrados);
+}
+
+No estilo funcional:
+
+fn main() {
+    let numeros = vec![1, 2, 3, 4, 5];
+
+    let dobrados: Vec<i32> = numeros
+        .iter()
+        .map(|x| x * 2)
+        .collect();
+
+    println!("{:?}", dobrados);
+}
+
+Comparação:
+
+IMPERATIVO
+
+for
+ ↓
+pega elemento
+ ↓
+calcula
+ ↓
+push()
+ ↓
+repete
+
+
+FUNCIONAL
+
+iter()
+ ↓
+map()
+ ↓
+transforma elementos
+ ↓
+collect()
+3. Closure
+
+Uma closure é semelhante a uma função anônima e pode capturar valores do ambiente onde foi criada.
+
+Função normal:
+
+fn dobro(x: i32) -> i32 {
+    x * 2
+}
+
+Closure equivalente:
+
+let dobro = |x: i32| x * 2;
+
+Uso:
+
+fn main() {
+    let dobro = |x: i32| x * 2;
+
+    println!("{}", dobro(10));
+}
+
+Resultado:
+
+20
+
+A sintaxe básica é:
+
+|parâmetros| expressão
+
+Exemplo:
+
+let somar = |a: i32, b: i32| a + b;
+
+println!("{}", somar(10, 20));
+4. Closure capturando valores
+
+Uma diferença importante entre uma função comum e uma closure é que a closure pode capturar valores do ambiente.
+
+fn main() {
+    let multiplicador = 5;
+
+    let calcular = |numero: i32| {
+        numero * multiplicador
+    };
+
+    println!("{}", calcular(10));
+}
+
+Resultado:
+
+50
+
+A closure consegue acessar:
+
+multiplicador
+
+mesmo ele tendo sido declarado fora dela.
+
+5. Função de Alta Ordem e Closure
+
+Uma função de alta ordem é uma função que trabalha com outras funções/closures, por exemplo recebendo uma como argumento ou retornando uma.
+
+fn executar<F>(numero: i32, operacao: F) -> i32
+where
+    F: Fn(i32) -> i32,
+{
+    operacao(numero)
+}
+
+Uso:
+
+fn main() {
+    let dobro = |x| x * 2;
+
+    let resultado = executar(10, dobro);
+
+    println!("{}", resultado);
+}
+
+Resultado:
+
+20
+
+Aqui:
+
+executar()
+   │
+   ├── recebe 10
+   │
+   └── recebe closure
+          ↓
+       |x| x * 2
+          ↓
+         20
+6. Fn, FnMut e FnOnce
+
+Rust possui traits importantes relacionadas às closures:
+
+Fn
+→ pode ser chamada sem precisar alterar/mover o ambiente capturado.
+
+FnMut
+→ pode precisar modificar o ambiente capturado.
+
+FnOnce
+→ pode consumir valores capturados;
+  garante pelo menos uma chamada.
+
+Exemplo de FnMut:
+
+fn main() {
+    let mut contador = 0;
+
+    let mut incrementar = || {
+        contador += 1;
+    };
+
+    incrementar();
+    incrementar();
+    incrementar();
+
+    println!("{}", contador);
+}
+
+Resultado:
+
+3
+7. Chamando uma função de alta ordem várias vezes
+
+Podemos aplicar a mesma função/closure repetidamente.
+
+fn aplicar<F>(valor: i32, funcao: F) -> i32
+where
+    F: Fn(i32) -> i32,
+{
+    funcao(valor)
+}
+
+fn main() {
+    let dobro = |x| x * 2;
+
+    println!("{}", aplicar(10, &dobro));
+    println!("{}", aplicar(20, &dobro));
+    println!("{}", aplicar(30, &dobro));
+}
+
+Resultado:
+
+20
+40
+60
+
+Ou aplicar uma operação várias vezes dentro de uma função:
+
+fn aplicar_tres_vezes<F>(valor: i32, funcao: F) -> i32
+where
+    F: Fn(i32) -> i32,
+{
+    let resultado = funcao(valor);
+    let resultado = funcao(resultado);
+    funcao(resultado)
+}
+
+fn main() {
+    let dobro = |x| x * 2;
+
+    println!("{}", aplicar_tres_vezes(5, dobro));
+}
+
+Temos:
+
+5
+↓ ×2
+10
+↓ ×2
+20
+↓ ×2
+40
+8. Programação funcional para desconto sobre salário
+
+Podemos criar uma função de alta ordem para aplicar diferentes descontos:
+
+fn calcular_salario<F>(salario: f64, desconto: F) -> f64
+where
+    F: Fn(f64) -> f64,
+{
+    desconto(salario)
+}
+
+fn main() {
+    let desconto_10 = |salario: f64| {
+        salario - salario * 0.10
+    };
+
+    let resultado = calcular_salario(
+        3000.0,
+        desconto_10,
+    );
+
+    println!("Salário final: {:.2}", resultado);
+}
+
+Resultado:
+
+Salário final: 2700.00
+
+Podemos trocar o comportamento facilmente:
+
+let desconto_20 = |salario: f64| {
+    salario - salario * 0.20
+};
+
+Assim, a função:
+
+calcular_salario()
+
+não precisa saber como o desconto é calculado. Ela recebe o comportamento.
+
+9. Estrutura de funções decorativas
+
+Rust não possui decorators nativos iguais aos do Python, mas podemos criar funções que envolvem outras funções para adicionar comportamento.
+
+fn executar_com_log<F>(funcao: F)
+where
+    F: Fn(),
+{
+    println!("Iniciando função...");
+
+    funcao();
+
+    println!("Finalizando função...");
+}
+
+fn main() {
+    let tarefa = || {
+        println!("Executando tarefa");
+    };
+
+    executar_com_log(tarefa);
+}
+
+Resultado:
+
+Iniciando função...
+Executando tarefa
+Finalizando função...
+
+Conceitualmente:
+
+executar_com_log()
+      ↓
+ comportamento antes
+      ↓
+ função original
+      ↓
+ comportamento depois
+10. Recursividade em Programação Funcional
+
+Uma função recursiva é aquela que chama a si mesma.
+
+Exemplo clássico: fatorial.
+
+fn fatorial(n: u64) -> u64 {
+    match n {
+        0 => 1,
+        _ => n * fatorial(n - 1),
+    }
+}
+
+fn main() {
+    println!("{}", fatorial(5));
+}
+
+Funcionamento:
+
+fatorial(5)
+↓
+5 * fatorial(4)
+↓
+5 * 4 * fatorial(3)
+↓
+5 * 4 * 3 * fatorial(2)
+↓
+5 * 4 * 3 * 2 * fatorial(1)
+↓
+5 * 4 * 3 * 2 * 1
+↓
+120
+
+É essencial existir uma condição de parada:
+
+0 => 1
+
+Sem ela, a recursão continuaria até causar estouro da pilha.
+
+11. Pattern Matching
+
+Pattern Matching permite verificar um valor contra diferentes padrões.
+
+O principal exemplo é match:
+
+fn verificar(numero: i32) {
+    match numero {
+        0 => println!("Zero"),
+        1 => println!("Um"),
+        2 => println!("Dois"),
+        _ => println!("Outro número"),
+    }
+}
+
+O _ significa:
+
+qualquer outro valor
+Pattern Matching com Option
+fn mostrar(valor: Option<i32>) {
+    match valor {
+        Some(numero) => {
+            println!("Valor: {}", numero);
+        }
+
+        None => {
+            println!("Sem valor");
+        }
+    }
+}
+
+Aqui também ocorre destructuring:
+
+Some(10)
+   ↓
+Some(numero)
+     ↓
+numero = 10
+Resumo para copiar e colar
+
+1. Concorrência e Paralelismo
+
+Apesar de relacionados, são conceitos diferentes.
+
+Concorrência significa lidar com várias tarefas que podem progredir durante o mesmo período.
+
+Paralelismo significa executar tarefas literalmente ao mesmo tempo, normalmente utilizando múltiplos núcleos da CPU.
+
+CONCORRÊNCIA
+Tarefa A ──┐
+           ├── alternância/progresso
+Tarefa B ──┘
+
+PARALELISMO
+
+Core 1 → Tarefa A
+Core 2 → Tarefa B
+         ↓
+executadas simultaneamente
+
+Rust fornece ferramentas como:
+
+Concorrência / Paralelismo
+│
+├── Threads
+├── Channels
+├── Arc
+├── Mutex
+├── Rayon
+└── Async / Tokio
+2. Trabalhando com Threads
+
+Uma thread é uma linha de execução dentro de um processo.
+
+Rust fornece:
+
+std::thread
+
+Exemplo:
+
+use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        for i in 1..5 {
+            println!("Thread: {}", i);
+        }
+    });
+
+    handle.join().unwrap();
+
+    println!("Programa finalizado");
+}
+
+O:
+
+thread::spawn(...)
+
+cria uma nova thread.
+
+Já:
+
+handle.join().unwrap();
+
+faz a thread atual esperar a outra terminar.
+
+Fluxo:
+
+main
+ │
+ ├── thread::spawn()
+ │        ↓
+ │    nova thread
+ │        ↓
+ │    executa código
+ │
+ └── join()
+          ↓
+      espera terminar
+3. move com Threads
+
+É muito comum encontrar:
+
+thread::spawn(move || {
+    // código
+});
+
+O move transfere a posse dos valores capturados pela closure quando necessário.
+
+use std::thread;
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    let handle = thread::spawn(move || {
+        println!("Olá, {}", nome);
+    });
+
+    handle.join().unwrap();
+}
+
+Isso se relaciona diretamente com ownership.
+
+4. Channel para compartilhar dados entre Threads
+
+Threads podem se comunicar utilizando channels.
+
+A biblioteca padrão oferece:
+
+std::sync::mpsc
+
+Exemplo:
+
+use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let mensagem = String::from("Dados processados");
+
+        tx.send(mensagem).unwrap();
+    });
+
+    let recebido = rx.recv().unwrap();
+
+    println!("{}", recebido);
+}
+
+Temos:
+
+mpsc::channel()
+      ↓
+ ┌─────────────┐
+ ↓             ↓
+tx             rx
+Transmitter    Receiver
+ ↓             ↑
+send()      recv()
+ └─────────────┘
+
+tx envia.
+
+rx recebe.
+
+5. Código concorrente para migração de dados
+
+Imagine que precisamos migrar vários registros.
+
+Podemos distribuir tarefas entre threads.
+
+use std::thread;
+
+fn migrar(id: i32) {
+    println!("Migrando registro {}", id);
+}
+
+fn main() {
+    let mut handles = vec![];
+
+    for id in 1..=5 {
+        let handle = thread::spawn(move || {
+            migrar(id);
+        });
+
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+}
+
+Conceitualmente:
+
+Registros
+1 2 3 4 5
+│ │ │ │ │
+↓ ↓ ↓ ↓ ↓
+T T T T T
+│ │ │ │ │
+└─┴─┴─┴─┴──→ processamento
+
+A ordem das mensagens pode variar porque as threads são agendadas independentemente.
+
+6. Arc e Mutex
+
+Esse é um dos assuntos mais importantes desse bloco.
+
+Arc
+
+Arc<T> significa:
+
+Atomic Reference Counting.
+
+Ele permite que múltiplas threads tenham propriedade compartilhada sobre um valor.
+
+use std::sync::Arc;
+
+Conceitualmente:
+
+        Arc<Dado>
+        /   |   \
+       /    |    \
+Thread 1 Thread 2 Thread 3
+
+O Arc sozinho, porém, não significa que podemos alterar livremente o valor compartilhado.
+
+Para mutação compartilhada, frequentemente combinamos com Mutex.
+
+7. Mutex
+
+Mutex<T> significa Mutual Exclusion.
+
+Ele permite que apenas uma thread por vez tenha acesso protegido ao dado.
+
+Thread 1 ──┐
+Thread 2 ──┼──→ Mutex → Dado
+Thread 3 ──┘
+                ↑
+          uma por vez
+
+Exemplo:
+
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    let contador = Arc::new(Mutex::new(0));
+
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let contador = Arc::clone(&contador);
+
+        let handle = thread::spawn(move || {
+            let mut numero = contador.lock().unwrap();
+
+            *numero += 1;
+        });
+
+        handles.push(handle);
+    }
+
