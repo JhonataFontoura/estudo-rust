@@ -1,0 +1,803 @@
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    };
+
+    let Pessoa { nome, idade } = &pessoa;
+
+    println!("{}", nome);
+    println!("{}", idade);
+
+    println!("{}", pessoa.nome);
+}
+
+Aqui estamos desestruturando:
+
+&pessoa
+
+em vez de consumir diretamente pessoa.
+
+Isso conecta:
+
+DESTRUCTURING
+      ↓
+PATTERNS
+      ↓
+REFERENCES
+      ↓
+BORROWING
+      ↓
+OWNERSHIP
+13. Destructuring aninhado
+
+Também podemos desestruturar estruturas dentro de estruturas.
+
+Exemplo:
+
+struct Pessoa {
+    nome: String,
+    localizacao: (i32, i32),
+}
+
+Podemos fazer:
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        localizacao: (10, 20),
+    };
+
+    let Pessoa {
+        nome,
+        localizacao: (x, y),
+    } = pessoa;
+
+    println!("Nome: {}", nome);
+    println!("X: {}", x);
+    println!("Y: {}", y);
+}
+
+Observe:
+
+Pessoa
+│
+├── nome: "Jhonata" ─────────→ nome
+│
+└── localizacao
+        │
+        └── (10, 20)
+             ↓   ↓
+             x   y
+
+Estamos fazendo destructuring em dois níveis.
+
+RESUMO
+
+| Situação              | Destructuring                          |
+| --------------------- | -------------------------------------- |
+| Tupla                 | `let (a, b) = tupla;`                  |
+| Array                 | `let [a, b] = array;`                  |
+| Struct                | `let Pessoa { nome, idade } = pessoa;` |
+| Ignorar um valor      | `_`                                    |
+| Ignorar vários campos | `..`                                   |
+| Renomear campo        | `nome: novo_nome`                      |
+| Função                | `fn teste((x, y): (i32, i32))`         |
+| Match                 | `match valor { (x, y) => ... }`        |
+| Referência            | `let Pessoa { nome, .. } = &pessoa;`   |
+A ideia mais importante é:
+
+DESTRUCTURING
+=
+pegar uma estrutura
++
+aplicar um padrão
++
+extrair suas partes
+
+obs: por isso, em Rust, destructuring está diretamente a Pattern Matching. quando utiliza para enum, math, if let e let else, esse conceito é visto o tempo inteiro
+
+Mais exemplos 
+criando o enum
+
+Vamos representar diferentes tipos de usuário:
+
+enum Usuario {
+    Admin {
+        nome: String,
+        nivel: u8,
+    },
+    Comum {
+        nome: String,
+    },
+    Visitante,
+}
+
+Perceba que cada variante pode ter uma estrutura diferente:
+
+Usuario
+│
+├── Admin
+│    ├── nome
+│    └── nivel
+│
+├── Comum
+│    └── nome
+│
+└── Visitante
+
+Criando um administrador:
+
+let usuario = Usuario::Admin {
+    nome: String::from("Jhonata"),
+    nivel: 10,
+};
+
+Agora podemos usar Pattern Matching + Destructuring.
+
+match + destructuring
+enum Usuario {
+    Admin {
+        nome: String,
+        nivel: u8,
+    },
+    Comum {
+        nome: String,
+    },
+    Visitante,
+}
+
+fn main() {
+    let usuario = Usuario::Admin {
+        nome: String::from("Jhonata"),
+        nivel: 10,
+    };
+
+    match usuario {
+        Usuario::Admin { nome, nivel } => {
+            println!("Admin: {}", nome);
+            println!("Nível: {}", nivel);
+        }
+
+        Usuario::Comum { nome } => {
+            println!("Usuário comum: {}", nome);
+        }
+
+        Usuario::Visitante => {
+            println!("Usuário visitante");
+        }
+    }
+}
+A parte importante é:
+
+Usuario::Admin { nome, nivel }
+
+Isso faz duas coisas ao mesmo tempo:
+
+Usuario::Admin { nome, nivel }
+       │              │
+       │              └── DESTRUCTURING
+       │
+       └── PATTERN MATCHING
+
+Primeiro Rust pergunta:
+
+O valor corresponde à variante Admin?
+
+Se sim, ele desestrutura:
+
+Usuario::Admin {
+    nome: "Jhonata",
+    nivel: 10
+}
+
+        ↓
+
+nome  = "Jhonata"
+nivel = 10
+
+if let + destructuring
+
+Agora imagine que você só está interessado em Admin.
+
+Fazer um match completo pode ser exagero.
+
+Podemos usar:
+
+if let
+
+Exemplo:
+
+enum Usuario {
+    Admin {
+        nome: String,
+        nivel: u8,
+    },
+    Comum {
+        nome: String,
+    },
+    Visitante,
+}
+
+fn main() {
+    let usuario = Usuario::Admin {
+        nome: String::from("Jhonata"),
+        nivel: 10,
+    };
+
+    if let Usuario::Admin { nome, nivel } = usuario {
+        println!("Admin encontrado!");
+        println!("Nome: {}", nome);
+        println!("Nível: {}", nivel);
+    }
+}
+
+Novamente:
+
+Usuario::Admin { nome, nivel }
+
+é o padrão.
+
+E:
+
+usuario
+
+é o valor que estamos tentando encaixar nesse padrão.
+
+Mentalmente:
+
+if let PADRÃO = VALOR
+
+Portanto:
+
+if let Usuario::Admin { nome, nivel } = usuario
+
+significa aproximadamente:
+
+Se usuario for um Admin, extraia nome e nivel.
+
+if let com else
+
+Também podemos fazer:
+
+if let Usuario::Admin { nome, nivel } = usuario {
+    println!("Admin: {}", nome);
+    println!("Nível: {}", nivel);
+} else {
+    println!("O usuário não é administrador.");
+}
+
+A ideia fica:
+
+             usuario
+                │
+                ▼
+         É Usuario::Admin?
+           /          \
+         SIM          NÃO
+          │             │
+          ▼             ▼
+   destructuring       else
+      │
+      ├── nome
+      └── nivel
+
+
+let else + destructuring
+
+Agora temos uma construção muito útil de Rust:
+
+let ... else
+
+Ela é ótima quando queremos dizer:
+
+Eu espero que esse valor tenha determinado formato. Se não tiver, saia daqui.
+
+Exemplo:
+
+enum Usuario {
+    Admin {
+        nome: String,
+        nivel: u8,
+    },
+    Comum {
+        nome: String,
+    },
+    Visitante,
+}
+
+fn verificar_admin(usuario: Usuario) {
+    let Usuario::Admin { nome, nivel } = usuario else {
+        println!("Este usuário não é Admin.");
+        return;
+    };
+
+    println!("Admin encontrado!");
+    println!("Nome: {}", nome);
+    println!("Nível: {}", nivel);
+}
+
+fn main() {
+    let usuario = Usuario::Admin {
+        nome: String::from("Jhonata"),
+        nivel: 10,
+    };
+
+    verificar_admin(usuario);
+}
+
+Aqui:
+
+let Usuario::Admin { nome, nivel } = usuario else {
+    return;
+};
+
+Rust tenta:
+
+usuario
+   │
+   ▼
+Usuario::Admin { nome, nivel }
+        │
+     combina?
+      /    \
+    SIM    NÃO
+     │       │
+     ▼       ▼
+nome      executa
+nivel      else
+            │
+          return
+
+Se combinar, depois do let else podemos usar normalmente:
+
+println!("{}", nome);
+println!("{}", nivel);
+
+
+Diferença entre match, if let e let else
+
+É importante não pensar que são três maneiras completamente iguais de escrever a mesma coisa.
+
+match
+
+Use quando você quer tratar várias possibilidades:
+
+match usuario {
+    Usuario::Admin { nome, nivel } => {
+        // ...
+    }
+
+    Usuario::Comum { nome } => {
+        // ...
+    }
+
+    Usuario::Visitante => {
+        // ...
+    }
+}
+
+Mentalmente:
+
+"Quero analisar todas as possibilidades."
+if let
+
+Use quando uma possibilidade específica é a que interessa:
+
+if let Usuario::Admin { nome, nivel } = usuario {
+    // ...
+}
+
+Mentalmente:
+
+"Se for Admin, faça isso."
+let else
+
+Use quando você espera determinado padrão e quer interromper o fluxo caso ele não corresponda:
+
+let Usuario::Admin { nome, nivel } = usuario else {
+    return;
+};
+
+Mentalmente:
+
+"Preciso que seja Admin.
+Se não for, saia daqui."
+
+Um exemplo juntando os três
+
+Esse é um bom código para você salvar nos seus estudos:
+
+#[derive(Debug)]
+enum Usuario {
+    Admin {
+        nome: String,
+        nivel: u8,
+    },
+    Comum {
+        nome: String,
+    },
+    Visitante,
+}
+
+fn verificar_admin(usuario: Usuario) {
+
+    // LET ELSE + DESTRUCTURING
+    let Usuario::Admin { nome, nivel } = usuario else {
+        println!("Acesso negado.");
+        return;
+    };
+
+    println!("Admin encontrado:");
+    println!("Nome: {}", nome);
+    println!("Nível: {}", nivel);
+}
+
+fn main() {
+
+    let usuario1 = Usuario::Admin {
+        nome: String::from("Jhonata"),
+        nivel: 10,
+    };
+
+    let usuario2 = Usuario::Comum {
+        nome: String::from("Carlos"),
+    };
+
+    let usuario3 = Usuario::Visitante;
+
+
+    // =========================================
+    // MATCH + DESTRUCTURING
+    // =========================================
+
+    match usuario2 {
+        Usuario::Admin { nome, nivel } => {
+            println!("Admin: {} - nível {}", nome, nivel);
+        }
+
+        Usuario::Comum { nome } => {
+            println!("Usuário comum: {}", nome);
+        }
+
+        Usuario::Visitante => {
+            println!("Visitante");
+        }
+    }
+
+
+    // =========================================
+    // IF LET + DESTRUCTURING
+    // =========================================
+
+    if let Usuario::Visitante = usuario3 {
+        println!("É um visitante.");
+    }
+
+
+    // =========================================
+    // LET ELSE + DESTRUCTURING
+    // =========================================
+
+    verificar_admin(usuario1);
+}
+Resumo para gravar
+ENUM
+│
+│ cria diferentes variantes
+│
+▼
+Usuario::Admin { nome, nivel }
+                │
+                ▼
+             DADOS
+                │
+                ▼
+        DESTRUCTURING
+                │
+                ▼
+        extrai nome e nivel
+
+E o Pattern Matching é o mecanismo que verifica se o formato combina:
+
+PATTERN MATCHING
+       │
+       ├── match
+       │    └─ várias possibilidades
+       │
+       ├── if let
+       │    └─ interessa uma possibilidade
+       │
+       └── let else
+            └─ exige um padrão;
+               caso contrário, desvia o fluxo
+
+A frase que vale guardar é:
+
+Pattern Matching verifica o formato do valor; destructuring extrai os dados desse formato.
+
+Por exemplo:
+
+Usuario::Admin { nome, nivel }
+
+Usuario::Admin { ... } identifica o padrão, enquanto { nome, nivel } permite desestruturar os dados contidos nessa variante.
+
+HASHMAP
+HashMap é uma coleção usada para armazenar dados no formato chave → valor.
+
+Pense em um dicionário:
+
+Chave             Valor
+ ↓                  ↓
+"nome"    ─────→ "Jhonata"
+"curso"   ─────→ "Rust"
+"nivel"   ─────→ "Iniciante"
+
+Diferente de um Vec, no qual normalmente acessamos elementos pela posição:
+
+numeros[0]
+
+no HashMap procuramos usando uma chave.
+
+1. Importando HashMap
+
+HashMap não vem automaticamente no prelude do Rust. Normalmente importamos:
+
+use std::collections::HashMap;
+
+Depois podemos criar:
+
+fn main() {
+    let mapa = HashMap::new();
+}
+
+Porém, nesse exemplo o Rust ainda não consegue saber quais serão os tipos da chave e do valor.
+
+Podemos especificar:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mapa: HashMap<String, i32> = HashMap::new();
+}
+
+Leia:
+
+HashMap<String, i32>
+        │       │
+        │       └── tipo do VALOR
+        │
+        └────────── tipo da CHAVE
+2. Inserindo valores com insert()
+
+Para inserir usamos:
+
+.insert(chave, valor)
+
+Exemplo:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut notas = HashMap::new();
+
+    notas.insert("Matemática", 9);
+    notas.insert("Rust", 10);
+    notas.insert("Banco de Dados", 8);
+
+    println!("{:?}", notas);
+}
+
+Precisamos de:
+
+let mut notas
+
+porque insert() modifica o HashMap.
+
+Mentalmente:
+
+notas
+│
+├── "Matemática" ──→ 9
+├── "Rust"       ──→ 10
+└── "Banco de Dados" → 8
+
+Importante: um HashMap não garante a mesma ordem de impressão/inserção.
+
+3. Acessando um valor com get()
+
+Podemos procurar uma chave:
+
+let nota = notas.get("Rust");
+
+Mas existe um detalhe importante.
+
+get() não retorna diretamente o valor.
+
+Ele retorna um:
+
+Option<&V>
+
+Nesse exemplo:
+
+Option<&i32>
+
+Isso acontece porque a chave pode existir ou não.
+
+notas.get("Rust")
+       │
+       ├── existe ───→ Some(&10)
+       │
+       └── não existe → None
+
+Aqui aparece exatamente o Option, match e Pattern Matching que você está estudando.
+
+4. HashMap + match
+use std::collections::HashMap;
+
+fn main() {
+    let mut notas = HashMap::new();
+
+    notas.insert("Rust", 10);
+    notas.insert("Python", 9);
+
+    match notas.get("Rust") {
+        Some(nota) => {
+            println!("Nota encontrada: {}", nota);
+        }
+
+        None => {
+            println!("Nota não encontrada.");
+        }
+    }
+}
+
+Observe:
+
+Some(nota)
+
+Aqui temos Pattern Matching + Destructuring.
+
+Se:
+
+notas.get("Rust")
+
+retornar:
+
+Some(&10)
+
+o padrão:
+
+Some(nota)
+
+extrai a referência para o valor:
+
+Some(&10)
+   │
+   ↓ destructuring
+ nota
+   │
+   ↓
+ &10
+5. HashMap + if let
+
+Se você só quer fazer alguma coisa quando a chave existir:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut notas = HashMap::new();
+
+    notas.insert("Rust", 10);
+
+    if let Some(nota) = notas.get("Rust") {
+        println!("Nota: {}", nota);
+    }
+}
+
+Leia:
+
+if let Some(nota) = notas.get("Rust")
+
+como:
+
+Se get() retornar Some, extraia o valor para nota.
+
+Novamente:
+
+HashMap
+   ↓
+get()
+   ↓
+Option<&V>
+   ↓
+Some(valor) / None
+   ↓
+Pattern Matching
+   ↓
+Destructuring
+6. HashMap + let else
+
+Também combina perfeitamente com o que você acabou de estudar:
+
+use std::collections::HashMap;
+
+fn mostrar_nota(notas: &HashMap<String, i32>) {
+    let Some(nota) = notas.get("Rust") else {
+        println!("Rust não foi encontrado.");
+        return;
+    };
+
+    println!("Nota de Rust: {}", nota);
+}
+
+fn main() {
+    let mut notas = HashMap::new();
+
+    notas.insert(String::from("Rust"), 10);
+    notas.insert(String::from("Python"), 9);
+
+    mostrar_nota(&notas);
+}
+
+Aqui:
+
+let Some(nota) = notas.get("Rust") else {
+    return;
+};
+
+significa:
+
+Procure "Rust"
+      │
+      ▼
+   encontrou?
+    /     \
+  SIM     NÃO
+   │        │
+Some(nota) else
+   │        │
+   ▼      return
+ nota
+7. Verificando se uma chave existe
+
+Existe:
+
+contains_key()
+
+Exemplo:
+
+if notas.contains_key("Rust") {
+    println!("Rust existe!");
+}
+
+Retorna:
+
+bool
+
+Portanto:
+
+contains_key("Rust")
+        ↓
+      true
+
+contains_key("Java")
+        ↓
+      false
+8. Removendo valores
+
+Usamos:
+
+remove()
+
+Exemplo:
+
+notas.remove("Rust");
+
+Depois:
+
+println!("{:?}", notas);
+
+A entrada associada à chave "Rust" foi removida.
+
+9. Alterando um valor existente
