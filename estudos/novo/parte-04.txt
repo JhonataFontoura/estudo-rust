@@ -1,0 +1,990 @@
+Uma forma é inserir novamente a mesma chave:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut notas = HashMap::new();
+
+    notas.insert("Rust", 8);
+
+    println!("{:?}", notas);
+
+    notas.insert("Rust", 10);
+
+    println!("{:?}", notas);
+}
+
+Como "Rust" já existe, o valor é substituído.
+
+Antes:
+
+"Rust" → 8
+
+insert("Rust", 10)
+
+Depois:
+
+"Rust" → 10
+
+Uma chave é única dentro daquele HashMap.
+
+10. entry() — inserir somente se não existir
+
+Rust oferece uma API muito importante:
+
+entry()
+
+Com:
+
+or_insert()
+
+Exemplo:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut notas = HashMap::new();
+
+    notas.insert("Rust", 10);
+
+    notas.entry("Rust").or_insert(5);
+    notas.entry("Python").or_insert(9);
+
+    println!("{:?}", notas);
+}
+
+O raciocínio é:
+
+entry("Rust")
+     ↓
+já existe?
+  ↓
+SIM
+  ↓
+mantém 10
+
+Enquanto:
+
+entry("Python")
+      ↓
+já existe?
+  ↓
+NÃO
+  ↓
+insere 9
+11. Alterando valor através de entry()
+
+or_insert() retorna uma referência mutável para o valor.
+
+Isso permite:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut contador = HashMap::new();
+
+    let valor = contador
+        .entry("Rust")
+        .or_insert(0);
+
+    *valor += 1;
+
+    println!("{:?}", contador);
+}
+
+Observe:
+
+*valor += 1;
+
+Aqui reaparece dereferencing.
+
+valor é essencialmente uma referência mutável ao valor armazenado.
+
+HashMap
+
+"Rust" ─────→ 0
+              ↑
+              │
+           &mut i32
+              │
+            valor
+
+*valor += 1
+
+"Rust" ─────→ 1
+
+Você está começando a ver os assuntos anteriores se conectando.
+
+12. Exemplo clássico: contar palavras
+
+Esse é um excelente exemplo para entender HashMap.
+
+use std::collections::HashMap;
+
+fn main() {
+    let texto = "rust python rust java rust python";
+
+    let mut contador = HashMap::new();
+
+    for palavra in texto.split_whitespace() {
+        let quantidade = contador
+            .entry(palavra)
+            .or_insert(0);
+
+        *quantidade += 1;
+    }
+
+    println!("{:?}", contador);
+}
+
+O resultado conceitualmente será:
+
+rust   → 3
+python → 2
+java   → 1
+
+A ordem pode variar.
+
+Vamos separar:
+
+for palavra in texto.split_whitespace()
+
+Percorre:
+
+rust
+python
+rust
+java
+rust
+python
+
+Depois:
+
+contador.entry(palavra)
+
+procura aquela palavra.
+
+Então:
+
+.or_insert(0)
+
+significa:
+
+Se ela ainda não existir, comece seu contador em 0.
+
+E:
+
+*quantidade += 1;
+
+incrementa o valor.
+
+13. Percorrendo um HashMap
+
+Podemos usar for:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut linguagens = HashMap::new();
+
+    linguagens.insert("Rust", 10);
+    linguagens.insert("Python", 9);
+    linguagens.insert("Java", 8);
+
+    for (linguagem, nota) in &linguagens {
+        println!("{}: {}", linguagem, nota);
+    }
+}
+
+E aqui temos outro conceito que você acabou de estudar:
+
+for (linguagem, nota) in &linguagens
+
+O:
+
+(linguagem, nota)
+
+é destructuring.
+
+Cada item iterado pelo HashMap aparece como um par chave/valor.
+
+Conceitualmente:
+
+("Rust", 10)
+     │     │
+     ↓     ↓
+linguagem nota
+
+Portanto temos:
+
+HashMap
+   ↓
+&HashMap
+   ↓
+for
+   ↓
+(chave, valor)
+   ↓
+DESTRUCTURING
+14. HashMap e Ownership
+
+Essa parte é importante em Rust.
+
+Considere:
+
+use std::collections::HashMap;
+
+fn main() {
+    let nome = String::from("Jhonata");
+    let idade = 24;
+
+    let mut pessoas = HashMap::new();
+
+    pessoas.insert(nome, idade);
+}
+
+A String pode ter seu ownership transferido para o HashMap.
+
+Depois:
+
+pessoas.insert(nome, idade);
+
+nome normalmente não poderá mais ser utilizado:
+
+println!("{}", nome); // ERRO
+
+Porque aconteceu:
+
+nome
+ │
+ │ MOVE
+ ▼
+HashMap
+ │
+ └── "Jhonata" → 24
+
+Já idade é um inteiro e implementa Copy, então a situação é diferente.
+
+Isso conecta HashMap diretamente com Ownership, Move e Copy.
+
+15. HashMap com Struct
+
+Agora podemos juntar struct + HashMap.
+
+use std::collections::HashMap;
+
+#[derive(Debug)]
+struct Aluno {
+    nome: String,
+    nota: f64,
+}
+
+fn main() {
+    let mut alunos: HashMap<u32, Aluno> = HashMap::new();
+
+    alunos.insert(
+        1,
+        Aluno {
+            nome: String::from("Jhonata"),
+            nota: 9.5,
+        },
+    );
+
+    alunos.insert(
+        2,
+        Aluno {
+            nome: String::from("Carlos"),
+            nota: 8.0,
+        },
+    );
+
+    println!("{:#?}", alunos);
+}
+
+Agora temos:
+
+HashMap<u32, Aluno>
+        │      │
+        │      └── VALOR
+        │
+        └───────── CHAVE
+
+Mentalmente:
+
+alunos
+│
+├── 1
+│   └── Aluno
+│       ├── nome: "Jhonata"
+│       └── nota: 9.5
+│
+└── 2
+    └── Aluno
+        ├── nome: "Carlos"
+        └── nota: 8.0
+16. HashMap + Struct + Pattern Matching
+
+Podemos buscar:
+
+if let Some(aluno) = alunos.get(&1) {
+    println!("Nome: {}", aluno.nome);
+    println!("Nota: {}", aluno.nota);
+}
+
+Temos vários conceitos trabalhando juntos:
+
+HashMap
+   │
+   │ get()
+   ▼
+Option<&Aluno>
+   │
+   ▼
+Some(aluno)
+   │
+   ├── Pattern Matching
+   │
+   └── Destructuring do Option
+            │
+            ▼
+          &Aluno
+
+
+RESUMO — HASHMAP EM RUST
+
+HashMap é uma coleção que armazena dados em pares de CHAVE → VALOR.
+
+Importar:
+use std::collections::HashMap;
+
+Criar:
+let mut mapa = HashMap::new();
+
+Inserir:
+mapa.insert("Rust", 10);
+
+Buscar:
+mapa.get("Rust");
+
+get() retorna:
+Option<&V>
+
+Pode retornar:
+Some(&valor)
+None
+
+Verificar se uma chave existe:
+mapa.contains_key("Rust");
+
+Remover:
+mapa.remove("Rust");
+
+Inserir somente se não existir:
+mapa.entry("Rust").or_insert(0);
+
+Alterar valor usando entry():
+let valor = mapa.entry("Rust").or_insert(0);
+*valor += 1;
+
+Percorrer:
+for (chave, valor) in &mapa {
+    println!("{}: {}", chave, valor);
+}
+
+(chave, valor) é DESTRUCTURING.
+
+HashMap + Pattern Matching:
+
+match mapa.get("Rust") {
+    Some(valor) => println!("{}", valor),
+    None => println!("Não encontrado"),
+}
+
+HashMap + if let:
+
+if let Some(valor) = mapa.get("Rust") {
+    println!("{}", valor);
+}
+
+HashMap + let else:
+
+let Some(valor) = mapa.get("Rust") else {
+    return;
+};
+
+RELAÇÃO COM OUTROS CONCEITOS:
+
+HashMap
+    ↓
+get()
+    ↓
+Option<&V>
+    ↓
+Some / None
+    ↓
+Pattern Matching
+    ↓
+match / if let / let else
+
+HashMap
+    ↓
+for (chave, valor)
+    ↓
+Destructuring
+
+entry()
+    ↓
+or_insert()
+    ↓
+&mut valor
+    ↓
+Dereferencing
+    ↓
+*valor
+
+IMPORTANTE:
+
+- HashMap trabalha com pares chave → valor.
+- As chaves são únicas.
+- Inserir novamente a mesma chave substitui o valor anterior.
+- HashMap não garante ordem dos elementos.
+- insert() pode transferir Ownership de valores como String.
+- get() normalmente empresta o valor em vez de transferir Ownership.
+- HashMap é útil quando queremos localizar um valor através de uma chave, em vez de uma posição.
+
+Gerenciamento de arquivos e mod em Rust
+
+Em Rust, mod é usado para organizar o código em módulos. Quando o projeto começa a crescer, em vez de colocar tudo dentro de main.rs, podemos separar responsabilidades em diferentes arquivos.
+
+Pense assim:
+
+main.rs
+   ↓
+mod
+   ↓
+outros módulos/arquivos
+   ↓
+código organizado
+
+1. Exemplo básico
+
+Estrutura:
+
+meu_projeto/
+│
+├── Cargo.toml
+│
+└── src/
+    ├── main.rs
+    └── usuario.rs
+
+No main.rs:
+
+mod usuario;
+
+fn main() {
+    usuario::mostrar_usuario();
+}
+
+No usuario.rs:
+
+pub fn mostrar_usuario() {
+    println!("Usuário: Jhonata");
+}
+
+O:
+
+mod usuario;
+
+declara o módulo usuario.
+
+Rust procura o código correspondente em:
+
+src/usuario.rs
+2. Por que precisamos de pub?
+
+Isso:
+
+fn mostrar_usuario() {
+    println!("Jhonata");
+}
+
+é privado por padrão.
+
+Se main.rs precisar acessar a função, usamos:
+
+pub fn mostrar_usuario() {
+    println!("Jhonata");
+}
+
+pub significa:
+
+Este item pode ser acessado de fora deste módulo, respeitando as regras de visibilidade.
+
+Então:
+
+mod usuario
+    │
+    └── pub fn mostrar_usuario()
+                    ↑
+                    │
+main.rs ────────────┘
+3. use
+
+Imagine:
+
+mod usuario;
+
+fn main() {
+    usuario::mostrar_usuario();
+}
+
+Podemos importar a função:
+
+mod usuario;
+
+use usuario::mostrar_usuario;
+
+fn main() {
+    mostrar_usuario();
+}
+
+O use traz um caminho para o escopo atual.
+
+mod
+↓
+declara/define módulo
+
+pub
+↓
+controla visibilidade
+
+use
+↓
+traz um caminho para o escopo
+4. Submódulos
+
+Podemos ter:
+
+src/
+├── main.rs
+│
+└── usuario/
+    ├── mod.rs
+    ├── cadastro.rs
+    └── login.rs
+
+main.rs:
+
+mod usuario;
+
+fn main() {
+    usuario::cadastro::cadastrar();
+}
+
+usuario/mod.rs:
+
+pub mod cadastro;
+pub mod login;
+
+usuario/cadastro.rs:
+
+pub fn cadastrar() {
+    println!("Usuário cadastrado!");
+}
+
+usuario/login.rs:
+
+pub fn entrar() {
+    println!("Login realizado!");
+}
+
+Visualmente:
+
+main.rs
+│
+└── usuario
+     │
+     ├── cadastro
+     │      └── cadastrar()
+     │
+     └── login
+            └── entrar()
+5. Forma moderna sem mod.rs
+
+Você também pode encontrar projetos organizados assim:
+
+src/
+├── main.rs
+├── usuario.rs
+│
+└── usuario/
+    ├── cadastro.rs
+    └── login.rs
+
+usuario.rs:
+
+pub mod cadastro;
+pub mod login;
+
+E:
+
+usuario.rs
+
+funciona como o módulo usuario, enquanto a pasta usuario/ contém seus submódulos.
+
+6. crate
+
+crate representa a raiz do crate atual.
+
+Exemplo:
+
+use crate::usuario::cadastro::cadastrar;
+
+Caminho:
+
+crate
+ ↓
+usuario
+ ↓
+cadastro
+ ↓
+cadastrar
+
+Depois:
+
+fn main() {
+    cadastrar();
+}
+7. super
+
+super significa aproximadamente:
+
+módulo pai.
+
+Imagine:
+
+usuario
+│
+├── cadastro
+└── login
+
+Dentro de um submódulo, super permite começar o caminho pelo módulo pai.
+
+Você verá caminhos como:
+
+super::alguma_funcao();
+
+Mentalmente:
+
+módulo atual
+    │
+    └── super
+          ↓
+       módulo pai
+8. self
+
+Em caminhos de módulos, self pode representar o módulo atual.
+
+Por exemplo:
+
+use self::cadastro::cadastrar;
+
+Aqui não é exatamente o mesmo uso de self que você viu nos métodos:
+
+fn mostrar(&self)
+
+O significado depende do contexto.
+
+Exemplo organizado
+src/
+├── main.rs
+├── banco.rs
+└── usuario.rs
+
+usuario.rs:
+
+pub struct Usuario {
+    pub nome: String,
+}
+
+pub fn criar_usuario(nome: String) -> Usuario {
+    Usuario { nome }
+}
+
+banco.rs:
+
+pub fn conectar() {
+    println!("Conectando ao banco...");
+}
+
+main.rs:
+
+mod usuario;
+mod banco;
+
+use usuario::criar_usuario;
+
+fn main() {
+    banco::conectar();
+
+    let usuario = criar_usuario(
+        String::from("Jhonata")
+    );
+
+    println!("{}", usuario.nome);
+}
+
+Aqui você já conecta:
+
+Arquivos
+   ↓
+mod
+   ↓
+Módulos
+   ↓
+pub
+   ↓
+Visibilidade
+   ↓
+use
+   ↓
+Importação de caminhos
+   ↓
+Structs / funções / enums etc.
+Resumo para copiar e colar
+GERENCIAMENTO DE ARQUIVOS E MOD — RUST
+
+mod
+→ declara/define um módulo.
+
+Exemplo:
+mod usuario;
+
+Rust pode procurar:
+src/usuario.rs
+
+pub
+→ torna um item acessível fora do módulo conforme sua visibilidade.
+
+Exemplo:
+pub fn cadastrar() {
+    println!("Cadastrado!");
+}
+
+use
+→ traz um caminho para o escopo atual.
+
+Exemplo:
+use usuario::cadastrar;
+
+crate
+→ representa a raiz do crate atual.
+
+Exemplo:
+use crate::usuario::cadastrar;
+
+super
+→ começa o caminho pelo módulo pai.
+
+self
+→ em caminhos, refere-se ao módulo atual.
+
+ESTRUTURA:
+
+src/
+├── main.rs
+├── usuario.rs
+└── usuario/
+    ├── cadastro.rs
+    └── login.rs
+
+main.rs:
+mod usuario;
+
+usuario.rs:
+pub mod cadastro;
+pub mod login;
+
+usuario/cadastro.rs:
+pub fn cadastrar() {
+    println!("Cadastrado!");
+}
+
+RELAÇÃO:
+
+main.rs
+   ↓
+mod usuario
+   ↓
+usuario.rs
+   ↓
+pub mod cadastro
+   ↓
+usuario/cadastro.rs
+   ↓
+pub fn cadastrar()
+
+RESUMO:
+
+mod   → módulos
+pub   → visibilidade
+use   → importa um caminho para o escopo
+crate → raiz do crate
+super → módulo pai
+self  → módulo atual
+
+IMPORTANTE:
+- Rust usa módulos para organizar o código.
+- Um módulo não precisa necessariamente estar em outro arquivo.
+- Itens são privados por padrão.
+- pub controla a exposição dos itens.
+- use não cria o módulo; ele traz um caminho para o escopo.
+- mod declara/define o módulo.
+- Podemos dividir projetos grandes em módulos e submódulos.
+
+use crate é usado para trazer um item do seu próprio projeto para o escopo atual, começando o caminho pela raiz do crate.
+
+Pense em:
+
+crate
+↓
+raiz do seu projeto Rust
+Exemplo
+
+Estrutura:
+
+src/
+├── main.rs
+└── usuario.rs
+
+usuario.rs:
+
+pub fn cadastrar() {
+    println!("Usuário cadastrado!");
+}
+
+main.rs:
+
+mod usuario;
+
+use crate::usuario::cadastrar;
+
+fn main() {
+    cadastrar();
+}
+
+O caminho:
+
+use crate::usuario::cadastrar;
+
+pode ser lido assim:
+
+crate
+  │
+  │ raiz
+  ▼
+usuario
+  │
+  │ módulo
+  ▼
+cadastrar
+  │
+  └── função
+
+Sem o use, poderíamos escrever o caminho completo:
+
+fn main() {
+    crate::usuario::cadastrar();
+}
+
+Com:
+
+use crate::usuario::cadastrar;
+
+podemos simplesmente usar:
+
+cadastrar();
+Com vários módulos
+
+Imagine:
+
+src/
+├── main.rs
+├── usuario.rs
+└── usuario/
+    └── cadastro.rs
+
+main.rs:
+
+mod usuario;
+
+usuario.rs:
+
+pub mod cadastro;
+
+usuario/cadastro.rs:
+
+pub fn cadastrar() {
+    println!("Cadastro realizado!");
+}
+
+Agora o caminho completo é:
+
+crate::usuario::cadastro::cadastrar
+
+Podemos importar:
+
+use crate::usuario::cadastro::cadastrar;
+
+E chamar:
+
+fn main() {
+    cadastrar();
+}
+crate não é a mesma coisa que Cargo.toml
+
+Um crate é uma unidade de compilação do Rust.
+
+Em um projeto simples com:
+
+src/
+└── main.rs
+
+main.rs é a raiz do crate binário.
+
+Se for uma biblioteca:
+
+src/
+└── lib.rs
+
+lib.rs é a raiz do crate da biblioteca.
+
+Por isso:
+
+crate::
+
+significa:
+
+Comece a procurar a partir da raiz do crate atual.
+
+crate × self × super
+
+Essa comparação é importante:
+
+crate
+  ↓
+raiz do crate
+
+self
+  ↓
+módulo atual
+
+super
+  ↓
+módulo pai
+
+Exemplo conceitual:
+
+crate
+│
