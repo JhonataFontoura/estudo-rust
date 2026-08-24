@@ -1,0 +1,951 @@
+└── usuario
+    │
+    └── cadastro
+        │
+        └── validacao
+
+Se você estiver dentro de validacao:
+
+crate::usuario
+
+começa da raiz.
+
+super::
+
+sobe para cadastro.
+
+self::
+
+começa em validacao.
+
+Resumo para copiar e colar
+USE CRATE — RUST
+
+crate
+→ representa a raiz do crate atual.
+
+use
+→ traz um caminho para o escopo atual.
+
+Exemplo:
+
+use crate::usuario::cadastrar;
+
+CAMINHO:
+
+crate
+  ↓
+usuario
+  ↓
+cadastrar
+
+Sem use:
+
+crate::usuario::cadastrar();
+
+Com use:
+
+use crate::usuario::cadastrar;
+
+cadastrar();
+
+EXEMPLO:
+
+src/
+├── main.rs
+├── usuario.rs
+└── usuario/
+    └── cadastro.rs
+
+main.rs:
+
+mod usuario;
+
+use crate::usuario::cadastro::cadastrar;
+
+fn main() {
+    cadastrar();
+}
+
+usuario.rs:
+
+pub mod cadastro;
+
+usuario/cadastro.rs:
+
+pub fn cadastrar() {
+    println!("Usuário cadastrado!");
+}
+
+COMPARAÇÃO:
+
+crate → raiz do crate
+self  → módulo atual
+super → módulo pai
+use   → traz um caminho para o escopo atual
+mod   → declara/define um módulo
+pub   → controla a visibilidade
+
+IMPORTANTE:
+
+use crate::...
+→ começa a busca pela raiz do crate atual.
+
+use não cria um módulo.
+use apenas traz um caminho para o escopo atual.
+
+mod declara/define o módulo.
+
+pub permite que o item seja acessado conforme
+as regras de visibilidade.
+
+crate::usuario::cadastro::cadastrar
+↓
+é um caminho absoluto dentro do crate atual.
+
+mod agrupado em arquivos — Rust
+
+Quando o projeto cresce, podemos usar mod para dividir e agrupar módulos relacionados em arquivos e pastas.
+
+Imagine um sistema com usuários. Em vez de colocar cadastro, login e perfil no main.rs, podemos organizar assim:
+
+src/
+├── main.rs
+├── usuario.rs
+│
+└── usuario/
+    ├── cadastro.rs
+    ├── login.rs
+    └── perfil.rs
+
+A hierarquia lógica fica:
+
+crate
+│
+└── usuario
+    ├── cadastro
+    ├── login
+    └── perfil
+1. main.rs
+
+Primeiro declaramos o módulo principal:
+
+mod usuario;
+
+fn main() {
+    usuario::cadastro::cadastrar();
+    usuario::login::entrar();
+}
+
+Quando Rust encontra:
+
+mod usuario;
+
+ele pode encontrar esse módulo em:
+
+src/usuario.rs
+2. usuario.rs agrupa os submódulos
+
+Dentro de usuario.rs:
+
+pub mod cadastro;
+pub mod login;
+pub mod perfil;
+
+Esse arquivo funciona como o módulo usuario e declara seus submódulos.
+
+A relação é:
+
+usuario.rs
+│
+├── pub mod cadastro;
+│        ↓
+│   usuario/cadastro.rs
+│
+├── pub mod login;
+│        ↓
+│   usuario/login.rs
+│
+└── pub mod perfil;
+         ↓
+    usuario/perfil.rs
+3. Arquivo cadastro.rs
+pub fn cadastrar() {
+    println!("Usuário cadastrado!");
+}
+4. Arquivo login.rs
+pub fn entrar() {
+    println!("Login realizado!");
+}
+5. Arquivo perfil.rs
+pub fn mostrar_perfil() {
+    println!("Exibindo perfil...");
+}
+
+Agora podemos acessar:
+
+usuario::cadastro::cadastrar();
+
+O caminho é:
+
+usuario
+    ↓
+cadastro
+    ↓
+cadastrar()
+Usando use crate
+
+Também podemos importar essas funções:
+
+mod usuario;
+
+use crate::usuario::cadastro::cadastrar;
+use crate::usuario::login::entrar;
+
+fn main() {
+    cadastrar();
+    entrar();
+}
+
+Temos:
+
+crate
+│
+└── usuario
+    │
+    ├── cadastro
+    │      └── cadastrar()
+    │
+    └── login
+           └── entrar()
+Agrupando imports
+
+Se vários itens vêm do mesmo módulo, também podemos agrupar o use.
+
+Em vez de:
+
+use crate::usuario::cadastro::cadastrar;
+use crate::usuario::login::entrar;
+use crate::usuario::perfil::mostrar_perfil;
+
+podemos escrever:
+
+use crate::usuario::{
+    cadastro::cadastrar,
+    login::entrar,
+    perfil::mostrar_perfil,
+};
+
+E então:
+
+fn main() {
+    cadastrar();
+    entrar();
+    mostrar_perfil();
+}
+
+Isso é agrupamento de caminhos de importação, enquanto mod está organizando os módulos.
+
+Outra estrutura: mod.rs
+
+Você também pode encontrar:
+
+src/
+├── main.rs
+│
+└── usuario/
+    ├── mod.rs
+    ├── cadastro.rs
+    ├── login.rs
+    └── perfil.rs
+
+Dentro de:
+
+usuario/mod.rs
+
+teríamos:
+
+pub mod cadastro;
+pub mod login;
+pub mod perfil;
+
+E no main.rs:
+
+mod usuario;
+
+As duas organizações representam conceitualmente:
+
+usuario
+├── cadastro
+├── login
+└── perfil
+
+Para projetos novos, a organização com usuario.rs + pasta usuario/ costuma deixar a hierarquia explícita sem depender de vários arquivos chamados mod.rs.
+
+Resumo para copiar e colar
+MOD AGRUPADO EM ARQUIVOS — RUST
+
+mod permite organizar um projeto em módulos,
+submódulos, arquivos e pastas.
+
+EXEMPLO:
+
+src/
+├── main.rs
+├── usuario.rs
+└── usuario/
+    ├── cadastro.rs
+    ├── login.rs
+    └── perfil.rs
+
+
+HIERARQUIA:
+
+crate
+│
+└── usuario
+    ├── cadastro
+    ├── login
+    └── perfil
+
+
+main.rs:
+
+mod usuario;
+
+use crate::usuario::{
+    cadastro::cadastrar,
+    login::entrar,
+    perfil::mostrar_perfil,
+};
+
+fn main() {
+    cadastrar();
+    entrar();
+    mostrar_perfil();
+}
+
+
+usuario.rs:
+
+pub mod cadastro;
+pub mod login;
+pub mod perfil;
+
+
+usuario/cadastro.rs:
+
+pub fn cadastrar() {
+    println!("Usuário cadastrado!");
+}
+
+
+usuario/login.rs:
+
+pub fn entrar() {
+    println!("Login realizado!");
+}
+
+
+usuario/perfil.rs:
+
+pub fn mostrar_perfil() {
+    println!("Exibindo perfil...");
+}
+
+
+RELAÇÃO:
+
+main.rs
+   ↓
+mod usuario;
+   ↓
+usuario.rs
+   │
+   ├── pub mod cadastro;
+   │          ↓
+   │   usuario/cadastro.rs
+   │
+   ├── pub mod login;
+   │          ↓
+   │   usuario/login.rs
+   │
+   └── pub mod perfil;
+              ↓
+       usuario/perfil.rs
+
+
+IMPORTANTE:
+
+mod usuario;
+→ declara o módulo usuario.
+
+pub mod cadastro;
+→ declara cadastro como submódulo público.
+
+pub fn cadastrar()
+→ torna a função acessível através do módulo.
+
+use crate::usuario::cadastro::cadastrar;
+→ traz a função para o escopo atual.
+
+crate
+→ começa o caminho pela raiz do crate.
+
+
+AGRUPAMENTO DE USE:
+
+use crate::usuario::{
+    cadastro::cadastrar,
+    login::entrar,
+    perfil::mostrar_perfil,
+};
+
+
+RESUMO:
+
+mod   → declara/define módulos
+pub   → controla visibilidade
+use   → traz caminhos para o escopo
+crate → raiz do crate
+
+Arquivos e pastas representam a organização física.
+
+mod e submódulos representam a organização lógica
+do código.
+
+mod com arquivos separados em Rust
+
+Quando você quer dividir seu código em arquivos diferentes, mod permite dizer ao Rust que determinado arquivo faz parte da estrutura de módulos do projeto.
+
+Exemplo simples
+
+Estrutura:
+
+src/
+├── main.rs
+├── usuario.rs
+└── banco.rs
+main.rs
+mod usuario;
+mod banco;
+
+fn main() {
+    usuario::mostrar_usuario();
+    banco::conectar();
+}
+
+Aqui:
+
+mod usuario;
+
+declara o módulo usuario.
+
+E:
+
+mod banco;
+
+declara o módulo banco.
+
+O Rust procura os arquivos correspondentes:
+
+mod usuario; → src/usuario.rs
+mod banco;   → src/banco.rs
+usuario.rs
+pub fn mostrar_usuario() {
+    println!("Usuário: Jhonata");
+}
+banco.rs
+pub fn conectar() {
+    println!("Conectando ao banco...");
+}
+
+O pub é necessário porque queremos acessar essas funções a partir de outro módulo.
+
+Usando use crate
+
+Também podemos importar as funções no main.rs:
+
+mod usuario;
+mod banco;
+
+use crate::usuario::mostrar_usuario;
+use crate::banco::conectar;
+
+fn main() {
+    mostrar_usuario();
+    conectar();
+}
+
+A estrutura lógica fica:
+
+crate
+│
+├── usuario
+│      └── mostrar_usuario()
+│
+└── banco
+       └── conectar()
+Exemplo com três arquivos
+src/
+├── main.rs
+├── usuario.rs
+├── produto.rs
+└── banco.rs
+usuario.rs
+pub fn cadastrar() {
+    println!("Usuário cadastrado.");
+}
+produto.rs
+pub fn cadastrar() {
+    println!("Produto cadastrado.");
+}
+banco.rs
+pub fn conectar() {
+    println!("Banco conectado.");
+}
+main.rs
+mod usuario;
+mod produto;
+mod banco;
+
+fn main() {
+    usuario::cadastrar();
+    produto::cadastrar();
+    banco::conectar();
+}
+
+Observe que existem duas funções chamadas:
+
+cadastrar()
+
+Mas não existe conflito quando usamos seus caminhos completos:
+
+usuario::cadastrar();
+produto::cadastrar();
+
+Porque são módulos diferentes.
+
+mod não é use
+
+Essa diferença é muito importante:
+
+mod
+↓
+declara/define que um módulo existe
+
+use
+↓
+traz um caminho existente para o escopo atual
+
+Por exemplo:
+
+mod usuario;
+
+use crate::usuario::cadastrar;
+
+Primeiro:
+
+mod usuario;
+
+faz o módulo usuario fazer parte da árvore de módulos.
+
+Depois:
+
+use crate::usuario::cadastrar;
+
+traz cadastrar para o escopo atual.
+
+Assim podemos fazer:
+
+cadastrar();
+
+em vez de:
+
+usuario::cadastrar();
+Resumo para copiar e colar
+MOD COM ARQUIVOS SEPARADOS — RUST
+
+mod pode ser usado para separar o código em
+diferentes arquivos.
+
+ESTRUTURA:
+
+src/
+├── main.rs
+├── usuario.rs
+└── banco.rs
+
+
+main.rs:
+
+mod usuario;
+mod banco;
+
+fn main() {
+    usuario::mostrar_usuario();
+    banco::conectar();
+}
+
+
+usuario.rs:
+
+pub fn mostrar_usuario() {
+    println!("Usuário: Jhonata");
+}
+
+
+banco.rs:
+
+pub fn conectar() {
+    println!("Conectando ao banco...");
+}
+
+
+RELAÇÃO:
+
+mod usuario;
+      ↓
+src/usuario.rs
+
+
+mod banco;
+      ↓
+src/banco.rs
+
+
+HIERARQUIA:
+
+crate
+│
+├── usuario
+│      └── mostrar_usuario()
+│
+└── banco
+       └── conectar()
+
+
+COM USE:
+
+mod usuario;
+mod banco;
+
+use crate::usuario::mostrar_usuario;
+use crate::banco::conectar;
+
+fn main() {
+    mostrar_usuario();
+    conectar();
+}
+
+
+DIFERENÇA:
+
+mod
+→ declara/define um módulo.
+
+use
+→ traz um caminho para o escopo atual.
+
+pub
+→ permite que um item seja acessado
+  de fora do módulo conforme sua visibilidade.
+
+crate
+→ representa a raiz do crate atual.
+
+
+IMPORTANTE:
+
+mod usuario;
+→ Rust associa o módulo ao arquivo correspondente,
+  como src/usuario.rs.
+
+usuario::mostrar_usuario();
+→ acessa a função usando o caminho do módulo.
+
+use crate::usuario::mostrar_usuario;
+→ importa o caminho para o escopo atual.
+
+Depois do use:
+
+mostrar_usuario();
+
+pode ser usado diretamente.
+
+
+RESUMO RÁPIDO:
+
+main.rs
+   │
+   ├── mod usuario;
+   │       ↓
+   │   usuario.rs
+   │
+   └── mod banco;
+           ↓
+       banco.rs
+
+mod = módulo
+arquivo .rs = onde o código do módulo pode ficar
+pub = visibilidade
+use = traz caminho para o escopo
+crate = raiz do crate
+
+mod declarando diretamente pelo path — Rust
+
+Rust permite indicar manualmente qual arquivo será usado por um módulo através do atributo:
+
+#[path = "caminho/arquivo.rs"]
+mod nome_modulo;
+
+Isso é útil quando o arquivo não está no local/nome padrão que o Rust esperaria.
+
+Exemplo simples
+
+Estrutura:
+
+src/
+├── main.rs
+└── arquivos/
+    └── usuario.rs
+
+No main.rs:
+
+#[path = "arquivos/usuario.rs"]
+mod usuario;
+
+fn main() {
+    usuario::mostrar();
+}
+
+No arquivos/usuario.rs:
+
+pub fn mostrar() {
+    println!("Usuário: Jhonata");
+}
+
+A linha:
+
+#[path = "arquivos/usuario.rs"]
+mod usuario;
+
+significa:
+
+#[path = "arquivos/usuario.rs"]
+          │
+          └── arquivo que contém o módulo
+                         ↓
+                    mod usuario
+                         ↓
+              nome do módulo no código
+
+Ou seja, o arquivo se chama:
+
+arquivos/usuario.rs
+
+mas dentro do programa ele será tratado como:
+
+usuario
+
+Por isso:
+
+usuario::mostrar();
+O nome do módulo pode ser diferente do arquivo
+
+Você poderia fazer:
+
+#[path = "arquivos/usuario.rs"]
+mod cliente;
+
+Mesmo o arquivo sendo:
+
+usuario.rs
+
+no código o módulo será:
+
+cliente
+
+Então:
+
+fn main() {
+    cliente::mostrar();
+}
+Exemplo com vários arquivos
+
+Estrutura:
+
+src/
+├── main.rs
+└── modulos/
+    ├── usuario.rs
+    ├── produto.rs
+    └── banco.rs
+
+main.rs:
+
+#[path = "modulos/usuario.rs"]
+mod usuario;
+
+#[path = "modulos/produto.rs"]
+mod produto;
+
+#[path = "modulos/banco.rs"]
+mod banco;
+
+fn main() {
+    usuario::cadastrar();
+    produto::listar();
+    banco::conectar();
+}
+
+usuario.rs:
+
+pub fn cadastrar() {
+    println!("Usuário cadastrado!");
+}
+
+produto.rs:
+
+pub fn listar() {
+    println!("Listando produtos...");
+}
+
+banco.rs:
+
+pub fn conectar() {
+    println!("Banco conectado!");
+}
+
+A relação fica:
+
+main.rs
+│
+├── #[path = "modulos/usuario.rs"]
+│       └── mod usuario;
+│
+├── #[path = "modulos/produto.rs"]
+│       └── mod produto;
+│
+└── #[path = "modulos/banco.rs"]
+        └── mod banco;
+Sem #[path] × com #[path]
+
+Normalmente:
+
+mod usuario;
+
+Rust procura o módulo seguindo as convenções de módulos, como o arquivo correspondente usuario.rs.
+
+Com:
+
+#[path = "outro_local/usuario.rs"]
+mod usuario;
+
+você está dizendo explicitamente:
+
+Use este arquivo como código do módulo usuario.
+
+Resumo para copiar e colar
+MOD DECLARANDO DIRETAMENTE PELO PATH — RUST
+
+#[path = "..."]
+→ permite informar manualmente qual arquivo
+  será usado como código de um módulo.
+
+SINTAXE:
+
+#[path = "caminho/arquivo.rs"]
+mod nome_modulo;
+
+
+EXEMPLO:
+
+src/
+├── main.rs
+└── arquivos/
+    └── usuario.rs
+
+
+main.rs:
+
+#[path = "arquivos/usuario.rs"]
+mod usuario;
+
+fn main() {
+    usuario::mostrar();
+}
+
+
+arquivos/usuario.rs:
+
+pub fn mostrar() {
+    println!("Usuário: Jhonata");
+}
+
+
+RELAÇÃO:
+
+#[path = "arquivos/usuario.rs"]
+              ↓
+      caminho do arquivo
+
+mod usuario;
+      ↓
+nome do módulo dentro do programa
+
+
+IMPORTANTE:
+
+O nome do módulo não precisa ser igual
+ao nome do arquivo.
+
+Exemplo:
+
+#[path = "arquivos/usuario.rs"]
+mod cliente;
+
+fn main() {
+    cliente::mostrar();
+}
+
+
+SEM PATH:
+
+mod usuario;
+
+→ Rust procura o módulo seguindo
+  sua estrutura/convenção padrão.
+
+
+COM PATH:
+
+#[path = "modulos/usuario.rs"]
+mod usuario;
+
+→ você informa explicitamente onde
+  está o arquivo do módulo.
+
+
+EXEMPLO COM VÁRIOS:
+
+#[path = "modulos/usuario.rs"]
+mod usuario;
+
+#[path = "modulos/produto.rs"]
+mod produto;
+
+#[path = "modulos/banco.rs"]
+mod banco;
+
+
+RESUMO:
+
+mod
+→ declara/define o módulo.
+
+#[path = "..."]
+→ informa manualmente o arquivo
+  que contém aquele módulo.
+
+pub
