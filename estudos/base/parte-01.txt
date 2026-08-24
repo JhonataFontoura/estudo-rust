@@ -1,0 +1,846 @@
+Essa sequência é muito importante:
+
+let valor_tabuada: i32 = entrada
+    .trim()
+    .parse()
+    .expect("Digite apenas números");
+
+\n
+
+cria uma quebra de linha antes da mensagem.
+
+use std::io;
+
+Importa as ferramentas de entrada e saída.
+
+let mut entrada = String::new();
+
+Cria uma String vazia que poderá ser alterada.
+
+io::stdin()
+
+Acessa a entrada padrão, normalmente o teclado.
+
+.read_line(&mut entrada)
+
+Lê o que o usuário digitou e armazena em entrada.
+
+.trim()
+
+Remove espaços e o Enter do começo/final da String.
+
+.parse()
+
+Converte a String para outro tipo.
+
+let valor_tabuada: i32
+
+Cria uma variável inteira i32.
+
+for i in 1..=10
+
+Repete o código de 1 até 10.
+
+valor_tabuada * i
+
+Calcula a multiplicação.
+
+println!()
+
+Exibe informações no console.
+
+Práticando loop e while
+
+fn main() {
+    loop {
+        println!("Digite uma das opções:");
+        println!("1 - Cadastrar");
+        println!("2 - Listar");
+        println!("3 - Sair");
+
+        let mut opcao = String::new();
+
+        std::io::stdin()
+            .read_line(&mut opcao)
+            .expect("Falha ao ler a entrada");
+
+        let opcao: i32 = opcao
+            .trim()
+            .parse()
+            .expect("Por favor, digite um número válido");
+
+        match opcao {
+            1 => {
+                println!("Cadastrar");
+            }
+
+            2 => {
+                println!("Listar");
+            }
+
+            3 => {
+                println!("Sair");
+                break;
+            }
+
+            _ => {
+                println!("Opção inválida!");
+            }
+        }
+    }
+}
+
+Estudo de função 
+fn main() {
+    let r: i8 = soma(122, 2);
+
+    println!("Resultado: {}", r);
+}
+
+fn soma(x: i8, y: i8) -> i8 {
+    x + y
+}
+
+Função recursiva
+Uma função recursiva em Rust é uma função que chama ela mesma para resolver um problema em partes menores.
+
+A ideia principal é:
+
+função()
+   ↓
+chama função() novamente
+   ↓
+chama função() novamente
+   ↓
+...
+   ↓
+chega em uma condição de parada
+
+A condição de parada é extremamente importante. Sem ela, a função continuaria chamando a si mesma até causar um erro de stack overflow.
+
+Exemplo simples: contagem regressiva
+fn contagem(numero: i32) {
+    if numero == 0 {
+        println!("Fim!");
+        return;
+    }
+
+    println!("{}", numero);
+
+    contagem(numero - 1);
+}
+
+fn main() {
+    contagem(5);
+}
+
+O resultado será:
+
+5
+4
+3
+2
+1
+Fim!
+MEMÓRIA EM RUST — STATIC, STACK E HEAP
+
+Para entender Ownership e Borrowing em Rust, é importante entender onde os dados podem ficar armazenados na memória.
+
+Os três conceitos principais são:
+
+1. Memória estática (Static)
+2. Stack (Pilha)
+3. Heap (Montão / memória dinâmica)
+
+
+==================================================
+1. STACK — PILHA
+==================================================
+
+A Stack é uma região de memória rápida usada principalmente para armazenar dados cujo tamanho é conhecido durante a execução de forma simples e previsível.
+
+Exemplo:
+
+fn main() {
+    let idade: i32 = 24;
+    let altura: f64 = 1.68;
+    let ativo: bool = true;
+}
+
+Valores como:
+
+i32
+i64
+f32
+f64
+bool
+char
+
+normalmente ficam diretamente na Stack quando são variáveis locais.
+
+Exemplo:
+
+let numero: i32 = 10;
+
+Podemos imaginar:
+
+STACK
+
+numero
+  |
+  v
+ 10
+
+
+A Stack funciona seguindo uma ideia chamada:
+
+LIFO = Last In, First Out
+
+Em português:
+
+Último a entrar, primeiro a sair.
+
+
+Imagine uma pilha de pratos:
+
+| prato 3 | <- primeiro a sair
+| prato 2 |
+| prato 1 |
+
+O último prato colocado é o primeiro retirado.
+
+
+A Stack é muito rápida porque a organização da memória é simples.
+
+
+==================================================
+2. HEAP — MEMÓRIA DINÂMICA
+==================================================
+
+A Heap é utilizada quando precisamos armazenar dados que podem ter tamanho dinâmico.
+
+Um exemplo muito importante em Rust é:
+
+String
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+
+A String pode crescer:
+
+let mut nome = String::from("Jhonata");
+
+nome.push_str(" Fontoura Nunes");
+
+
+Como o tamanho pode mudar, os caracteres da String são armazenados na Heap.
+
+Mas existe um detalhe muito importante.
+
+A variável String possui informações armazenadas na Stack que apontam para os dados da Heap.
+
+Simplificando:
+
+STACK
+
+nome
+ |
+ | ponteiro
+ | tamanho
+ | capacidade
+ |
+ v
+
+HEAP
+
+"Jhonata"
+
+
+Uma String possui informações como:
+
+pointer   -> onde os caracteres estão na Heap
+length    -> quantidade utilizada
+capacity  -> quantidade de espaço disponível
+
+
+Podemos imaginar:
+
+STACK
+
+nome
+----------------
+pointer   -----------+
+length = 7            |
+capacity = 7          |
+                      |
+                      v
+HEAP
+
+J h o n a t a
+
+
+==================================================
+3. POR QUE OWNERSHIP É IMPORTANTE PARA A HEAP?
+==================================================
+
+Dados armazenados na Heap precisam ter sua memória liberada quando não forem mais necessários.
+
+Rust utiliza Ownership para controlar isso.
+
+Exemplo:
+
+{
+    let nome = String::from("Jhonata");
+
+    println!("{}", nome);
+}
+
+Quando chegamos ao final:
+
+}
+
+a variável nome sai do escopo.
+
+Rust percebe que nome era proprietária da String e libera automaticamente os dados da Heap.
+
+Isso é feito internamente através do mecanismo de Drop.
+
+
+Podemos imaginar:
+
+{
+    nome -> "Jhonata"
+}
+
+Saiu do escopo:
+
+nome -> destruído
+
+Heap:
+"Jhonata" -> memória liberada
+
+
+==================================================
+4. MOVE E HEAP
+==================================================
+
+Agora fica mais fácil entender por que String possui comportamento diferente de i32.
+
+Exemplo:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1;
+
+
+Os dados "Jhonata" estão na Heap.
+
+Simplificando, antes:
+
+STACK
+
+nome1
+ |
+ +-----------> HEAP
+               "Jhonata"
+
+
+Quando fazemos:
+
+let nome2 = nome1;
+
+Rust transfere a propriedade.
+
+Depois:
+
+STACK
+
+nome1 -> não pode mais ser utilizado
+
+nome2
+ |
+ +-----------> HEAP
+               "Jhonata"
+
+
+Isso é chamado de:
+
+MOVE
+
+
+Rust não precisa copiar todos os caracteres da String.
+
+Ele transfere a propriedade.
+
+
+Isso também impede que nome1 e nome2 tentem liberar a mesma região da Heap.
+
+
+==================================================
+5. COPY E STACK
+==================================================
+
+Agora veja um i32:
+
+let numero1: i32 = 10;
+let numero2 = numero1;
+
+
+Como i32 é um tipo simples e implementa Copy, o valor pode ser copiado.
+
+STACK
+
+numero1 = 10
+numero2 = 10
+
+
+Por isso podemos continuar usando os dois:
+
+println!("{}", numero1);
+println!("{}", numero2);
+
+
+==================================================
+6. CLONE E HEAP
+==================================================
+
+Se realmente queremos copiar uma String, podemos utilizar:
+
+clone()
+
+
+Exemplo:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1.clone();
+
+
+Agora temos duas Strings independentes.
+
+Simplificando:
+
+STACK
+
+nome1 -----------> HEAP
+                   "Jhonata"
+
+nome2 -----------> HEAP
+                   "Jhonata"
+
+
+Os dados foram realmente duplicados.
+
+Por isso clone() pode ser mais custoso do que um simples Move.
+
+
+==================================================
+7. BORROWING E HEAP
+==================================================
+
+Borrowing permite acessar os dados sem transferir a propriedade.
+
+Exemplo:
+
+fn mostrar(nome: &String) {
+    println!("{}", nome);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar(&nome);
+
+    println!("{}", nome);
+}
+
+
+Podemos imaginar:
+
+nome
+ |
+ +-------------> "Jhonata"
+                     ^
+                     |
+                   &nome
+
+
+A função recebe uma referência para o valor.
+
+Ela pode acessar o valor, mas não se torna proprietária dele.
+
+Por isso nome continua válido depois da função.
+
+
+==================================================
+8. STATIC — MEMÓRIA ESTÁTICA
+==================================================
+
+Dados estáticos possuem duração relacionada a toda a execução do programa.
+
+Um exemplo importante são literais de String:
+
+let nome: &str = "Jhonata";
+
+
+"Jhonata" é um literal de string.
+
+Diferentemente de:
+
+String::from("Jhonata")
+
+o literal "Jhonata" faz parte dos dados do próprio programa e possui duração estática.
+
+
+Exemplo:
+
+let nome: &'static str = "Jhonata";
+
+
+'static significa que essa referência pode permanecer válida durante toda a execução do programa.
+
+
+Também podemos declarar valores estáticos:
+
+static IDADE: i32 = 24;
+
+fn main() {
+    println!("{}", IDADE);
+}
+
+
+==================================================
+9. &str VS String
+==================================================
+
+Essa diferença é muito importante em Rust.
+
+
+String:
+
+let nome = String::from("Jhonata");
+
+
+String é um tipo que possui ownership sobre seu conteúdo.
+
+Os caracteres normalmente ficam na Heap.
+
+
+Já:
+
+let nome: &str = "Jhonata";
+
+
+&str é uma referência para uma sequência de caracteres.
+
+Nesse exemplo específico, "Jhonata" é um literal armazenado nos dados estáticos do programa.
+
+
+IMPORTANTE:
+
+Nem todo &str está na memória estática.
+
+Por exemplo:
+
+let nome = String::from("Jhonata");
+
+let parte: &str = &nome[0..3];
+
+
+parte é um &str, mas está referenciando parte da String que possui seus caracteres na Heap.
+
+Portanto:
+
+&str NÃO significa automaticamente memória static.
+
+
+==================================================
+10. COMPARAÇÃO GERAL
+==================================================
+
+STACK
+
+- Muito rápida
+- Organização simples
+- Variáveis locais e valores de tamanho conhecido
+- Exemplos comuns: i32, f64, bool, char
+- Também pode armazenar estruturas que contêm ponteiros para dados da Heap
+
+
+HEAP
+
+- Memória dinâmica
+- Utilizada para dados que precisam de alocação dinâmica
+- Exemplos importantes: conteúdo de String, Vec<T>, Box<T>
+- Ownership é muito importante para controlar quando essa memória deve ser liberada
+
+
+STATIC
+
+- Dados que podem existir durante toda a execução do programa
+- Literais de String são um exemplo importante
+- Pode ser utilizado com static e referências 'static
+
+
+==================================================
+11. EXEMPLO COM OS TRÊS CONCEITOS
+==================================================
+
+static VERSAO: i32 = 1;
+
+fn main() {
+    let idade: i32 = 24;
+
+    let nome = String::from("Jhonata");
+
+    let linguagem: &'static str = "Rust";
+
+    println!("{}", VERSAO);
+    println!("{}", idade);
+    println!("{}", nome);
+    println!("{}", linguagem);
+}
+
+
+Simplificando:
+
+STATIC
+
+VERSAO = 1
+"Rust"
+
+
+STACK
+
+idade = 24
+
+nome:
+- pointer
+- length
+- capacity
+
+
+HEAP
+
+"Jhonata"
+
+
+==================================================
+12. RELAÇÃO COM OWNERSHIP
+==================================================
+
+Agora podemos juntar os conceitos:
+
+
+STACK
+Dados simples podem ser copiados facilmente.
+
+Exemplo:
+
+let x = 10;
+let y = x;
+
+
+HEAP
+Dados alocados dinamicamente precisam ter sua propriedade controlada.
+
+Exemplo:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1;
+
+Isso normalmente gera um MOVE.
+
+
+BORROWING
+Permite acessar os dados sem transferir ownership.
+
+&nome
+
+= empréstimo imutável
+
+
+&mut nome
+
+= empréstimo mutável
+
+
+STATIC
+Dados com duração estática podem permanecer disponíveis durante toda a execução do programa.
+
+
+==================================================
+RESUMO PARA DECORAR
+==================================================
+
+STACK
+=
+Memória rápida e organizada como uma pilha.
+
+Exemplos comuns:
+i32
+f64
+bool
+char
+
+
+HEAP
+=
+Memória utilizada para alocação dinâmica.
+
+Exemplos:
+conteúdo de String
+Vec
+Box
+
+
+STATIC
+=
+Dados que podem existir durante toda a execução do programa.
+
+Exemplo:
+
+"Rust"
+
+static VERSAO: i32 = 1;
+
+
+OWNERSHIP
+=
+Define quem é responsável por um valor.
+
+
+MOVE
+=
+Transfere a propriedade.
+
+
+COPY
+=
+Copia determinados valores simples.
+
+
+CLONE
+=
+Cria uma cópia explícita dos dados.
+
+
+BORROWING
+=
+Permite usar um valor sem assumir sua propriedade.
+
+
+&valor
+=
+Referência imutável.
+
+
+&mut valor
+=
+Referência mutável.
+
+
+FORMA SIMPLES DE LEMBRAR:
+
+STACK = dados rápidos e organizados.
+
+HEAP = dados alocados dinamicamente.
+
+STATIC = dados que podem durar o programa inteiro.
+
+OWNERSHIP = quem é o dono.
+
+BORROWING = pegar emprestado.
+
+MOVE = passar a propriedade.
+
+CLONE = criar outra cópia.
+
+Ownership e Borrowing em Rust
+
+Ownership (propriedade) e Borrowing (empréstimo) são dois dos conceitos mais importantes de Rust. Eles estão diretamente ligados à forma como Rust controla a memória sem precisar de um Garbage Collector (GC).
+
+A ideia central é:
+
+Ownership determina quem é responsável por um valor na memória. Borrowing permite usar esse valor temporariamente sem assumir sua propriedade.
+
+1. Por que Rust precisa de Ownership?
+
+Quando um programa executa, ele precisa armazenar informações na memória.
+
+Alguns dados são simples:
+
+let idade = 24;
+
+Outros podem precisar de memória alocada dinamicamente:
+
+let nome = String::from("Jhonata");
+
+Rust precisa saber:
+
+quem é responsável por essa memória;
+quando ela pode ser liberada;
+quem pode acessar o valor;
+quem pode modificar o valor;
+como impedir que alguém tente usar uma memória que já foi liberada.
+
+É aí que entra o Ownership.
+
+2. Ownership — Propriedade
+
+Em Rust, cada valor possui um dono, chamado de owner.
+
+Exemplo:
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    println!("{}", nome);
+}
+
+Aqui:
+
+let nome = String::from("Jhonata");
+
+a variável:
+
+nome
+
+é a dona (owner) da String.
+
+Podemos imaginar:
+
+nome
+ │
+ │ é proprietário
+ ↓
+"Jhonata"
+
+Quando nome sai do seu escopo, Rust automaticamente libera a memória utilizada pela String.
+
+3. As principais regras de Ownership
+
+Existem três regras importantes:
+
+1. Cada valor em Rust possui um proprietário (owner).
+
+2. Só pode existir um proprietário por vez.
+
+3. Quando o proprietário sai do escopo, o valor é descartado (drop).
+
+Exemplo:
+
+fn main() {
+    {
+        let nome = String::from("Jhonata");
+
+        println!("{}", nome);
+    }
+
+    // nome não existe mais aqui
+}
+
+Quando chegamos nesta chave:
+
+}
+
+nome sai do escopo.
