@@ -1,0 +1,916 @@
+Rust automaticamente libera a memória da String.
+
+4. Transferência de Ownership — Move
+
+Agora temos uma característica muito importante de Rust.
+
+Veja:
+
+fn main() {
+    let nome1 = String::from("Jhonata");
+
+    let nome2 = nome1;
+
+    println!("{}", nome2);
+}
+
+Quando fazemos:
+
+let nome2 = nome1;
+
+a propriedade é transferida.
+
+Antes:
+
+nome1
+  ↓
+"Jhonata"
+
+Depois:
+
+nome1    ❌ não é mais proprietário
+
+nome2
+  ↓
+"Jhonata"
+
+Isso é chamado de:
+
+Move — movimentação/transferência de propriedade.
+
+Por isso isto dará erro:
+
+fn main() {
+    let nome1 = String::from("Jhonata");
+
+    let nome2 = nome1;
+
+    println!("{}", nome1); // ERRO
+}
+
+Porque nome1 não é mais dono da String.
+
+5. Por que Rust faz isso?
+
+Imagine que Rust permitisse:
+
+nome1 ──→ memória
+nome2 ──→ mesma memória
+
+Depois nome1 fosse destruído e liberasse aquela memória.
+
+nome2 poderia tentar acessar uma região que já foi liberada.
+
+Isso poderia gerar problemas de segurança de memória.
+
+Rust evita esse tipo de problema durante a compilação.
+
+6. E números? Por que isso funciona?
+
+Agora veja:
+
+fn main() {
+    let numero1 = 10;
+
+    let numero2 = numero1;
+
+    println!("{}", numero1);
+    println!("{}", numero2);
+}
+
+Isso funciona.
+
+Você pode pensar:
+
+"Mas não deveria acontecer um Move?"
+
+Para tipos simples como:
+
+i8
+i32
+i64
+u32
+f32
+f64
+bool
+char
+
+Rust normalmente utiliza o trait Copy.
+
+Então:
+
+let numero2 = numero1;
+
+faz uma cópia do valor.
+
+numero1 = 10
+numero2 = 10
+
+Os dois continuam válidos.
+
+Isso é diferente de uma String.
+
+7. String e Copy
+
+Uma String normalmente não implementa Copy.
+
+Por isso:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1;
+
+faz um:
+
+MOVE
+
+e não:
+
+COPY
+
+Então:
+
+nome1 ──────┐
+            │ MOVE
+            ↓
+          nome2
+            ↓
+         "Jhonata"
+8. E se eu realmente quiser copiar uma String?
+
+Você pode usar:
+
+.clone()
+
+Exemplo:
+
+fn main() {
+    let nome1 = String::from("Jhonata");
+
+    let nome2 = nome1.clone();
+
+    println!("{}", nome1);
+    println!("{}", nome2);
+}
+
+Agora existem duas Strings independentes.
+
+nome1 → "Jhonata"
+
+nome2 → "Jhonata"
+
+Mas clone() pode envolver uma cópia real dos dados na memória, então não é algo para usar automaticamente em todo lugar apenas para evitar problemas de ownership.
+
+9. O problema ao passar valores para funções
+
+Veja esta função:
+
+fn mostrar_nome(nome: String) {
+    println!("{}", nome);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar_nome(nome);
+}
+
+Quando fazemos:
+
+mostrar_nome(nome);
+
+a propriedade da String é transferida para o parâmetro:
+
+nome: String
+
+Podemos imaginar:
+
+main
+nome
+ ↓
+
+mostrar_nome(nome)
+        ↓
+ propriedade transferida
+        ↓
+ parâmetro nome
+
+Depois disso, tentar:
+
+println!("{}", nome);
+
+na main dará erro:
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar_nome(nome);
+
+    println!("{}", nome); // ERRO
+}
+
+Porque a propriedade foi movida para a função.
+
+10. É aqui que entra Borrowing
+
+Às vezes queremos que uma função use um valor, mas não queremos entregar a propriedade dele.
+
+Para isso existe o:
+
+Borrowing — empréstimo.
+
+Em Rust usamos referências com:
+
+&
+
+Exemplo:
+
+fn mostrar_nome(nome: &String) {
+    println!("{}", nome);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar_nome(&nome);
+
+    println!("{}", nome);
+}
+
+Agora funciona.
+
+10. É aqui que entra Borrowing
+
+Às vezes queremos que uma função use um valor, mas não queremos entregar a propriedade dele.
+
+Para isso existe o:
+
+Borrowing — empréstimo.
+
+Em Rust usamos referências com:
+
+&
+
+Exemplo:
+
+fn mostrar_nome(nome: &String) {
+    println!("{}", nome);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar_nome(&nome);
+
+    println!("{}", nome);
+}
+
+Agora funciona.
+
+11. O que & significa?
+
+Quando fazemos:
+
+&nome
+
+estamos criando uma referência ao valor.
+
+Podemos pensar:
+
+main:
+
+nome
+ ↓
+"Jhonata"
+ ↑
+ │
+ &nome
+ ↑
+ │
+mostrar_nome()
+
+A função consegue acessar a String, mas não se torna dona dela.
+
+É como dizer:
+
+"Você pode usar minha String, mas ela continua sendo minha."
+
+Por isso chamamos de Borrowing.
+
+12. Ownership vs Borrowing
+
+Com Ownership:
+
+mostrar_nome(nome);
+
+podemos ter transferência de propriedade:
+
+nome
+ ↓
+MOVE
+ ↓
+função
+
+Com Borrowing:
+
+mostrar_nome(&nome);
+
+temos:
+
+nome
+ ↓
+continua sendo proprietário
+
+função
+ ↓
+pega emprestado
+
+Essa diferença é fundamental.
+
+13. Borrowing imutável
+
+Quando usamos:
+
+&nome
+
+estamos fazendo um empréstimo imutável.
+
+A função pode ler:
+
+fn mostrar_nome(nome: &String) {
+    println!("{}", nome);
+}
+
+Mas não pode modificar a String.
+
+Por exemplo, isso não funciona:
+
+fn alterar_nome(nome: &String) {
+    nome.push_str(" Nunes");
+}
+
+Porque &String é uma referência imutável.
+
+14. Mutable Borrowing — empréstimo mutável
+
+Se queremos permitir que a função modifique o valor, utilizamos:
+
+&mut
+
+Exemplo:
+
+fn adicionar_sobrenome(nome: &mut String) {
+    nome.push_str(" Nunes");
+}
+
+fn main() {
+    let mut nome = String::from("Jhonata");
+
+    adicionar_sobrenome(&mut nome);
+
+    println!("{}", nome);
+}
+
+Resultado:
+
+Jhonata Nunes
+
+Observe que precisamos de mut em dois lugares.
+
+Primeiro:
+
+let mut nome
+
+A variável pode ser modificada.
+
+Depois:
+
+&mut nome
+
+Estamos emprestando uma referência que permite modificação.
+
+E a função precisa aceitar:
+
+nome: &mut String
+15. Entendendo mut e &mut
+
+Eles parecem semelhantes, mas representam coisas diferentes.
+
+let mut nome
+
+significa:
+
+Essa variável pode ser modificada.
+
+Já:
+
+&mut nome
+
+significa:
+
+Estou criando uma referência mutável para essa variável.
+
+E:
+
+nome: &mut String
+
+significa:
+
+Essa função recebe uma referência mutável para uma String.
+
+Juntando:
+
+fn alterar(nome: &mut String) {
+    nome.push_str(" Nunes");
+}
+
+fn main() {
+    let mut nome = String::from("Jhonata");
+
+    alterar(&mut nome);
+}
+16. Uma regra importante do Borrowing
+
+Rust controla quantas referências existem.
+
+De maneira simplificada, você pode ter várias referências imutáveis ao mesmo valor:
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    let referencia1 = &nome;
+    let referencia2 = &nome;
+
+    println!("{} {}", referencia1, referencia2);
+}
+
+Isso é permitido porque nenhuma delas modifica o valor.
+
+Podemos imaginar:
+
+          ┌── &referencia1
+          │
+"Jhonata" ┤
+          │
+          └── &referencia2
+
+Todos estão apenas lendo.
+
+17. Referência mutável
+
+Quando existe uma referência mutável ativa, Rust restringe outros acessos conflitantes.
+
+Por exemplo, conceitualmente:
+
+let mut nome = String::from("Jhonata");
+
+let referencia1 = &mut nome;
+let referencia2 = &mut nome;
+
+Se ambas forem usadas de forma sobreposta, o compilador impedirá isso.
+
+A ideia é evitar:
+
+referência 1 → altera memória
+                   ↑
+referência 2 → altera memória
+
+ao mesmo tempo.
+
+Isso ajuda Rust a evitar data races e outros problemas de memória.
+
+18. Exemplo completo de Ownership + Borrowing
+fn mostrar_nome(nome: &String) {
+    println!("Nome atual: {}", nome);
+}
+
+fn alterar_nome(nome: &mut String) {
+    nome.push_str(" Nunes");
+}
+
+fn main() {
+    let mut nome = String::from("Jhonata");
+
+    mostrar_nome(&nome);
+
+    alterar_nome(&mut nome);
+
+    mostrar_nome(&nome);
+}
+
+Resultado:
+
+Nome atual: Jhonata
+Nome atual: Jhonata Nunes
+
+Primeiro:
+
+let mut nome = String::from("Jhonata");
+
+nome é o owner.
+
+Depois:
+
+mostrar_nome(&nome);
+
+fazemos um empréstimo imutável:
+
+&nome
+
+A função pode ler, mas não modificar.
+
+Depois:
+
+alterar_nome(&mut nome);
+
+fazemos um empréstimo mutável:
+
+&mut nome
+
+Agora a função pode modificar.
+
+Depois que esse empréstimo termina, nome continua sendo o proprietário:
+
+mostrar_nome(&nome);
+RESUMO — OWNERSHIP E BORROWING EM RUST
+
+1. OWNERSHIP (PROPRIEDADE)
+
+Ownership é o sistema do Rust que controla quem é responsável por um valor na memória.
+
+Cada valor em Rust possui um proprietário (owner).
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+
+Nesse caso:
+- nome é o proprietário (owner) da String.
+- Quando nome sair do seu escopo, Rust libera a memória automaticamente.
+
+Principais regras do Ownership:
+
+1. Cada valor possui um proprietário (owner).
+2. Só pode existir um proprietário por vez.
+3. Quando o proprietário sai do escopo, o valor é descartado e sua memória é liberada.
+
+
+2. MOVE — TRANSFERÊNCIA DE PROPRIEDADE
+
+Exemplo:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1;
+
+Nesse caso acontece um MOVE.
+
+Antes:
+
+nome1 -> "Jhonata"
+
+Depois:
+
+nome1 -> não pode mais ser usado
+nome2 -> "Jhonata"
+
+A propriedade foi transferida de nome1 para nome2.
+
+Por isso isto gera erro:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1;
+
+println!("{}", nome1); // ERRO
+
+
+3. COPY
+
+Tipos simples, como números, normalmente implementam Copy.
+
+Exemplo:
+
+let numero1 = 10;
+let numero2 = numero1;
+
+println!("{}", numero1);
+println!("{}", numero2);
+
+Nesse caso os dois continuam funcionando.
+
+numero1 = 10
+numero2 = 10
+
+Alguns exemplos de tipos que normalmente possuem Copy:
+
+i8
+i32
+i64
+u32
+f32
+f64
+bool
+char
+
+
+4. CLONE
+
+Se quisermos criar uma cópia independente de uma String, podemos usar clone().
+
+Exemplo:
+
+let nome1 = String::from("Jhonata");
+let nome2 = nome1.clone();
+
+println!("{}", nome1);
+println!("{}", nome2);
+
+Agora temos duas Strings independentes.
+
+nome1 -> "Jhonata"
+nome2 -> "Jhonata"
+
+
+5. BORROWING (EMPRÉSTIMO)
+
+Borrowing permite utilizar um valor sem assumir sua propriedade.
+
+Usamos & para criar uma referência.
+
+Exemplo:
+
+fn mostrar_nome(nome: &String) {
+    println!("{}", nome);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar_nome(&nome);
+
+    println!("{}", nome);
+}
+
+A função mostrar_nome() utiliza nome, mas não se torna proprietária da String.
+
+A propriedade continua pertencendo à variável nome.
+
+
+6. & — REFERÊNCIA IMUTÁVEL
+
+&valor significa que estamos emprestando o valor somente para leitura.
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+
+mostrar_nome(&nome);
+
+&nome = referência para nome.
+
+A função pode ler o valor, mas não pode modificá-lo.
+
+
+7. &mut — REFERÊNCIA MUTÁVEL
+
+&mut permite emprestar um valor permitindo que ele seja modificado.
+
+Exemplo:
+
+fn alterar_nome(nome: &mut String) {
+    nome.push_str(" Nunes");
+}
+
+fn main() {
+    let mut nome = String::from("Jhonata");
+
+    alterar_nome(&mut nome);
+
+    println!("{}", nome);
+}
+
+Resultado:
+
+Jhonata Nunes
+
+
+8. DIFERENÇA ENTRE mut E &mut
+
+let mut nome
+
+significa:
+
+A variável nome pode ser modificada.
+
+&mut nome
+
+significa:
+
+Estamos criando uma referência mutável para nome.
+
+nome: &mut String
+
+significa:
+
+A função recebe uma referência mutável para uma String.
+
+
+9. OWNERSHIP VS BORROWING
+
+Ownership:
+
+mostrar_nome(nome);
+
+Pode transferir a propriedade do valor para a função.
+
+Borrowing:
+
+mostrar_nome(&nome);
+
+Empresta o valor para a função sem transferir sua propriedade.
+
+
+10. EXEMPLO COMPLETO
+
+fn mostrar_nome(nome: &String) {
+    println!("Nome atual: {}", nome);
+}
+
+fn alterar_nome(nome: &mut String) {
+    nome.push_str(" Nunes");
+}
+
+fn main() {
+    let mut nome = String::from("Jhonata");
+
+    mostrar_nome(&nome);
+
+    alterar_nome(&mut nome);
+
+    mostrar_nome(&nome);
+}
+
+Resultado:
+
+Nome atual: Jhonata
+Nome atual: Jhonata Nunes
+
+
+11. RESUMO RÁPIDO PARA DECORAR
+
+Ownership = quem é o dono do valor.
+
+Move = transfere a propriedade para outra variável ou função.
+
+Copy = copia automaticamente valores de determinados tipos simples.
+
+Clone = cria explicitamente uma cópia dos dados.
+
+Borrowing = usar um valor temporariamente sem assumir sua propriedade.
+
+&valor = referência imutável; permite leitura.
+
+&mut valor = referência mutável; permite leitura e alteração.
+
+mut = indica que uma variável pode ser modificada.
+
+
+REGRA MENTAL:
+
+Ownership -> "Esse valor é meu."
+
+Move -> "Estou passando esse valor para você."
+
+Borrowing (&) -> "Você pode usar, mas continua sendo meu."
+
+Borrowing mutável (&mut) -> "Você pode usar e modificar, mas continua sendo meu."
+
+Clone -> "Vou criar uma cópia para você."
+
+
+IDEIA PRINCIPAL:
+
+Ownership controla quem possui os dados.
+
+Borrowing permite acessar os dados sem transferir sua propriedade.
+
+Rust utiliza esses mecanismos para controlar a memória e evitar vários erros de memória durante a compilação.
+
+DESREFERENCIAMENTO (DEREFERENCING) EM RUST
+
+==================================================
+1. O QUE É DESREFERENCIAMENTO?
+==================================================
+
+Desreferenciar significa acessar o VALOR para o qual uma referência aponta.
+
+Em Rust:
+
+& = cria uma referência
+* = desreferencia uma referência
+
+Forma simples de lembrar:
+
+& -> "quero uma referência para esse valor"
+* -> "quero acessar o valor dessa referência"
+
+
+==================================================
+2. EXEMPLO BÁSICO
+==================================================
+
+fn main() {
+    let numero = 10;
+
+    let referencia = &numero;
+
+    println!("Número: {}", numero);
+    println!("Referência: {}", referencia);
+    println!("Desreferenciado: {}", *referencia);
+}
+
+Temos:
+
+let numero = 10;
+
+numero possui o valor 10.
+
+Depois:
+
+let referencia = &numero;
+
+Criamos uma referência para numero.
+
+Visualmente:
+
+numero
+  |
+  v
+ 10
+  ^
+  |
+referencia
+
+
+Quando fazemos:
+
+*referencia
+
+estamos dizendo:
+
+"Pegue o valor para o qual referencia aponta."
+
+Então:
+
+*referencia
+
+resulta em:
+
+10
+
+
+==================================================
+3. & E * SÃO OPERAÇÕES OPOSTAS NESSE CONTEXTO
+==================================================
+
+Temos:
+
+let numero = 10;
+
+let referencia = &numero;
+
+&numero
+   |
+   v
+cria uma referência
+
+
+Depois:
+
+*referencia
+   |
+   v
+acessa o valor referenciado
+
+
+Podemos pensar:
+
+numero = 10
+
+&numero
+   ↓
+referência para 10
+
+*referencia
+   ↓
+10
+
+
+==================================================
+4. EXEMPLO COM COMPARAÇÃO
+==================================================
+
+fn main() {
+    let numero = 10;
+
+    let referencia = &numero;
+
+    if *referencia == 10 {
