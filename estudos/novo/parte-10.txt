@@ -1,0 +1,901 @@
+                );
+
+                let nome = ler_texto(
+                    "Digite o novo nome:",
+                );
+
+                let email = ler_texto(
+                    "Digite o novo email:",
+                );
+
+                alterar_cliente(
+                    &mut clientes,
+                    id,
+                    nome,
+                    email,
+                );
+            }
+
+            4 => {
+                let id = ler_u32(
+                    "Digite o ID do cliente que deseja excluir:",
+                );
+
+                excluir_cliente(
+                    &mut clientes,
+                    id,
+                );
+            }
+
+            5 => {
+                println!("Finalizando aplicação...");
+                break;
+            }
+
+            _ => {
+                println!("Opção inválida!");
+            }
+        }
+    }
+}
+
+1. Operador Option
+
+Option<T> é usado quando um valor pode existir ou não existir.
+
+Ele possui duas possibilidades:
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+Exemplo:
+
+fn buscar_usuario(id: u32) -> Option<String> {
+    if id == 1 {
+        Some(String::from("Jhonata"))
+    } else {
+        None
+    }
+}
+
+fn main() {
+    match buscar_usuario(1) {
+        Some(nome) => println!("Usuário: {}", nome),
+        None => println!("Usuário não encontrado"),
+    }
+}
+
+Fluxo:
+
+Option<T>
+   │
+   ├── Some(T) → existe um valor
+   │
+   └── None    → não existe valor
+2. Result
+
+Result<T, E> é usado para operações que podem funcionar ou gerar um erro.
+
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+Onde:
+
+T → tipo do valor em caso de sucesso
+E → tipo do erro
+
+Exemplo:
+
+fn dividir(a: f64, b: f64) -> Result<f64, String> {
+    if b == 0.0 {
+        Err(String::from("Não é possível dividir por zero"))
+    } else {
+        Ok(a / b)
+    }
+}
+
+Tratando com match:
+
+fn main() {
+    match dividir(10.0, 2.0) {
+        Ok(valor) => println!("Resultado: {}", valor),
+        Err(erro) => println!("Erro: {}", erro),
+    }
+}
+
+A diferença principal:
+
+Option<T>
+→ Some(T)
+→ None
+
+Result<T, E>
+→ Ok(T)
+→ Err(E)
+3. Utilizando ? para disparar/propagar erros
+
+O operador:
+
+?
+
+é muito usado com Result.
+
+Ele permite propagar o erro para quem chamou a função, evitando escrever vários match.
+
+Sem ?:
+
+fn converter(texto: &str) -> Result<i32, std::num::ParseIntError> {
+    match texto.parse::<i32>() {
+        Ok(numero) => Ok(numero),
+        Err(erro) => Err(erro),
+    }
+}
+
+Com ?:
+
+fn converter(texto: &str) -> Result<i32, std::num::ParseIntError> {
+    let numero = texto.parse::<i32>()?;
+
+    Ok(numero)
+}
+
+Quando fazemos:
+
+let numero = texto.parse::<i32>()?;
+
+acontece conceitualmente:
+
+parse()
+   ↓
+Result
+   │
+   ├── Ok(valor)
+   │      ↓
+   │   continua
+   │
+   └── Err(erro)
+          ↓
+      retorna o erro
+
+Então ? não cria o erro. Ele propaga um erro existente quando ocorre Err.
+
+4. Trabalhando com erros customizados
+
+Também podemos criar nosso próprio tipo de erro.
+
+Por exemplo:
+
+#[derive(Debug)]
+enum ErroCliente {
+    NomeVazio,
+    IdadeInvalida,
+}
+
+Agora podemos retornar:
+
+Result<T, ErroCliente>
+
+Exemplo:
+
+#[derive(Debug)]
+enum ErroCliente {
+    NomeVazio,
+    IdadeInvalida,
+}
+
+fn criar_cliente(
+    nome: &str,
+    idade: i32,
+) -> Result<(), ErroCliente> {
+
+    if nome.is_empty() {
+        return Err(ErroCliente::NomeVazio);
+    }
+
+    if idade < 0 {
+        return Err(ErroCliente::IdadeInvalida);
+    }
+
+    Ok(())
+}
+
+Uso:
+
+fn main() {
+    match criar_cliente("", 24) {
+        Ok(()) => println!("Cliente criado"),
+        Err(erro) => println!("Erro: {:?}", erro),
+    }
+}
+
+Isso é interessante porque podemos representar diferentes erros:
+
+ErroCliente
+│
+├── NomeVazio
+└── IdadeInvalida
+
+em vez de depender apenas de mensagens em String.
+
+5. Erro customizado com fonte em erro original
+
+Às vezes nosso erro personalizado acontece porque outro erro ocorreu primeiro.
+
+Por exemplo:
+
+Nosso programa
+     ↓
+tenta converter String → i32
+     ↓
+ParseIntError
+     ↓
+nosso erro personalizado
+
+Podemos preservar o erro original como a fonte (source).
+
+Exemplo:
+
+use std::error::Error;
+use std::fmt;
+use std::num::ParseIntError;
+
+#[derive(Debug)]
+struct ErroIdade {
+    source: ParseIntError,
+}
+
+impl fmt::Display for ErroIdade {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Erro ao converter a idade")
+    }
+}
+
+impl Error for ErroIdade {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(&self.source)
+    }
+}
+
+Podemos criar uma função:
+
+fn converter_idade(texto: &str) -> Result<i32, ErroIdade> {
+    texto
+        .parse::<i32>()
+        .map_err(|erro| ErroIdade { source: erro })
+}
+
+Assim temos duas camadas:
+
+ErroIdade
+   │
+   ├── mensagem:
+   │   "Erro ao converter a idade"
+   │
+   └── source
+         ↓
+      ParseIntError
+
+Isso é útil porque você consegue adicionar contexto próprio sem perder a causa original do erro.
+
+Resumo para copiar e colar
+TRATAMENTO DE ERROS — RUST
+
+========================
+OPTION<T>
+========================
+
+Option<T>
+→ representa um valor que pode existir ou não.
+
+Possibilidades:
+
+Some(T)
+→ existe um valor.
+
+None
+→ não existe valor.
+
+Exemplo:
+
+fn buscar(id: u32) -> Option<String> {
+    if id == 1 {
+        Some(String::from("Jhonata"))
+    } else {
+        None
+    }
+}
+
+
+========================
+RESULT<T, E>
+========================
+
+Result<T, E>
+→ representa uma operação que pode
+  funcionar ou gerar um erro.
+
+Possibilidades:
+
+Ok(T)
+→ sucesso.
+
+Err(E)
+→ erro.
+
+T
+→ tipo do sucesso.
+
+E
+→ tipo do erro.
+
+Exemplo:
+
+fn dividir(a: f64, b: f64) -> Result<f64, String> {
+    if b == 0.0 {
+        Err(String::from("Divisão por zero"))
+    } else {
+        Ok(a / b)
+    }
+}
+
+
+OPTION VS RESULT:
+
+Option<T>
+├── Some(T)
+└── None
+
+Result<T, E>
+├── Ok(T)
+└── Err(E)
+
+
+========================
+OPERADOR ?
+========================
+
+?
+→ facilita a propagação de erros.
+
+Exemplo:
+
+fn converter(
+    texto: &str
+) -> Result<i32, std::num::ParseIntError> {
+
+    let numero = texto.parse::<i32>()?;
+
+    Ok(numero)
+}
+
+
+FUNCIONAMENTO:
+
+operação?
+    ↓
+Result
+    │
+    ├── Ok(valor)
+    │      ↓
+    │   continua
+    │
+    └── Err(erro)
+           ↓
+       retorna/propaga o erro
+
+
+IMPORTANTE:
+
+? não cria o erro.
+
+? facilita a propagação de um erro
+para quem chamou a função.
+
+
+========================
+ERROS CUSTOMIZADOS
+========================
+
+Podemos criar nossos próprios tipos
+para representar erros.
+
+Exemplo:
+
+#[derive(Debug)]
+enum ErroCliente {
+    NomeVazio,
+    IdadeInvalida,
+}
+
+Depois:
+
+Result<T, ErroCliente>
+
+
+Exemplo:
+
+fn validar(idade: i32) -> Result<(), ErroCliente> {
+
+    if idade < 0 {
+        return Err(ErroCliente::IdadeInvalida);
+    }
+
+    Ok(())
+}
+
+
+========================
+ERRO COM SOURCE
+========================
+
+Um erro personalizado pode preservar
+a causa original do problema.
+
+Exemplo conceitual:
+
+ErroIdade
+    ↓
+source
+    ↓
+ParseIntError
+
+
+Isso permite:
+
+→ adicionar contexto ao erro
+→ preservar o erro original
+→ descobrir a causa do problema
+
+
+RELAÇÃO GERAL:
+
+Option<T>
+↓
+valor pode existir ou não
+
+Result<T, E>
+↓
+operação pode funcionar ou falhar
+
+?
+↓
+propaga erros
+
+Erro Customizado
+↓
+representa erros específicos da aplicação
+
+source()
+↓
+preserva/acessa a causa original
+
+
+FORMA PARA MEMORIZAR:
+
+Option
+= "Tem valor?"
+
+Some → sim
+None → não
+
+
+Result
+= "Funcionou?"
+
+Ok → sim
+Err → não
+
+
+?
+= "Se der erro, propague."
+
+
+Erro customizado
+= "Quero representar meus próprios erros."
+
+
+source
+= "Qual erro causou este erro?"
+
+1. Macros declarativas — macro_rules!
+
+Macros permitem gerar código a partir de padrões.
+
+Você já usa macros em Rust:
+
+println!("Olá");
+vec![1, 2, 3];
+
+O ! normalmente indica uma chamada de macro.
+
+Uma macro simples:
+
+macro_rules! saudacao {
+    () => {
+        println!("Olá!");
+    };
+}
+
+fn main() {
+    saudacao!();
+}
+
+A macro:
+
+saudacao!();
+
+expande para código equivalente ao corpo definido.
+
+2. Aprofundando macro_rules!
+
+Uma macro pode receber valores e reconhecer diferentes padrões.
+
+macro_rules! mostrar {
+    ($valor:expr) => {
+        println!("Valor: {}", $valor);
+    };
+}
+
+fn main() {
+    mostrar!(10);
+    mostrar!("Rust");
+}
+
+Aqui:
+
+$valor
+→ variável da macro
+
+expr
+→ fragmento que deve ser uma expressão
+
+Também podemos definir múltiplos padrões:
+
+macro_rules! calcular {
+    (dobro $valor:expr) => {
+        $valor * 2
+    };
+
+    (triplo $valor:expr) => {
+        $valor * 3
+    };
+}
+
+fn main() {
+    println!("{}", calcular!(dobro 10));
+    println!("{}", calcular!(triplo 10));
+}
+3. Macro para ler dados de um JSON
+
+Uma macro pode encapsular código repetitivo para leitura e desserialização.
+
+Usando serde e serde_json, por exemplo:
+
+macro_rules! ler_json {
+    ($arquivo:expr, $tipo:ty) => {{
+        let conteudo =
+            std::fs::read_to_string($arquivo)
+                .expect("Erro ao ler arquivo");
+
+        serde_json::from_str::<$tipo>(&conteudo)
+            .expect("JSON inválido")
+    }};
+}
+
+Uso:
+
+let usuario: Usuario =
+    ler_json!("usuario.json", Usuario);
+
+Aqui:
+
+$arquivo:expr
+→ recebe uma expressão
+
+$tipo:ty
+→ recebe um tipo
+4. Macro para criar Struct com propriedades e métodos
+
+Macros podem gerar estruturas inteiras:
+
+macro_rules! criar_pessoa {
+    ($nome:ident) => {
+        struct $nome {
+            nome: String,
+            idade: u32,
+        }
+
+        impl $nome {
+            fn apresentar(&self) {
+                println!(
+                    "{} tem {} anos",
+                    self.nome,
+                    self.idade
+                );
+            }
+        }
+    };
+}
+
+criar_pessoa!(Pessoa);
+
+A macro gera conceitualmente:
+
+criar_pessoa!(Pessoa)
+        ↓
+      expansão
+        ↓
+struct Pessoa
+        +
+impl Pessoa
+        ↓
+apresentar()
+5. Utilizando macro em arquivos separados
+
+Macros também podem ser organizadas em arquivos.
+
+Estrutura:
+
+src/
+├── main.rs
+└── macros.rs
+
+macros.rs:
+
+macro_rules! saudacao {
+    () => {
+        println!("Olá!");
+    };
+}
+
+pub(crate) use saudacao;
+
+main.rs:
+
+mod macros;
+
+use macros::saudacao;
+
+fn main() {
+    saudacao!();
+}
+
+Isso ajuda a evitar colocar várias macros grandes diretamente no main.rs.
+
+6. Criando uma Crate para macro declarativa
+
+Também podemos colocar macros reutilizáveis em uma biblioteca.
+
+Estrutura conceitual:
+
+minhas_macros/
+├── Cargo.toml
+└── src/
+    └── lib.rs
+
+Em lib.rs:
+
+#[macro_export]
+macro_rules! saudacao {
+    () => {
+        println!("Olá!");
+    };
+}
+
+O:
+
+#[macro_export]
+
+exporta a macro para que outros crates possam utilizá-la.
+
+Depois outro projeto pode depender dessa crate.
+
+7. Macro que gera Struct + SQL + CRUD
+
+Aqui entramos em geração de código mais avançada.
+
+Podemos imaginar uma macro recebendo:
+
+modelo!(Usuario);
+
+e gerando partes como:
+
+struct Usuario {
+    id: i32,
+    nome: String,
+}
+
+e funções associadas para operações:
+
+CREATE
+READ
+UPDATE
+DELETE
+
+Por exemplo, uma macro didática simples:
+
+macro_rules! criar_modelo {
+    ($nome:ident, $tabela:expr) => {
+        struct $nome {
+            id: i32,
+        }
+
+        impl $nome {
+            fn sql_criar_tabela() -> String {
+                format!(
+                    "CREATE TABLE {} (id INTEGER PRIMARY KEY)",
+                    $tabela
+                )
+            }
+        }
+    };
+}
+
+criar_modelo!(Usuario, "usuarios");
+
+Então:
+
+println!("{}", Usuario::sql_criar_tabela());
+
+gera:
+
+CREATE TABLE usuarios (id INTEGER PRIMARY KEY)
+
+Em sistemas reais, macros desse tipo podem ser muito mais complexas e trabalhar junto de bibliotecas de banco de dados.
+
+8. Macro Derive — Macros Procedurais
+
+Agora existe uma diferença fundamental.
+
+Isto:
+
+macro_rules!
+
+é uma macro declarativa.
+
+Já:
+
+#[derive(...)]
+
+envolve macros procedurais derive.
+
+Você já viu:
+
+#[derive(Debug)]
+struct Pessoa {
+    nome: String,
+}
+
+derive solicita uma implementação gerada para a struct.
+
+Por exemplo:
+
+#[derive(Debug, Clone)]
+struct Pessoa {
+    nome: String,
+}
+
+Conceitualmente:
+
+Pessoa
+  │
+  ├── Debug
+  └── Clone
+9. Criando seu próprio Derive
+
+Macros procedurais personalizadas são normalmente colocadas em uma crate apropriada de procedural macro.
+
+No Cargo.toml dessa crate:
+
+[lib]
+proc-macro = true
+
+Um derive personalizado possui uma estrutura conceitual como:
+
+#[proc_macro_derive(MinhaMacro)]
+pub fn minha_macro(
+    input: TokenStream
+) -> TokenStream {
+    // analisar entrada
+    // gerar código
+}
+
+Depois você poderia utilizar algo como:
+
+#[derive(MinhaMacro)]
+struct Usuario {
+    nome: String,
+}
+
+A macro recebe a representação do código, analisa e produz novos tokens/código durante a compilação.
+
+10. Polimorfismo para mudar comportamento de um Macro Derive
+
+Aqui é importante separar dois conceitos.
+
+Trait define o comportamento:
+
+trait Mostrar {
+    fn mostrar(&self);
+}
+
+Uma macro derive pode gerar a implementação desse trait para diferentes structs.
+
+Conceitualmente:
+
+#[derive(Mostrar)]
+struct Usuario {
+    nome: String,
+}
+
+#[derive(Mostrar)]
+struct Produto {
+    nome: String,
+}
+
+A macro pode gerar implementações equivalentes a:
+
+impl Mostrar for Usuario {
+    // ...
+}
+
+impl Mostrar for Produto {
+    // ...
+}
+
+Assim temos:
+
+             Trait Mostrar
+              /        \
+             /          \
+        Usuario        Produto
+           ↓              ↓
+       mostrar()       mostrar()
+
+Isso conecta o que você acabou de estudar:
+
+Trait
+    ↓
+Polimorfismo
+    ↓
+impl Trait for Tipo
+
+          +
+
+Derive Macro
+    ↓
+gera implementação
+    ↓
+automaticamente durante compilação
+Resumo para copiar e colar
+MACROS EM RUST
+
+========================
+MACRO DECLARATIVA
+========================
+
+macro_rules!
+→ cria macros baseadas em padrões.
+
+Exemplo:
+
+macro_rules! saudacao {
+    () => {
+        println!("Olá!");
+    };
+}
+
+Uso:
+
+saudacao!();
+
+
+========================
+PARÂMETROS
+========================
+
+macro_rules! mostrar {
