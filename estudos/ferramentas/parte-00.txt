@@ -1,0 +1,926 @@
+CARGO WATCH
+CARGO WATCH — RESUMO
+
+Cargo Watch é uma ferramenta usada durante o desenvolvimento em Rust
+para observar alterações nos arquivos do projeto e executar comandos
+automaticamente quando alguma mudança é detectada.
+
+Sem Cargo Watch:
+
+1. Você altera o código.
+2. Salva o arquivo.
+3. Executa manualmente:
+
+cargo run
+
+4. Altera novamente.
+5. Precisa executar cargo run novamente.
+
+
+Com Cargo Watch, esse processo pode ser automatizado.
+
+Exemplo:
+
+cargo watch -x run
+
+Esse comando significa:
+
+cargo watch
+= monitora alterações nos arquivos do projeto.
+
+-x
+= indica qual comando do Cargo deverá ser executado.
+
+run
+= executa cargo run.
+
+
+Então:
+
+cargo watch -x run
+
+funciona aproximadamente assim:
+
+Alterou código
+      ↓
+Salvou arquivo
+      ↓
+Cargo Watch detecta
+      ↓
+cargo run
+      ↓
+Programa recompilado e executado
+      ↓
+Cargo Watch continua esperando alterações
+
+
+==================================================
+INSTALAÇÃO
+==================================================
+
+Cargo Watch não faz parte do Cargo padrão.
+
+Normalmente ele é instalado com:
+
+cargo install cargo-watch
+
+Depois podemos verificar:
+
+cargo watch --version
+
+
+==================================================
+COMANDOS ÚTEIS
+==================================================
+
+Executar o programa quando houver alteração:
+
+cargo watch -x run
+
+
+Verificar o código sem executar o programa:
+
+cargo watch -x check
+
+
+Executar os testes automaticamente:
+
+cargo watch -x test
+
+
+Executar mais de um comando:
+
+cargo watch -x check -x test
+
+
+==================================================
+CARGO RUN VS CARGO WATCH
+==================================================
+
+cargo run
+=
+Compila e executa o programa uma vez.
+
+
+cargo watch -x run
+=
+Observa alterações e executa cargo run novamente
+quando os arquivos monitorados forem modificados.
+
+
+==================================================
+IMPORTANTE
+==================================================
+
+Cargo Watch NÃO é o compilador do Rust.
+
+Cargo Watch NÃO substitui o Cargo.
+
+Ele funciona como uma ferramenta auxiliar de desenvolvimento.
+
+Ele observa alterações e manda o Cargo executar determinadas tarefas.
+
+
+RESUMO PARA DECORAR:
+
+cargo run
+= executar uma vez
+
+cargo check
+= verificar se o código compila sem gerar o executável final
+
+cargo test
+= executar testes
+
+cargo watch
+= observar alterações
+
+cargo watch -x run
+= alterou e salvou → executa novamente
+
+cargo watch -x check
+= alterou e salvou → verifica novamente
+
+cargo watch -x test
+= alterou e salvou → testa novamente
+
+
+FORMA SIMPLES DE LEMBRAR:
+
+Cargo Watch = "vigia meu projeto e executa um comando quando eu alterar o código."
+
+FORMATAÇÃO PADRONIZADA
+rustfmt src/main.rs arquivo por arquivo 
+cargo fnt formata todo o arquivo
+
+VALGRIND, PERF E WSL — RUST NO WINDOWS
+
+==================================================
+1. VISÃO GERAL
+==================================================
+
+Valgrind e perf são ferramentas utilizadas para analisar
+o comportamento de programas.
+
+De forma simples:
+
+VALGRIND
+=
+Análise principalmente relacionada à memória.
+
+PERF
+=
+Análise principalmente relacionada à performance.
+
+Como essas ferramentas são muito associadas ao Linux,
+no Windows podemos utilizar o WSL.
+
+WSL
+=
+Windows Subsystem for Linux
+
+Ele permite executar um ambiente Linux dentro do Windows.
+
+
+Fluxo:
+
+WINDOWS
+   ↓
+PowerShell
+   ↓
+WSL
+   ↓
+Ubuntu/Linux
+   ↓
+Rust + Cargo
+   ↓
+Programa Rust
+   ↓
+Valgrind / perf
+
+
+==================================================
+2. O QUE É VALGRIND?
+==================================================
+
+Valgrind é um conjunto de ferramentas para analisar programas
+durante sua execução.
+
+Uma de suas ferramentas mais conhecidas é:
+
+Memcheck
+
+Ela ajuda a analisar o uso da memória.
+
+
+Valgrind pode ajudar a encontrar problemas como:
+
+- acessos inválidos à memória
+- uso incorreto de memória
+- memory leaks (vazamentos de memória)
+- problemas de alocação/liberação
+- comportamento incorreto envolvendo memória
+
+
+==================================================
+3. VALGRIND E RUST
+==================================================
+
+Rust já possui vários mecanismos para evitar problemas de memória:
+
+- Ownership
+- Borrowing
+- Lifetimes
+- Borrow Checker
+
+
+Por exemplo:
+
+Ownership
+    ↓
+controla quem possui determinado valor
+
+Borrowing
+    ↓
+controla empréstimos
+
+Borrow Checker
+    ↓
+verifica regras durante a compilação
+
+
+Por isso, Rust consegue evitar muitos erros de memória
+antes mesmo de executar o programa.
+
+Mesmo assim, Valgrind pode ser útil.
+
+Principalmente quando trabalhamos com:
+
+unsafe
+
+FFI
+
+bibliotecas C/C++
+
+código de baixo nível
+
+ou quando queremos estudar o comportamento da memória.
+
+
+==================================================
+4. COMANDOS DO VALGRIND
+==================================================
+
+Executar um programa:
+
+valgrind ./programa
+
+
+Verificar possíveis vazamentos:
+
+valgrind --leak-check=full ./programa
+
+
+Exemplo com projeto Rust:
+
+cargo build
+
+valgrind ./target/debug/meu_programa
+
+
+Fluxo:
+
+Código Rust
+    ↓
+cargo build
+    ↓
+executável Linux
+    ↓
+Valgrind
+    ↓
+análise da execução e memória
+
+
+==================================================
+5. O QUE É PERF?
+==================================================
+
+perf é uma ferramenta de análise de PERFORMANCE do Linux.
+
+Ela ajuda a descobrir onde um programa está gastando
+recursos de processamento.
+
+Pode analisar informações relacionadas a:
+
+- CPU
+- ciclos do processador
+- instruções
+- cache
+- chamadas de funções
+- tempo de execução
+- gargalos de performance
+
+
+Enquanto Valgrind pode ajudar a responder:
+
+"Como meu programa está utilizando a memória?"
+
+
+perf ajuda a responder:
+
+"Onde meu programa está gastando processamento?"
+
+
+==================================================
+6. VALGRIND VS PERF
+==================================================
+
+VALGRIND
+
+Foco principal para nosso estudo:
+
+MEMÓRIA
+
+Pode ajudar a analisar:
+
+- memory leaks
+- acessos inválidos
+- alocação de memória
+- erros de memória
+
+
+PERF
+
+Foco:
+
+PERFORMANCE
+
+Pode analisar:
+
+- CPU
+- ciclos
+- instruções
+- cache
+- gargalos
+- funções que consomem processamento
+
+
+FORMA SIMPLES:
+
+Valgrind
+=
+memória
+
+perf
+=
+performance
+
+
+==================================================
+7. O QUE É WSL?
+==================================================
+
+WSL significa:
+
+Windows Subsystem for Linux
+
+
+É uma tecnologia do Windows que permite executar
+um ambiente Linux dentro do Windows.
+
+Por exemplo:
+
+Windows
+   ↓
+WSL
+   ↓
+Ubuntu
+
+
+Isso permite utilizar ferramentas Linux sem precisar
+instalar outro sistema operacional separadamente.
+
+
+==================================================
+8. POR QUE USAR WSL COM RUST?
+==================================================
+
+No Windows normalmente geramos:
+
+programa.exe
+
+
+Já dentro do WSL podemos compilar o projeto como
+um programa Linux.
+
+Isso permite utilizar ferramentas Linux como:
+
+Valgrind
+
+perf
+
+
+Então podemos ter:
+
+Windows
+   ↓
+PowerShell
+   ↓
+WSL
+   ↓
+Ubuntu
+   ↓
+Rust
+   ↓
+Cargo
+   ↓
+executável Linux
+   ↓
+Valgrind / perf
+
+
+==================================================
+9. INSTALANDO WSL PELO POWERSHELL
+==================================================
+
+Abra:
+
+PowerShell como Administrador
+
+
+Depois execute:
+
+wsl --install
+
+
+Esse comando instala o WSL.
+
+Dependendo da configuração do Windows, pode ser necessário
+reiniciar o computador.
+
+
+==================================================
+10. INSTALANDO UBUNTU PELO POWERSHELL
+==================================================
+
+Podemos instalar diretamente:
+
+wsl --install -d Ubuntu
+
+
+Depois da instalação, o Ubuntu poderá solicitar:
+
+nome de usuário Linux
+
+senha Linux
+
+
+Essa conta é utilizada dentro do ambiente Linux.
+
+
+==================================================
+11. VER DISTRIBUIÇÕES DISPONÍVEIS
+==================================================
+
+No PowerShell:
+
+wsl --list --online
+
+
+Forma curta:
+
+wsl -l -o
+
+
+Isso mostra distribuições Linux disponíveis para instalação.
+
+
+==================================================
+12. VER DISTRIBUIÇÕES INSTALADAS
+==================================================
+
+PowerShell:
+
+wsl --list --verbose
+
+
+Forma curta:
+
+wsl -l -v
+
+
+Exemplo:
+
+NAME       STATE       VERSION
+
+Ubuntu     Running     2
+
+
+O mais importante é:
+
+VERSION = 2
+
+
+Isso significa:
+
+WSL 2
+
+
+==================================================
+13. DEFINIR WSL 2 COMO PADRÃO
+==================================================
+
+PowerShell:
+
+wsl --set-default-version 2
+
+
+Assim novas distribuições utilizarão WSL 2 por padrão.
+
+
+==================================================
+14. CONVERTER UMA DISTRIBUIÇÃO PARA WSL 2
+==================================================
+
+Se aparecer:
+
+Ubuntu     1
+
+
+podemos utilizar:
+
+wsl --set-version Ubuntu 2
+
+
+Depois verificar:
+
+wsl -l -v
+
+
+==================================================
+15. ENTRANDO NO WSL PELO POWERSHELL
+==================================================
+
+PowerShell:
+
+wsl
+
+
+Antes:
+
+PS C:\Users\usuario>
+
+
+Depois pode aparecer algo semelhante a:
+
+usuario@computador:/mnt/c/Users/usuario$
+
+
+Isso significa que agora estamos dentro do Linux.
+
+
+==================================================
+16. ENTRANDO DIRETAMENTE NO UBUNTU
+==================================================
+
+PowerShell:
+
+wsl -d Ubuntu
+
+
+==================================================
+17. SAINDO DO WSL
+==================================================
+
+Dentro do Linux:
+
+exit
+
+
+Você retorna para:
+
+PS C:\Users\usuario>
+
+
+==================================================
+18. EXECUTANDO COMANDO LINUX PELO POWERSHELL
+==================================================
+
+Também podemos executar alguns comandos Linux sem entrar
+manualmente no terminal do WSL.
+
+Exemplo:
+
+wsl ls
+
+
+Outro:
+
+wsl pwd
+
+
+Outro:
+
+wsl uname -a
+
+
+A estrutura é:
+
+wsl COMANDO_LINUX
+
+
+==================================================
+19. ATUALIZANDO O WSL
+==================================================
+
+No PowerShell:
+
+wsl --update
+
+
+Verificar versão:
+
+wsl --version
+
+
+==================================================
+20. DESLIGANDO O WSL
+==================================================
+
+PowerShell:
+
+wsl --shutdown
+
+
+Isso encerra as distribuições WSL que estão executando.
+
+
+==================================================
+21. ATUALIZANDO O UBUNTU
+==================================================
+
+Entre no WSL:
+
+wsl
+
+
+Agora, dentro do Ubuntu:
+
+sudo apt update
+
+
+Depois:
+
+sudo apt upgrade -y
+
+
+Podemos fazer os dois:
+
+sudo apt update && sudo apt upgrade -y
+
+
+IMPORTANTE:
+
+wsl
+
+é um comando executado pelo PowerShell.
+
+
+Já:
+
+sudo
+apt
+valgrind
+perf
+
+são comandos executados dentro do Linux/WSL.
+
+
+==================================================
+22. INSTALANDO VALGRIND NO WSL
+==================================================
+
+Entre no WSL:
+
+wsl
+
+
+Depois:
+
+sudo apt update
+
+
+Instale:
+
+sudo apt install valgrind -y
+
+
+Verifique:
+
+valgrind --version
+
+
+Se aparecer a versão, a instalação foi concluída.
+
+
+==================================================
+23. INSTALANDO PERF NO WSL
+==================================================
+
+Dentro do Ubuntu/WSL:
+
+sudo apt install linux-tools-common linux-tools-generic -y
+
+
+Depois:
+
+perf --version
+
+
+IMPORTANTE:
+
+perf depende do suporte oferecido pelo kernel Linux.
+
+No WSL, dependendo da versão do kernel e do Ubuntu,
+algumas funcionalidades do perf podem ser limitadas.
+
+Se perf instalar mas algum comando não funcionar,
+isso não significa necessariamente que a instalação
+foi feita incorretamente.
+
+
+==================================================
+24. RUST DO WINDOWS VS RUST DO WSL
+==================================================
+
+Isso é MUITO IMPORTANTE.
+
+O Rust instalado no Windows e o Rust instalado no WSL
+são ambientes diferentes.
+
+
+WINDOWS:
+
+PowerShell
+    ↓
+Rust Windows
+    ↓
+programa.exe
+
+
+WSL:
+
+Ubuntu
+    ↓
+Rust Linux
+    ↓
+executável Linux
+
+
+Para utilizar Valgrind com seu programa Rust dentro do WSL,
+é recomendado compilar o programa usando o Rust instalado
+dentro do próprio WSL.
+
+
+==================================================
+25. INSTALANDO RUST NO WSL
+==================================================
+
+Entre no WSL:
+
+wsl
+
+
+Dentro do Linux, instale Rust usando rustup.
+
+Depois da instalação, verifique:
+
+rustc --version
+
+cargo --version
+
+
+Assim teremos:
+
+WSL
+ ↓
+Ubuntu
+ ↓
+Rust
+ ↓
+Cargo
+
+
+==================================================
+26. ACESSANDO ARQUIVOS DO WINDOWS PELO WSL
+==================================================
+
+O disco C: do Windows normalmente aparece como:
+
+/mnt/c/
+
+
+Então:
+
+Windows:
+
+C:\Users\usuario
+
+
+equivale aproximadamente a:
+
+WSL:
+
+/mnt/c/Users/usuario
+
+
+Por exemplo:
+
+Windows:
+
+C:\Users\usuario\Desktop
+
+
+WSL:
+
+/mnt/c/Users/usuario/Desktop
+
+
+Podemos entrar usando:
+
+cd /mnt/c/Users/usuario/Desktop
+
+
+==================================================
+27. ONDE É MELHOR CRIAR PROJETOS RUST?
+==================================================
+
+É possível trabalhar diretamente com projetos localizados
+em /mnt/c/.
+
+Porém, para desenvolvimento Linux/WSL, geralmente é melhor
+manter projetos dentro do sistema de arquivos do próprio Linux.
+
+Exemplo:
+
+~/projetos/rust/
+
+
+Criar:
+
+mkdir -p ~/projetos/rust
+
+
+Entrar:
+
+cd ~/projetos/rust
+
+
+Criar projeto:
+
+cargo new estudo_memoria
+
+
+Entrar:
+
+cd estudo_memoria
+
+
+==================================================
+28. COMPILANDO O PROGRAMA
+==================================================
+
+Dentro do projeto:
+
+cargo build
+
+
+Isso gera normalmente:
+
+target/debug/nome_do_programa
+
+
+Diferentemente do Windows, não será:
+
+programa.exe
+
+
+Será um executável Linux.
+
+
+==================================================
+29. EXECUTANDO NORMALMENTE
+==================================================
+
+Podemos utilizar:
+
+cargo run
+
+
+Ou diretamente:
+
+./target/debug/nome_do_programa
+
+
+==================================================
+30. UTILIZANDO VALGRIND COM RUST
