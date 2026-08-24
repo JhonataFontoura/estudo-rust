@@ -1,0 +1,986 @@
+#[derive(Debug, Clone)]
+struct Pessoa {
+    nome: String,
+}
+
+Estamos pedindo implementações de:
+
+Pessoa
+├── Debug
+└── Clone
+12. Trait × impl normal
+
+Você já estudou:
+
+impl Pessoa {
+
+    fn mostrar(&self) {
+    }
+
+}
+
+Isso cria um método diretamente associado a Pessoa.
+
+Já:
+
+impl Falar for Pessoa {
+
+    fn falar(&self) {
+    }
+
+}
+
+significa que Pessoa está implementando um comportamento definido pelo trait Falar.
+
+Compare:
+
+impl Pessoa
+↓
+implementação própria do tipo
+
+
+impl Falar for Pessoa
+↓
+implementação de uma Trait para o tipo
+Resumo para copiar e colar
+TRAITS — RUST
+
+trait
+→ define comportamentos compartilhados
+  entre diferentes tipos.
+
+
+CRIANDO:
+
+trait Falar {
+
+    fn falar(&self);
+
+}
+
+
+IMPLEMENTANDO:
+
+struct Pessoa {
+    nome: String,
+}
+
+impl Falar for Pessoa {
+
+    fn falar(&self) {
+        println!("Olá, sou {}", self.nome);
+    }
+
+}
+
+
+USANDO:
+
+let pessoa = Pessoa {
+    nome: String::from("Jhonata"),
+};
+
+pessoa.falar();
+
+
+SINTAXE:
+
+impl Trait for Tipo
+
+Exemplo:
+
+impl Falar for Pessoa
+
+
+VÁRIOS TIPOS PODEM IMPLEMENTAR
+A MESMA TRAIT:
+
+trait Falar
+     │
+     ├── Pessoa
+     │      └── falar()
+     │
+     └── Robo
+            └── falar()
+
+
+IMPLEMENTAÇÃO PADRÃO:
+
+trait Informacao {
+
+    fn mostrar(&self) {
+        println!("Informação padrão");
+    }
+
+}
+
+
+TRAIT COMO PARÂMETRO:
+
+fn executar(item: &impl Falar) {
+    item.falar();
+}
+
+→ aceita tipos que implementem Falar.
+
+
+TRAIT BOUND:
+
+fn executar<T: Falar>(item: &T) {
+    item.falar();
+}
+
+T: Falar
+
+→ T deve implementar Falar.
+
+
+COM WHERE:
+
+fn executar<T>(item: &T)
+where
+    T: Falar,
+{
+    item.falar();
+}
+
+
+MAIS DE UMA TRAIT:
+
+T: Falar + Mostrar
+
+
+TRAITS COMUNS:
+
+Debug
+Display
+Clone
+Copy
+Default
+Iterator
+Into
+From
+PartialEq
+Eq
+
+
+EXEMPLO:
+
+#[derive(Debug, Clone)]
+struct Pessoa {
+    nome: String,
+}
+
+
+DIFERENÇA:
+
+impl Pessoa {
+    ...
+}
+
+→ métodos próprios de Pessoa.
+
+
+impl Falar for Pessoa {
+    ...
+}
+
+→ implementação do trait Falar
+  para Pessoa.
+
+
+RELAÇÃO:
+
+Trait
+  ↓
+define comportamento
+  ↓
+impl Trait for Tipo
+  ↓
+Tipo passa a possuir aquele comportamento
+
+
+FORMA PARA MEMORIZAR:
+
+trait
+→ O QUE deve ser feito
+
+impl Trait for Tipo
+→ COMO aquele tipo faz
+
+
+RESUMO FINAL:
+
+trait = contrato/comportamento
+
+impl Trait for Tipo
+= implementação do comportamento
+
+impl Trait
+= aceita tipos que implementam a trait
+
+T: Trait
+= Trait Bound
+
+where T: Trait
+= outra forma de declarar a restrição
+
+Polimorfismo em Rust: impl Trait vs dyn Trait
+
+Polimorfismo significa permitir que tipos diferentes sejam tratados através de um comportamento em comum.
+
+Em Rust, traits são fundamentais para isso.
+
+Imagine:
+
+trait Falar {
+    fn falar(&self);
+}
+
+Agora dois tipos diferentes:
+
+struct Pessoa;
+struct Robo;
+
+impl Falar for Pessoa {
+    fn falar(&self) {
+        println!("Olá, sou uma pessoa!");
+    }
+}
+
+impl Falar for Robo {
+    fn falar(&self) {
+        println!("Olá, sou um robô!");
+    }
+}
+
+Temos:
+
+             Falar
+            /     \
+           ↓       ↓
+       Pessoa     Robo
+          ↓         ↓
+       falar()   falar()
+
+Os tipos são diferentes, mas compartilham o comportamento Falar.
+
+Isso é polimorfismo.
+
+1. impl Trait — polimorfismo estático
+
+Podemos criar:
+
+fn executar(item: &impl Falar) {
+    item.falar();
+}
+
+E usar:
+
+fn main() {
+    let pessoa = Pessoa;
+    let robo = Robo;
+
+    executar(&pessoa);
+    executar(&robo);
+}
+
+A função aceita qualquer tipo que implemente:
+
+Falar
+
+&impl Falar é uma forma conveniente de expressar uma restrição genérica.
+
+Uma forma equivalente neste exemplo é:
+
+fn executar<T: Falar>(item: &T) {
+    item.falar();
+}
+
+Ou:
+
+fn executar<T>(item: &T)
+where
+    T: Falar,
+{
+    item.falar();
+}
+
+Mentalmente:
+
+impl Trait
+    ↓
+tipo concreto conhecido na compilação
+    ↓
+compilador gera código apropriado
+    ↓
+STATIC DISPATCH
+2. Static Dispatch
+
+Com:
+
+fn executar<T: Falar>(item: &T)
+
+podemos imaginar conceitualmente que o compilador trata chamadas para tipos concretos separadamente:
+
+executar<Pessoa>()
+executar<Robo>()
+
+Esse processo está relacionado à monomorfização.
+
+Conceitualmente:
+
+Generics + Trait Bounds
+        ↓
+Monomorfização
+        ↓
+Static Dispatch
+
+O compilador sabe qual implementação será chamada.
+
+3. dyn Trait — polimorfismo dinâmico
+
+Agora temos outra possibilidade:
+
+fn executar(item: &dyn Falar) {
+    item.falar();
+}
+
+Observe:
+
+&dyn Falar
+
+Aqui estamos trabalhando com um trait object.
+
+Podemos fazer:
+
+fn main() {
+    let pessoa = Pessoa;
+    let robo = Robo;
+
+    executar(&pessoa);
+    executar(&robo);
+}
+
+Mas agora a escolha da implementação é feita por dynamic dispatch.
+
+dyn Trait
+    ↓
+Trait Object
+    ↓
+implementação determinada em runtime
+    ↓
+DYNAMIC DISPATCH
+4. A principal diferença
+
+Compare:
+
+fn executar(item: &impl Falar)
+
+com:
+
+fn executar(item: &dyn Falar)
+impl Trait
+Compilação
+    ↓
+tipo concreto conhecido
+    ↓
+Static Dispatch
+dyn Trait
+Runtime
+    ↓
+trait object
+    ↓
+Dynamic Dispatch
+5. Onde dyn Trait fica realmente interessante
+
+Imagine que queremos colocar tipos diferentes na mesma coleção.
+
+Temos:
+
+struct Pessoa;
+struct Robo;
+struct Cachorro;
+
+Todos implementam:
+
+Falar
+
+Queremos:
+
+Vec
+├── Pessoa
+├── Robo
+└── Cachorro
+
+Um Vec<T> precisa ter um único tipo de elemento.
+
+Então não podemos simplesmente fazer um Vec contendo valores concretos de tipos diferentes.
+
+Podemos usar:
+
+Vec<Box<dyn Falar>>
+
+Exemplo:
+
+trait Falar {
+    fn falar(&self);
+}
+
+struct Pessoa;
+struct Robo;
+struct Cachorro;
+
+impl Falar for Pessoa {
+    fn falar(&self) {
+        println!("Pessoa falando");
+    }
+}
+
+impl Falar for Robo {
+    fn falar(&self) {
+        println!("Robô falando");
+    }
+}
+
+impl Falar for Cachorro {
+    fn falar(&self) {
+        println!("Au au!");
+    }
+}
+
+fn main() {
+    let itens: Vec<Box<dyn Falar>> = vec![
+        Box::new(Pessoa),
+        Box::new(Robo),
+        Box::new(Cachorro),
+    ];
+
+    for item in itens {
+        item.falar();
+    }
+}
+
+Agora temos:
+
+Vec<Box<dyn Falar>>
+        │
+        ├── Box<Pessoa>
+        ├── Box<Robo>
+        └── Box<Cachorro>
+
+Todos são tratados através do trait:
+
+Falar
+6. Por que usamos Box<dyn Trait>?
+
+dyn Falar representa tipos concretos que podem ter tamanhos diferentes.
+
+Por exemplo:
+
+struct Pessoa {
+    nome: String,
+}
+
+struct Robo {
+    id: u64,
+    modelo: String,
+}
+
+Os dois não precisam ter o mesmo tamanho.
+
+Por isso, um trait object normalmente aparece atrás de algum tipo de ponteiro/referência:
+
+&dyn Falar
+
+ou:
+
+Box<dyn Falar>
+
+No caso do Box, o próprio Box possui tamanho conhecido.
+
+Box
+ ↓
+ponteiro de tamanho conhecido
+ ↓
+objeto concreto
+7. Trait Object e vtable
+
+Para entender dyn Trait mais profundamente, pense conceitualmente em duas informações:
+
+&dyn Falar
+│
+├── referência para os dados
+│
+└── informação para encontrar
+    a implementação dos métodos
+
+O despacho dinâmico normalmente envolve uma vtable (virtual method table).
+
+Simplificando:
+
+Trait Object
+│
+├── dados
+│
+└── vtable
+      │
+      └── falar()
+
+Se o objeto concreto for Pessoa:
+
+vtable
+  ↓
+Pessoa::falar()
+
+Se for Robo:
+
+vtable
+  ↓
+Robo::falar()
+
+É assim que o programa consegue decidir em runtime qual implementação chamar.
+
+8. impl Trait não significa “qualquer tipo misturado”
+
+Esse detalhe é muito importante.
+
+Quando temos:
+
+fn executar(item: impl Falar)
+
+significa que a função aceita diferentes tipos que implementam Falar em diferentes chamadas.
+
+Mas cada chamada ainda trabalha com um tipo concreto.
+
+Isso não significa que você pode criar diretamente:
+
+Vec<impl Falar>
+
+para misturar arbitrariamente Pessoa, Robo, etc.
+
+Para uma coleção heterogênea baseada em comportamento, normalmente usamos:
+
+Vec<Box<dyn Falar>>
+9. impl Trait como retorno
+
+Também podemos encontrar:
+
+fn criar() -> impl Falar {
+    Pessoa
+}
+
+Isso significa:
+
+A função retorna algum tipo concreto que implementa Falar, sem expor esse tipo na assinatura.
+
+Mas há uma regra importante: nesse uso, a função precisa resolver para um único tipo concreto.
+
+Isso, por exemplo, não funciona simplesmente:
+
+fn criar(robo: bool) -> impl Falar {
+    if robo {
+        Robo
+    } else {
+        Pessoa
+    }
+}
+
+Porque:
+
+Robo   ≠   Pessoa
+
+São dois tipos concretos diferentes.
+
+10. dyn Trait como retorno
+
+Se realmente precisamos escolher entre diferentes tipos concretos em runtime, podemos usar um trait object:
+
+fn criar(robo: bool) -> Box<dyn Falar> {
+    if robo {
+        Box::new(Robo)
+    } else {
+        Box::new(Pessoa)
+    }
+}
+
+Agora funciona porque ambos são convertidos para:
+
+Box<dyn Falar>
+
+Conceitualmente:
+
+             criar()
+                │
+          ┌─────┴─────┐
+          ↓           ↓
+        Pessoa       Robo
+          │           │
+          └─────┬─────┘
+                ↓
+        Box<dyn Falar>
+11. Quando usar cada um?
+
+Use:
+
+impl Trait
+
+quando o tipo concreto pode ser determinado na compilação e você quer static dispatch.
+
+Use:
+
+dyn Trait
+
+quando precisa tratar tipos concretos diferentes através do mesmo trait dinamicamente, especialmente em situações como:
+
+Vec<Box<dyn Trait>>
+
+ou quando a escolha do tipo ocorre em runtime.
+
+Resumo para copiar e colar
+POLIMORFISMO — IMPL TRAIT VS DYN TRAIT — RUST
+
+Polimorfismo
+→ diferentes tipos podem compartilhar
+  o mesmo comportamento através de Traits.
+
+
+EXEMPLO:
+
+trait Falar {
+    fn falar(&self);
+}
+
+struct Pessoa;
+struct Robo;
+
+impl Falar for Pessoa {
+    fn falar(&self) {
+        println!("Pessoa falando");
+    }
+}
+
+impl Falar for Robo {
+    fn falar(&self) {
+        println!("Robô falando");
+    }
+}
+
+
+=========================
+IMPL TRAIT
+=========================
+
+fn executar(item: &impl Falar) {
+    item.falar();
+}
+
+impl Trait
+→ polimorfismo estático
+→ Static Dispatch
+→ tipo concreto conhecido na compilação.
+
+
+FORMA COM GENERICS:
+
+fn executar<T: Falar>(item: &T) {
+    item.falar();
+}
+
+
+RELAÇÃO:
+
+impl Trait
+    ↓
+Generics / Trait Bounds
+    ↓
+tipo concreto
+    ↓
+Monomorfização
+    ↓
+Static Dispatch
+
+
+=========================
+DYN TRAIT
+=========================
+
+fn executar(item: &dyn Falar) {
+    item.falar();
+}
+
+dyn Trait
+→ Trait Object
+→ polimorfismo dinâmico
+→ Dynamic Dispatch
+→ implementação escolhida em runtime.
+
+
+RELAÇÃO:
+
+dyn Trait
+    ↓
+Trait Object
+    ↓
+dados + vtable
+    ↓
+Dynamic Dispatch
+
+
+=========================
+COLEÇÕES
+=========================
+
+Para guardar tipos diferentes que
+implementam a mesma Trait:
+
+Vec<Box<dyn Falar>>
+
+Exemplo:
+
+let itens: Vec<Box<dyn Falar>> = vec![
+    Box::new(Pessoa),
+    Box::new(Robo),
+];
+
+for item in itens {
+    item.falar();
+}
+
+
+=========================
+RETORNO
+=========================
+
+impl Trait:
+
+fn criar() -> impl Falar {
+    Pessoa
+}
+
+→ retorna um tipo concreto que implementa Falar.
+
+
+dyn Trait:
+
+fn criar(robo: bool) -> Box<dyn Falar> {
+
+    if robo {
+        Box::new(Robo)
+    } else {
+        Box::new(Pessoa)
+    }
+}
+
+→ permite escolher entre diferentes
+  tipos concretos em runtime.
+
+
+=========================
+COMPARAÇÃO
+=========================
+
+impl Trait
+→ Static Dispatch
+→ tipo concreto conhecido na compilação
+→ normalmente relacionado a generics
+→ monomorfização
+
+
+dyn Trait
+→ Dynamic Dispatch
+→ Trait Object
+→ decisão em runtime
+→ usa vtable
+→ comum com &dyn Trait
+  e Box<dyn Trait>
+
+
+FORMA PARA MEMORIZAR:
+
+impl Trait
+= "qualquer tipo que implemente essa Trait,
+   mas trabalhando com tipo concreto"
+
+dyn Trait
+= "trate tipos concretos diferentes
+   através da mesma Trait em runtime"
+
+
+RESUMO FINAL:
+
+Trait
+↓
+comportamento compartilhado
+
+impl Trait
+↓
+polimorfismo estático
+↓
+Static Dispatch
+
+dyn Trait
+↓
+polimorfismo dinâmico
+↓
+Trait Object
+↓
+Dynamic Dispatch
+
+Generics em Rust
+
+Generics permitem escrever código que funciona com diferentes tipos, sem precisar repetir a mesma função, struct, enum ou implementação para cada tipo.
+
+A ideia é:
+
+Sem Generics:
+
+função para i32
+função para f64
+função para String
+
+Com Generics:
+
+função<T>
+    ↓
+funciona com diferentes tipos
+
+Normalmente usamos letras como:
+
+T
+U
+K
+V
+
+T geralmente significa Type.
+
+1. Generics em funções
+
+Imagine duas funções:
+
+fn mostrar_i32(valor: i32) {
+    println!("{}", valor);
+}
+
+fn mostrar_f64(valor: f64) {
+    println!("{}", valor);
+}
+
+Existe repetição.
+
+Com Generic:
+
+fn mostrar<T>(valor: T) {
+    // usar valor
+}
+
+Agora T representa um tipo genérico.
+
+Porém, isso:
+
+fn mostrar<T>(valor: T) {
+    println!("{}", valor);
+}
+
+não funciona para qualquer T, porque Rust não sabe se T pode ser exibido com {}.
+
+É aqui que Generics se conectam com Traits.
+
+use std::fmt::Display;
+
+fn mostrar<T: Display>(valor: T) {
+    println!("{}", valor);
+}
+
+fn main() {
+    mostrar(10);
+    mostrar(3.14);
+    mostrar("Rust");
+}
+
+Aqui:
+
+T: Display
+
+significa:
+
+T pode ser qualquer tipo, desde que implemente Display.
+
+2. Mais de um tipo Generic
+
+Podemos ter:
+
+fn mostrar<T, U>(primeiro: T, segundo: U) {
+}
+
+T e U podem representar tipos diferentes.
+
+Exemplo:
+
+use std::fmt::Debug;
+
+fn mostrar<T: Debug, U: Debug>(primeiro: T, segundo: U) {
+    println!("{:?}", primeiro);
+    println!("{:?}", segundo);
+}
+
+fn main() {
+    mostrar(10, "Rust");
+}
+
+Nesse caso:
+
+T = i32
+U = &str
+3. Generic em Struct
+
+Generics também podem ser usados em struct.
+
+struct Caixa<T> {
+    valor: T,
+}
+
+Agora podemos criar:
+
+fn main() {
+    let numero = Caixa {
+        valor: 10,
+    };
+
+    let texto = Caixa {
+        valor: String::from("Rust"),
+    };
+}
+
+O compilador entende:
+
+numero
+↓
+Caixa<i32>
+
+texto
+↓
+Caixa<String>
+
+A mesma struct funciona com tipos diferentes.
+
+4. Struct com vários Generics
+struct Par<T, U> {
+    primeiro: T,
+    segundo: U,
+}
+
+Uso:
+
+fn main() {
+    let dados = Par {
+        primeiro: String::from("Jhonata"),
+        segundo: 24,
+    };
+}
+
+Aqui:
+
+T = String
+U = i32
+
