@@ -1,0 +1,445 @@
+struct Conta {
+    titular: String,
+    saldo: f64,
+}
+
+Mas podemos também definir comportamentos para ela.
+
+Para isso existe:
+
+impl
+
+Exemplo:
+
+struct Conta {
+    titular: String,
+    saldo: f64,
+}
+
+impl Conta {
+
+    fn mostrar_saldo(&self) {
+        println!("Saldo: R$ {:.2}", self.saldo);
+    }
+
+}
+
+Agora podemos fazer:
+
+fn main() {
+    let conta = Conta {
+        titular: String::from("Jhonata"),
+        saldo: 1500.0,
+    };
+
+    conta.mostrar_saldo();
+}
+
+Resultado:
+
+Saldo: R$ 1500.00
+12. O que é self?
+
+Essa parte é fundamental.
+
+Dentro:
+
+impl Conta
+
+self representa a própria instância.
+
+Imagine:
+
+let conta = Conta {
+    titular: String::from("Jhonata"),
+    saldo: 1500.0,
+};
+
+Quando fazemos:
+
+conta.mostrar_saldo();
+
+Dentro do método:
+
+fn mostrar_saldo(&self) {
+    println!("{}", self.saldo);
+}
+
+self.saldo significa:
+
+saldo desta conta
+
+Nesse caso:
+
+1500.0
+13. &self
+
+Muito comum:
+
+fn mostrar_saldo(&self)
+
+O &self significa:
+
+pegar uma referência emprestada da struct.
+
+Ou seja, o método pode consultar os dados sem tomar posse da estrutura.
+
+Exemplo:
+
+fn mostrar_nome(&self) {
+    println!("{}", self.titular);
+}
+14. &mut self
+
+Se você quiser alterar a struct:
+
+fn depositar(&mut self, valor: f64) {
+    self.saldo += valor;
+}
+
+Exemplo completo:
+
+struct Conta {
+    titular: String,
+    saldo: f64,
+}
+
+impl Conta {
+
+    fn depositar(&mut self, valor: f64) {
+        self.saldo += valor;
+    }
+
+}
+
+fn main() {
+    let mut conta = Conta {
+        titular: String::from("Jhonata"),
+        saldo: 1000.0,
+    };
+
+    conta.depositar(500.0);
+
+    println!("{}", conta.saldo);
+}
+
+Resultado:
+
+1500
+
+Observe que a variável precisa ser:
+
+let mut conta
+
+porque estamos alterando seus dados.
+
+15. self sem &
+
+Também existe:
+
+fn alguma_coisa(self)
+
+Nesse caso, o método recebe a propriedade inteira da struct.
+
+Exemplo:
+
+fn excluir(self) {
+    println!("Conta excluída");
+}
+
+Depois de:
+
+conta.excluir();
+
+aquela conta normalmente não poderá mais ser utilizada, porque o método recebeu sua ownership.
+
+Por enquanto, grave:
+
+&self
+↓
+só consultar
+
+&mut self
+↓
+consultar e alterar
+
+self
+↓
+tomar posse do objeto
+16. Associated Function
+
+Nem toda função dentro de impl precisa ter self.
+
+Exemplo:
+
+impl Conta {
+
+    fn nova(titular: String) -> Conta {
+        Conta {
+            titular,
+            saldo: 0.0,
+        }
+    }
+
+}
+
+Usamos:
+
+let conta = Conta::nova(String::from("Jhonata"));
+
+Observe:
+
+Conta::nova()
+
+e não:
+
+conta.nova()
+
+Isso acontece porque nova() não recebe:
+
+self
+&self
+&mut self
+
+É muito parecido com um construtor.
+
+17. Exemplo completo: ByteBank
+
+Esse exemplo junta quase tudo:
+
+#[derive(Debug)]
+struct Conta {
+    titular: String,
+    saldo: f64,
+    ativa: bool,
+}
+
+impl Conta {
+
+    fn nova(titular: String) -> Conta {
+        Conta {
+            titular,
+            saldo: 0.0,
+            ativa: true,
+        }
+    }
+
+    fn depositar(&mut self, valor: f64) {
+        self.saldo += valor;
+    }
+
+    fn sacar(&mut self, valor: f64) {
+
+        if valor <= self.saldo {
+            self.saldo -= valor;
+            println!("Saque realizado.");
+        } else {
+            println!("Saldo insuficiente.");
+        }
+
+    }
+
+    fn mostrar_saldo(&self) {
+        println!(
+            "{} possui R$ {:.2}",
+            self.titular,
+            self.saldo
+        );
+    }
+}
+
+fn main() {
+
+    let mut conta = Conta::nova(
+        String::from("Jhonata")
+    );
+
+    conta.depositar(1500.0);
+
+    conta.mostrar_saldo();
+
+    conta.sacar(500.0);
+
+    conta.mostrar_saldo();
+
+}
+
+Saída:
+
+Jhonata possui R$ 1500.00
+Saque realizado.
+Jhonata possui R$ 1000.00
+18. Struct dentro de outra struct
+
+Uma struct também pode conter outra.
+
+struct Endereco {
+    cidade: String,
+    estado: String,
+}
+
+struct Pessoa {
+    nome: String,
+    endereco: Endereco,
+}
+
+Criando:
+
+fn main() {
+
+    let endereco = Endereco {
+        cidade: String::from("Rio de Janeiro"),
+        estado: String::from("RJ"),
+    };
+
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        endereco,
+    };
+
+    println!("{}", pessoa.endereco.cidade);
+}
+
+Perceba:
+
+pessoa.endereco.cidade
+
+Podemos navegar entre as estruturas usando ..
+
+19. Struct com Vec
+
+Também pode armazenar coleções.
+
+struct Aluno {
+    nome: String,
+    notas: Vec<f64>,
+}
+
+Exemplo:
+
+fn main() {
+
+    let aluno = Aluno {
+        nome: String::from("Jhonata"),
+        notas: vec![8.0, 9.5, 10.0],
+    };
+
+    println!("{:?}", aluno.notas);
+}
+20. Struct e Ownership
+
+Aqui está uma ligação importante com o que você já estudou.
+
+Observe:
+
+struct Pessoa {
+    nome: String,
+}
+
+String possui ownership.
+
+Então:
+
+let nome = String::from("Jhonata");
+
+let pessoa = Pessoa {
+    nome,
+};
+
+O ownership da String foi movido para:
+
+pessoa.nome
+
+Depois disso:
+
+println!("{}", nome);
+
+pode gerar erro porque nome foi movido.
+
+Mentalmente:
+
+nome
+  │
+  │ ownership movida
+  ▼
+
+Pessoa
+└── nome: String
+
+Isso conecta diretamente:
+
+Struct
++
+Ownership
++
+Borrowing
+Resumo para memorizar
+
+Guarde essa sequência:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+Define um novo tipo.
+
+let pessoa = Pessoa {
+    nome: String::from("Jhonata"),
+    idade: 24,
+};
+
+Cria uma instância.
+
+pessoa.nome
+
+Acessa um campo.
+
+let mut pessoa
+
+Permite alterar.
+
+impl Pessoa
+
+Adiciona comportamento.
+
+fn mostrar(&self)
+
+Lê os dados.
+
+fn alterar(&mut self)
+
+Altera os dados.
+
+fn consumir(self)
+
+Toma ownership.
+
+fn nova() -> Pessoa
+
+É uma função associada.
+
+Pessoa::nova()
+
+Chama uma função associada.
+
+Resumo em uma frase
+
+struct representa os dados de algo e impl representa o que esse algo consegue fazer.
+
+Um jeito excelente de pensar nisso no seu ByteBank seria:
+
+Conta
+│
+├── DADOS
+│   ├── titular
+│   ├── saldo
+│   └── ativa
+│
+└── COMPORTAMENTOS
+    ├── nova()
+    ├── depositar()
+    ├── sacar()
+    └── mostrar_saldo()
+
+Esse assunto prepara diretamente o caminho para enum, match, métodos, impl, traits e organização de programas maiores em Rust.
