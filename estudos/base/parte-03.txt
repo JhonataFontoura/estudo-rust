@@ -1,0 +1,998 @@
+        println!("O valor é 10");
+    }
+}
+
+Aqui:
+
+referencia
+
+é uma referência para numero.
+
+Quando fazemos:
+
+*referencia
+
+acessamos o valor:
+
+10
+
+
+==================================================
+5. REFERÊNCIA MUTÁVEL + DESREFERENCIAMENTO
+==================================================
+
+Também podemos modificar um valor através de uma referência mutável.
+
+Exemplo:
+
+fn main() {
+    let mut numero = 10;
+
+    let referencia = &mut numero;
+
+    *referencia = 20;
+
+    println!("{}", numero);
+}
+
+Resultado:
+
+20
+
+
+Passo a passo:
+
+let mut numero = 10;
+
+Criamos uma variável que pode ser modificada.
+
+
+let referencia = &mut numero;
+
+Criamos uma referência mutável para numero.
+
+
+*referencia = 20;
+
+Desreferenciamos referencia e alteramos o valor para o qual ela aponta.
+
+
+Antes:
+
+numero
+  |
+  v
+ 10
+
+
+Depois:
+
+*referencia = 20;
+
+
+numero
+  |
+  v
+ 20
+
+
+==================================================
+6. RELAÇÃO COM BORROWING
+==================================================
+
+Borrowing:
+
+let referencia = &numero;
+
+Estamos pegando numero emprestado através de uma referência.
+
+
+Dereferencing:
+
+*referencia
+
+Estamos acessando o valor através dessa referência.
+
+
+Então:
+
+&numero
+
+significa:
+
+"Crie uma referência para numero."
+
+
+*referencia
+
+significa:
+
+"Acesse o valor para o qual referencia aponta."
+
+
+==================================================
+7. EXEMPLO EM FUNÇÃO
+==================================================
+
+fn dobrar(numero: &mut i32) {
+    *numero = *numero * 2;
+}
+
+fn main() {
+    let mut valor = 10;
+
+    dobrar(&mut valor);
+
+    println!("{}", valor);
+}
+
+Resultado:
+
+20
+
+
+Vamos analisar:
+
+dobrar(&mut valor);
+
+Estamos emprestando valor de forma mutável.
+
+
+A função recebe:
+
+numero: &mut i32
+
+Ou seja:
+
+numero é uma referência mutável para um i32.
+
+
+Dentro da função:
+
+*numero
+
+acessa o valor original.
+
+
+Então:
+
+*numero = *numero * 2;
+
+Se o valor era 10:
+
+*numero = 10 * 2;
+
+*numero = 20;
+
+
+Como estamos trabalhando através de uma referência mutável,
+o valor original também foi alterado.
+
+
+==================================================
+8. DEREF COM BOX
+==================================================
+
+O conceito também aparece com Box.
+
+Exemplo:
+
+fn main() {
+    let numero = Box::new(100);
+
+    println!("{}", *numero);
+}
+
+Box coloca o valor que possui na Heap.
+
+Simplificando:
+
+STACK
+
+numero
+  |
+  | aponta para
+  v
+
+HEAP
+
+100
+
+
+Quando fazemos:
+
+*numero
+
+acessamos:
+
+100
+
+
+==================================================
+9. DEREFERENCIAMENTO AUTOMÁTICO
+==================================================
+
+Rust consegue realizar alguns desreferenciamentos automaticamente.
+
+Isso é especialmente comum ao chamar métodos.
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+
+let referencia = &nome;
+
+println!("{}", referencia.len());
+
+Mesmo referencia sendo:
+
+&String
+
+Rust permite chamar:
+
+referencia.len()
+
+sem precisar escrever algo como:
+
+(*referencia).len()
+
+Esse comportamento ajuda o código Rust a ficar mais simples.
+
+
+==================================================
+10. CUIDADO COM O *
+==================================================
+
+O símbolo * pode possuir significados diferentes dependendo do contexto.
+
+Neste assunto:
+
+*referencia
+
+significa:
+
+DESREFERENCIAR.
+
+
+Mas * também é usado para multiplicação:
+
+let resultado = 5 * 2;
+
+Nesse caso:
+
+*
+
+significa multiplicação.
+
+
+O contexto determina o significado.
+
+
+==================================================
+RESUMO
+==================================================
+
+REFERÊNCIA:
+
+&valor
+
+Cria uma referência para um valor.
+
+
+REFERÊNCIA MUTÁVEL:
+
+&mut valor
+
+Cria uma referência que permite modificar o valor.
+
+
+DESREFERENCIAMENTO:
+
+*referencia
+
+Acessa o valor para o qual a referência aponta.
+
+
+EXEMPLO:
+
+let numero = 10;
+
+let referencia = &numero;
+
+*referencia
+
+Resultado:
+
+10
+
+
+EXEMPLO MUTÁVEL:
+
+let mut numero = 10;
+
+let referencia = &mut numero;
+
+*referencia = 20;
+
+Agora:
+
+numero = 20
+
+
+FORMA SIMPLES DE DECORAR:
+
+&  = referência
+     "onde está o valor?"
+
+*  = desreferenciamento
+     "quero acessar o valor referenciado"
+
+&mut = referência mutável
+       "quero uma referência que permita alterar o valor"
+
+
+RELAÇÃO ENTRE OS CONCEITOS:
+
+Ownership
+    ↓
+Quem é dono do valor?
+
+Borrowing
+    ↓
+Posso pegar esse valor emprestado?
+
+&valor
+    ↓
+Crio uma referência.
+
+*referencia
+    ↓
+Acesso o valor através da referência.
+
+&mut valor
+    ↓
+Pego emprestado permitindo modificação.
+
+*referencia = novo_valor
+    ↓
+Modifico o valor através da referência.
+fn main() {
+    let mut numero = 10;
+
+    let referencia = &mut numero;
+
+    *referencia += 5;
+
+    println!("Número: {}", numero);
+}
+Pense nele como:
+
+numero é o dono → &mut numero pega emprestado → *referencia acessa/modifica o valor → numero continua sendo o dono.
+
+Essa sequência conecta Ownership → Borrowing → Referências → Dereferencing.
+
+REBORROWING EM RUST
+
+==================================================
+1. O QUE É REBORROWING?
+==================================================
+
+Reborrowing significa "reemprestar" uma referência.
+
+Ou seja:
+
+- Existe um valor original.
+- Criamos uma referência para esse valor.
+- A partir dessa referência, criamos outra referência temporária.
+
+Forma simples:
+
+VALOR
+  ↓
+REFERÊNCIA
+  ↓
+NOVA REFERÊNCIA TEMPORÁRIA
+
+Isso é chamado de REBORROWING.
+
+
+==================================================
+2. EXEMPLO SIMPLES
+==================================================
+
+fn main() {
+    let mut numero = 10;
+
+    let referencia1 = &mut numero;
+
+    let referencia2 = &mut *referencia1;
+
+    *referencia2 += 5;
+
+    println!("{}", referencia1);
+}
+
+Resultado:
+
+15
+
+
+==================================================
+3. ENTENDENDO PASSO A PASSO
+==================================================
+
+Primeiro:
+
+let mut numero = 10;
+
+numero é o proprietário do valor.
+
+numero
+  |
+  v
+ 10
+
+
+Depois:
+
+let referencia1 = &mut numero;
+
+Criamos uma referência mutável.
+
+numero
+  |
+  v
+ 10
+  ^
+  |
+referencia1
+
+
+Agora:
+
+let referencia2 = &mut *referencia1;
+
+Essa parte parece complicada, então vamos separar.
+
+
+==================================================
+4. *referencia1
+==================================================
+
+Temos:
+
+referencia1
+
+que é:
+
+&mut i32
+
+Quando fazemos:
+
+*referencia1
+
+estamos desreferenciando.
+
+Ou seja:
+
+"Acesse o valor para o qual referencia1 aponta."
+
+
+referencia1
+     |
+     v
+    10
+
+
+*referencia1
+
+representa o valor referenciado.
+
+
+==================================================
+5. &mut *referencia1
+==================================================
+
+Agora fazemos:
+
+&mut *referencia1
+
+Primeiro:
+
+*referencia1
+
+Acessamos o valor.
+
+Depois:
+
+&mut
+
+criamos uma nova referência mutável para esse valor.
+
+Então:
+
+let referencia2 = &mut *referencia1;
+
+é um REBORROW.
+
+
+Visualmente:
+
+numero
+  |
+  v
+ 10
+  ^
+  |
+referencia1
+  |
+  | reborrow
+  v
+referencia2
+
+
+referencia2 é um empréstimo temporário criado através de referencia1.
+
+
+==================================================
+6. POR QUE ISSO EXISTE?
+==================================================
+
+Imagine que uma função recebe uma referência mutável:
+
+fn alterar(numero: &mut i32) {
+    *numero += 1;
+}
+
+Agora:
+
+fn main() {
+    let mut valor = 10;
+
+    let referencia = &mut valor;
+
+    alterar(&mut *referencia);
+
+    println!("{}", referencia);
+}
+
+Aqui:
+
+referencia
+
+já é:
+
+&mut i32
+
+
+Quando fazemos:
+
+&mut *referencia
+
+criamos um novo empréstimo temporário para passar para alterar().
+
+Depois que alterar() termina, esse reborrow termina.
+
+Então referencia pode voltar a ser utilizada.
+
+
+==================================================
+7. REBORROWING E FUNÇÕES
+==================================================
+
+Exemplo:
+
+fn adicionar(numero: &mut i32) {
+    *numero += 5;
+}
+
+fn main() {
+    let mut valor = 10;
+
+    let referencia = &mut valor;
+
+    adicionar(&mut *referencia);
+
+    println!("{}", referencia);
+}
+
+Resultado:
+
+15
+
+
+Fluxo:
+
+valor
+  ↓
+10
+
+&mut valor
+  ↓
+referencia
+
+&mut *referencia
+  ↓
+reborrow
+
+adicionar()
+  ↓
+modifica o valor
+
+reborrow termina
+  ↓
+referencia pode ser usada novamente
+
+
+==================================================
+8. POR QUE NÃO PODEMOS USAR AS DUAS AO MESMO TEMPO?
+==================================================
+
+Enquanto um reborrow mutável está ativo, a referência original fica temporariamente indisponível para acessos conflitantes.
+
+Exemplo conceitual:
+
+let mut numero = 10;
+
+let referencia1 = &mut numero;
+
+let referencia2 = &mut *referencia1;
+
+
+Enquanto referencia2 estiver sendo utilizada, não podemos utilizar referencia1 de uma maneira que entre em conflito com referencia2.
+
+Isso acontece porque Rust evita que existam dois acessos mutáveis ativos ao mesmo valor ao mesmo tempo.
+
+
+REGRA IMPORTANTE:
+
+Várias referências imutáveis:
+
+&T
+&T
+&T
+
+podem coexistir.
+
+
+Mas acesso mutável:
+
+&mut T
+
+precisa ser exclusivo durante o período em que está sendo utilizado.
+
+
+==================================================
+9. REBORROWING IMUTÁVEL
+==================================================
+
+Reborrowing também pode acontecer para leitura.
+
+Exemplo:
+
+fn mostrar(numero: &i32) {
+    println!("{}", numero);
+}
+
+fn main() {
+    let mut valor = 10;
+
+    let referencia = &mut valor;
+
+    mostrar(&*referencia);
+
+    println!("{}", referencia);
+}
+
+Aqui:
+
+*referencia
+
+acessa o valor.
+
+&*referencia
+
+cria uma referência imutável temporária.
+
+Ou seja:
+
+&mut i32
+   ↓
+reborrow
+   ↓
+&i32
+
+
+A função mostrar() pode ler o valor, mas não modificá-lo.
+
+
+==================================================
+10. RELAÇÃO COM DEREFERENCING
+==================================================
+
+Reborrowing fica mais fácil quando entendemos:
+
+&
+
+&mut
+
+*
+
+
+Exemplo:
+
+let referencia = &mut numero;
+
+Temos:
+
+referencia: &mut i32
+
+
+Agora:
+
+*referencia
+
+acessa o valor.
+
+
+Depois:
+
+&mut *referencia
+
+cria uma nova referência mutável para esse valor.
+
+
+Então:
+
+&mut *referencia
+
+pode ser lido como:
+
+1. * -> acesse o valor referenciado.
+
+2. &mut -> crie uma nova referência mutável para esse valor.
+
+
+==================================================
+11. EXEMPLO COMPLETO
+==================================================
+
+fn aumentar(numero: &mut i32) {
+    *numero += 10;
+}
+
+fn main() {
+    let mut valor = 20;
+
+    let referencia = &mut valor;
+
+    aumentar(&mut *referencia);
+
+    *referencia += 5;
+
+    println!("Resultado: {}", referencia);
+}
+
+Resultado:
+
+35
+
+
+Passo a passo:
+
+valor = 20
+
+referencia = &mut valor
+
+aumentar(&mut *referencia)
+        ↓
+reborrow
+        ↓
+20 + 10
+        ↓
+30
+
+A função termina.
+
+O reborrow termina.
+
+Depois:
+
+*referencia += 5
+
+30 + 5
+
+35
+
+
+==================================================
+12. REBORROWING AUTOMÁTICO
+==================================================
+
+Rust frequentemente consegue realizar reborrowing automaticamente.
+
+Por isso, muitas vezes você não precisa escrever explicitamente:
+
+&mut *referencia
+
+O compilador consegue entender determinados contextos e criar o empréstimo temporário necessário.
+
+Porém, entender:
+
+&mut *referencia
+
+é importante porque mostra claramente o que está acontecendo com as referências.
+
+
+==================================================
+13. RELAÇÃO ENTRE TODOS OS CONCEITOS
+==================================================
+
+OWNERSHIP
+
+Quem é dono do valor?
+
+Exemplo:
+
+let mut numero = 10;
+
+
+BORROWING
+
+Pegamos o valor emprestado:
+
+let referencia = &mut numero;
+
+
+DEREFERENCING
+
+Acessamos o valor através da referência:
+
+*referencia
+
+
+REBORROWING
+
+Criamos um novo empréstimo a partir da referência:
+
+let nova_referencia = &mut *referencia;
+
+
+Fluxo:
+
+numero
+   ↓
+OWNER
+   ↓
+&mut numero
+   ↓
+BORROWING
+   ↓
+referencia
+   ↓
+*referencia
+   ↓
+DEREFERENCING
+   ↓
+&mut *referencia
+   ↓
+REBORROWING
+
+
+==================================================
+RESUMO PARA DECORAR
+==================================================
+
+OWNERSHIP
+=
+Quem é dono do valor.
+
+
+BORROWING
+=
+Pegar um valor emprestado através de uma referência.
+
+
+&valor
+=
+Referência imutável.
+
+
+&mut valor
+=
+Referência mutável.
+
+
+DEREFERENCING
+=
+Acessar o valor através da referência.
+
+*referencia
+
+
+REBORROWING
+=
+Criar um novo empréstimo temporário a partir de uma referência existente.
+
+
+Exemplo:
+
+let mut numero = 10;
+
+let referencia1 = &mut numero;
+
+let referencia2 = &mut *referencia1;
+
+
+Aqui:
+
+numero
+=
+owner
+
+referencia1
+=
+borrowing
+
+*referencia1
+=
+dereferencing
+
+referencia2
+=
+reborrowing
+
+
+FORMA SIMPLES DE LEMBRAR:
+
+Ownership:
+"O valor é meu."
+
+Borrowing:
+"Vou emprestar o valor."
+
+Dereferencing:
+"Quero acessar o valor emprestado."
+
+Reborrowing:
+"Vou emprestar temporariamente através do empréstimo que já tenho."
+
+
+IDEIA PRINCIPAL:
+
+Reborrowing não cria uma cópia do valor.
+
+Reborrowing cria uma NOVA REFERÊNCIA temporária para o mesmo valor.
+
+Rust controla o tempo de vida desses empréstimos para impedir acessos conflitantes à memória.
+
+ESTUDO COM CONTEÚDO PRÁTICO 
+static TEXTO_STATIC: &str = "Dado Static";
+
+fn main() {
+    println!("========================================");
+    println!("   ESTUDO DE MEMÓRIA EM RUST");
+    println!("========================================\n");
+
+    // =========================================================
+    // 1. STACK + OWNERSHIP
+    // =========================================================
+
+    let mut numero: i32 = 4;
+
+    println!("[OWNERSHIP]");
+    println!("Valor original: {}", numero);
+    println!("Endereço: {:p}", &numero);
+    println!("Memória: STACK");
+    println!("Motivo: i32 local possui tamanho conhecido.\n");
+
+    // =========================================================
+    // 2. BORROWING
+    // =========================================================
+
+    {
+        let referencia = &numero;
+
+        println!("[BORROWING]");
+        println!("Valor acessado pela referência: {}", referencia);
+        println!("Endereço do valor referenciado: {:p}", referencia);
