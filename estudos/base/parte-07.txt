@@ -1,0 +1,1018 @@
+fn main() {
+    let mut numeros = vec![10, 20, 30];
+
+    numeros[1] = 100;
+
+    println!("{:?}", numeros);
+}
+
+
+Resultado:
+
+[10, 100, 30]
+
+
+==================================================
+20. TAMANHO DO VEC
+==================================================
+
+Utilizamos:
+
+.len()
+
+
+Exemplo:
+
+let numeros = vec![10, 20, 30];
+
+println!("{}", numeros.len());
+
+
+Resultado:
+
+3
+
+
+==================================================
+21. VERIFICAR SE ESTÁ VAZIO
+==================================================
+
+Podemos utilizar:
+
+.is_empty()
+
+
+Exemplo:
+
+let numeros: Vec<i32> = Vec::new();
+
+if numeros.is_empty() {
+    println!("O Vec está vazio");
+}
+
+
+==================================================
+22. PERCORRENDO UM VEC
+==================================================
+
+Podemos usar for.
+
+Exemplo:
+
+let numeros = vec![10, 20, 30];
+
+for numero in &numeros {
+    println!("{}", numero);
+}
+
+
+Resultado:
+
+10
+20
+30
+
+
+Aqui:
+
+&numeros
+
+faz borrowing.
+
+O for utiliza o Vec sem tomar seu ownership.
+
+
+==================================================
+23. MODIFICANDO ELEMENTOS COM &mut
+==================================================
+
+Podemos percorrer os elementos de forma mutável:
+
+fn main() {
+    let mut numeros = vec![10, 20, 30];
+
+    for numero in &mut numeros {
+        *numero += 5;
+    }
+
+    println!("{:?}", numeros);
+}
+
+
+Resultado:
+
+[15, 25, 35]
+
+
+Observe a relação com os conceitos anteriores:
+
+&mut numeros
+=
+borrowing mutável
+
+
+numero
+=
+referência mutável para cada elemento
+
+
+*numero
+=
+dereferencing
+
+
+*numero += 5
+=
+acessa e modifica o valor referenciado
+
+
+==================================================
+24. VEC E MEMÓRIA
+==================================================
+
+Vec possui uma estrutura semelhante à ideia estudada
+em String.
+
+Simplificando, um Vec possui:
+
+pointer
+length
+capacity
+
+
+Quando temos:
+
+let numeros = vec![10, 20, 30];
+
+
+Podemos visualizar:
+
+STACK
+
+numeros
+----------------
+pointer -----------+
+length = 3         |
+capacity >= 3      |
+                   |
+                   v
+
+HEAP
+
+10
+20
+30
+
+
+A estrutura Vec local normalmente possui seus metadados
+na Stack.
+
+Os elementos pertencentes ao Vec ficam em uma
+alocação na Heap.
+
+
+==================================================
+25. LENGTH VS CAPACITY
+==================================================
+
+Vec possui dois conceitos importantes:
+
+length
+=
+quantos elementos existem atualmente
+
+
+capacity
+=
+quantos elementos cabem na alocação atual antes que
+o Vec precise realocar espaço
+
+
+Exemplo:
+
+let numeros = vec![10, 20, 30];
+
+println!("Length: {}", numeros.len());
+println!("Capacity: {}", numeros.capacity());
+
+
+O length será:
+
+3
+
+
+A capacity depende de como a alocação foi realizada.
+
+
+==================================================
+26. O QUE ACONTECE QUANDO VEC CRESCE?
+==================================================
+
+Imagine conceitualmente:
+
+Vec:
+
+[10, 20, 30]
+
+length = 3
+capacity = 3
+
+
+Agora:
+
+numeros.push(40);
+
+
+Se não houver capacidade suficiente, o Vec pode precisar:
+
+1. Solicitar uma nova região maior na Heap.
+
+2. Mover/copiar os elementos para essa nova alocação.
+
+3. Atualizar seu ponteiro.
+
+4. Liberar a alocação antiga.
+
+
+Por isso uma operação push() pode, em determinados momentos,
+causar uma realocação.
+
+
+==================================================
+27. REFERÊNCIAS E REALOCAÇÃO
+==================================================
+
+Isso ajuda a entender algumas regras do Borrow Checker.
+
+Imagine conceitualmente:
+
+let mut numeros = vec![10, 20, 30];
+
+let primeiro = &numeros[0];
+
+numeros.push(40);
+
+
+Se push() precisar realocar o Vec, o endereço dos elementos
+pode mudar.
+
+Uma referência antiga poderia ficar apontando para memória
+que não contém mais aqueles dados.
+
+Rust utiliza suas regras de borrowing para impedir situações
+inseguras quando a referência ainda precisa ser usada.
+
+
+==================================================
+28. VEC E OWNERSHIP
+==================================================
+
+Vec possui ownership sobre seus elementos.
+
+Exemplo:
+
+let numeros1 = vec![10, 20, 30];
+
+let numeros2 = numeros1;
+
+
+Normalmente ocorre:
+
+MOVE
+
+
+Agora numeros2 possui o Vec.
+
+numeros1 não pode mais ser utilizado.
+
+
+==================================================
+29. CLONE DE VEC
+==================================================
+
+Se os elementos puderem ser clonados, podemos fazer:
+
+let numeros1 = vec![10, 20, 30];
+
+let numeros2 = numeros1.clone();
+
+
+Agora temos dois Vec independentes.
+
+Simplificando:
+
+numeros1
+    |
+    v
+HEAP
+[10, 20, 30]
+
+
+numeros2
+    |
+    v
+HEAP
+[10, 20, 30]
+
+
+São duas coleções diferentes.
+
+
+==================================================
+30. ARRAY VS VEC
+==================================================
+
+ARRAY:
+
+let numeros = [10, 20, 30];
+
+
+Características:
+
+- Tamanho fixo
+- Mesmo tipo
+- Tamanho faz parte do tipo
+- Pode ser armazenado diretamente onde a variável/estrutura estiver
+- Não possui push() para aumentar seu tamanho
+
+
+VEC:
+
+let numeros = vec![10, 20, 30];
+
+
+Características:
+
+- Tamanho dinâmico
+- Mesmo tipo
+- Pode crescer
+- Pode diminuir
+- Elementos são armazenados em uma alocação na Heap
+- Possui length
+- Possui capacity
+- Possui push()
+- Possui pop()
+
+
+==================================================
+31. ARRAY VS VEC VS TUPLA
+==================================================
+
+TUPLA:
+
+let pessoa = ("Jhonata", 24, true);
+
+- Tamanho fixo
+- Pode possuir tipos diferentes
+- Acesso: pessoa.0
+
+
+ARRAY:
+
+let numeros = [10, 20, 30];
+
+- Tamanho fixo
+- Elementos do mesmo tipo
+- Acesso: numeros[0]
+
+
+VEC:
+
+let numeros = vec![10, 20, 30];
+
+- Tamanho dinâmico
+- Elementos do mesmo tipo
+- Acesso: numeros[0]
+- Pode usar push() e pop()
+
+
+VISUALMENTE:
+
+TUPLA
+
+("Jhonata", 24, true)
+     ↓       ↓    ↓
+    &str    i32  bool
+
+
+ARRAY
+
+[10, 20, 30]
+ ↓   ↓   ↓
+i32 i32 i32
+
+
+VEC
+
+[10, 20, 30, ...]
+ ↓   ↓   ↓
+i32 i32 i32
+
+pode crescer ou diminuir.
+
+
+==================================================
+32. EXEMPLO COMPLETO COM VEC
+==================================================
+
+fn main() {
+    let mut numeros: Vec<i32> = Vec::new();
+
+    numeros.push(10);
+    numeros.push(20);
+    numeros.push(30);
+
+    println!("Vec: {:?}", numeros);
+
+    println!("Quantidade: {}", numeros.len());
+
+    for numero in &numeros {
+        println!("Número: {}", numero);
+    }
+
+    numeros.pop();
+
+    println!("Depois do pop: {:?}", numeros);
+}
+
+
+Resultado aproximado:
+
+Vec: [10, 20, 30]
+
+Quantidade: 3
+
+Número: 10
+Número: 20
+Número: 30
+
+Depois do pop: [10, 20]
+
+
+==================================================
+RESUMO — ARRAY E VEC
+==================================================
+
+ARRAY
+=
+Coleção de tamanho FIXO com elementos do mesmo tipo.
+
+
+Criar:
+
+let numeros = [10, 20, 30];
+
+
+Tipo explícito:
+
+let numeros: [i32; 3] = [10, 20, 30];
+
+
+Acessar:
+
+numeros[0]
+
+
+Modificar:
+
+let mut numeros = [10, 20, 30];
+
+numeros[0] = 100;
+
+
+Tamanho:
+
+numeros.len();
+
+
+Criar valores repetidos:
+
+let numeros = [0; 5];
+
+
+--------------------------------------------------
+
+VEC
+=
+Coleção DINÂMICA com elementos do mesmo tipo.
+
+
+Criar:
+
+let numeros = vec![10, 20, 30];
+
+
+Criar vazio:
+
+let mut numeros: Vec<i32> = Vec::new();
+
+
+Adicionar:
+
+numeros.push(10);
+
+
+Remover último:
+
+numeros.pop();
+
+
+Acessar:
+
+numeros[0];
+
+
+Acessar de forma tratável:
+
+numeros.get(0);
+
+
+Tamanho:
+
+numeros.len();
+
+
+Capacidade:
+
+numeros.capacity();
+
+
+Verificar se está vazio:
+
+numeros.is_empty();
+
+
+--------------------------------------------------
+
+MEMÓRIA:
+
+ARRAY LOCAL SIMPLES:
+
+STACK
+
+[10, 20, 30]
+
+
+VEC:
+
+STACK
+
+pointer
+length
+capacity
+   |
+   v
+
+HEAP
+
+[10, 20, 30]
+
+
+==================================================
+FORMA SIMPLES DE DECORAR
+==================================================
+
+TUPLA:
+
+"Quero agrupar uma quantidade fixa de dados
+que podem ter tipos diferentes."
+
+
+ARRAY:
+
+"Quero uma quantidade FIXA de elementos
+do MESMO tipo."
+
+
+VEC:
+
+"Quero uma quantidade que pode MUDAR
+de elementos do MESMO tipo."
+
+
+ARRAY:
+
+[i32; 3]
+
+tipo + tamanho
+
+
+VEC:
+
+Vec<i32>
+
+tipo dos elementos
+
+
+ARRAY:
+
+não cresce
+
+
+VEC:
+
+push() -> cresce
+
+pop() -> remove do final
+
+
+E RELACIONANDO COM O QUE JÁ FOI ESTUDADO:
+
+Vec
+  ↓
+possui seus elementos
+  ↓
+OWNERSHIP
+  ↓
+elementos na HEAP
+
+
+&Vec / &numeros
+  ↓
+BORROWING
+
+
+&mut numeros
+  ↓
+BORROWING MUTÁVEL
+
+
+*numero
+  ↓
+DEREFERENCING de uma referência para um elemento
+
+STRUCTS
+
+Uma struct serve para reunir várias informações que pertencem à mesma coisa.
+
+Por exemplo, se você quiser representar uma conta bancária, poderia ter:
+
+nome do cliente;
+número da conta;
+saldo;
+conta ativa ou não.
+
+Sem struct, você poderia ter várias variáveis separadas:
+
+let nome = "Jhonata";
+let conta = 1234;
+let saldo = 1500.0;
+let ativa = true;
+
+Funciona, mas conforme o programa cresce, essas informações ficam espalhadas.
+
+Com uma struct, você pode reunir tudo:
+
+struct Conta {
+    nome: String,
+    numero: u32,
+    saldo: f64,
+    ativa: bool,
+}
+
+Agora Conta virou um novo tipo de dado criado por você.
+
+1. Estrutura básica
+
+A sintaxe é:
+
+struct NomeDaStruct {
+    campo1: Tipo,
+    campo2: Tipo,
+    campo3: Tipo,
+}
+
+Exemplo:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+    altura: f32,
+}
+
+Nesse caso:
+
+Pessoa
+ ├── nome   -> String
+ ├── idade  -> u32
+ └── altura -> f32
+
+A struct define apenas o formato.
+
+Ela ainda não criou nenhuma pessoa.
+
+2. Criando uma instância
+
+Depois de criar a estrutura:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+    altura: f32,
+}
+
+Podemos criar uma pessoa:
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+        altura: 1.68,
+    };
+}
+
+Agora pessoa contém todos esses dados.
+
+Visualmente:
+
+pessoa
+│
+├── nome: "Jhonata"
+├── idade: 24
+└── altura: 1.68
+3. Acessando os campos
+
+Usamos .:
+
+println!("{}", pessoa.nome);
+println!("{}", pessoa.idade);
+println!("{}", pessoa.altura);
+
+Exemplo completo:
+
+struct Pessoa {
+    nome: String,
+    idade: u32,
+    altura: f32,
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+        altura: 1.68,
+    };
+
+    println!("Nome: {}", pessoa.nome);
+    println!("Idade: {}", pessoa.idade);
+    println!("Altura: {}", pessoa.altura);
+}
+
+Resultado:
+
+Nome: Jhonata
+Idade: 24
+Altura: 1.68
+4. Struct mutável
+
+Por padrão, variáveis em Rust são imutáveis.
+
+Isso também vale para uma instância de struct.
+
+Por exemplo:
+
+let pessoa = Pessoa {
+    nome: String::from("Jhonata"),
+    idade: 24,
+    altura: 1.68,
+};
+
+Você não poderia fazer:
+
+pessoa.idade = 25;
+
+Para alterar os valores:
+
+let mut pessoa = Pessoa {
+    nome: String::from("Jhonata"),
+    idade: 24,
+    altura: 1.68,
+};
+
+pessoa.idade = 25;
+
+Agora funciona.
+
+5. Função retornando uma struct
+
+Uma função também pode criar e retornar uma estrutura.
+
+struct Usuario {
+    nome: String,
+    idade: u32,
+}
+
+fn criar_usuario() -> Usuario {
+    Usuario {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    }
+}
+
+fn main() {
+    let usuario = criar_usuario();
+
+    println!("{}", usuario.nome);
+}
+
+Observe:
+
+fn criar_usuario() -> Usuario
+
+O -> Usuario significa:
+
+essa função retorna um valor do tipo Usuario.
+
+6. Field Init Shorthand
+
+Rust possui uma forma abreviada quando a variável e o campo têm o mesmo nome.
+
+Normalmente:
+
+fn criar_usuario(nome: String, idade: u32) -> Usuario {
+    Usuario {
+        nome: nome,
+        idade: idade,
+    }
+}
+
+Como os nomes são iguais, podemos fazer:
+
+fn criar_usuario(nome: String, idade: u32) -> Usuario {
+    Usuario {
+        nome,
+        idade,
+    }
+}
+
+Exemplo:
+
+struct Usuario {
+    nome: String,
+    idade: u32,
+}
+
+fn criar_usuario(nome: String, idade: u32) -> Usuario {
+    Usuario {
+        nome,
+        idade,
+    }
+}
+
+fn main() {
+    let usuario = criar_usuario(
+        String::from("Jhonata"),
+        24
+    );
+
+    println!("{}", usuario.nome);
+}
+
+Isso aparece bastante em projetos Rust.
+
+7. Struct Update Syntax
+
+Imagine:
+
+struct Usuario {
+    nome: String,
+    idade: u32,
+    ativo: bool,
+}
+
+Temos:
+
+let usuario1 = Usuario {
+    nome: String::from("Jhonata"),
+    idade: 24,
+    ativo: true,
+};
+
+E queremos criar outro usuário reaproveitando alguns valores.
+
+Poderíamos escrever tudo:
+
+let usuario2 = Usuario {
+    nome: String::from("Carlos"),
+    idade: usuario1.idade,
+    ativo: usuario1.ativo,
+};
+
+Mas Rust permite:
+
+let usuario2 = Usuario {
+    nome: String::from("Carlos"),
+    ..usuario1
+};
+
+O:
+
+..usuario1
+
+significa:
+
+copie/reutilize os outros campos de usuario1.
+
+8. Tuple Struct
+
+Existe também a tuple struct.
+
+Ela não possui nomes nos campos.
+
+Exemplo:
+
+struct Cor(u8, u8, u8);
+
+Criando:
+
+let vermelho = Cor(255, 0, 0);
+
+Acessando:
+
+println!("{}", vermelho.0);
+println!("{}", vermelho.1);
+println!("{}", vermelho.2);
+
+Resultado:
+
+255
+0
+0
+
+É parecido com uma tupla:
+
+let cor = (255, 0, 0);
+
+Mas existe uma diferença importante.
+
+Com:
+
+struct Cor(u8, u8, u8);
+
+Cor virou um tipo específico.
+
+9. Unit-like Struct
+
+Também existe struct sem campos:
+
+struct Admin;
+
+Isso é chamado de:
+
+Unit-like struct
+
+Uso:
+
+let usuario = Admin;
+
+Ela é menos comum para iniciantes, mas aparece bastante quando você começar a estudar traits, tipos marcadores e arquiteturas maiores.
+
+10. Debug em Struct
+
+Isso não funciona automaticamente:
+
+println!("{:?}", pessoa);
+
+Para Rust permitir imprimir toda a estrutura, normalmente usamos:
+
+#[derive(Debug)]
+
+Exemplo:
+
+#[derive(Debug)]
+struct Pessoa {
+    nome: String,
+    idade: u32,
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    };
+
+    println!("{:?}", pessoa);
+}
+
+Resultado semelhante a:
+
+Pessoa { nome: "Jhonata", idade: 24 }
+
+Também existe:
+
+println!("{:#?}", pessoa);
+
+Que imprime de maneira mais organizada:
+
+Pessoa {
+    nome: "Jhonata",
+    idade: 24,
+}
+
+Para estudo, #[derive(Debug)] é extremamente útil.
+
+11. Struct + impl
+
+Aqui começa uma das partes mais importantes.
+
+Uma struct pode armazenar dados:
