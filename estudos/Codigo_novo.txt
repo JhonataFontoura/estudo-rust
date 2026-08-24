@@ -1,0 +1,13 @@
+Índice do conteúdo novo do Rust Tutorial W3.
+
+O conteúdo completo está dividido em:
+
+estudos/novo/parte-00.txt até estudos/novo/parte-14.txt
+
+Para reconstruir um único arquivo localmente, execute na raiz do projeto:
+
+python reconstruir.py
+
+O script irá gerar:
+
+estudos/Codigo_novo_completo.txt
