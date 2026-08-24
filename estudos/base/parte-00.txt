@@ -1,0 +1,768 @@
+fn main() { 
+  let x = 5 
+  println!(“O valor de x é :{}” , x); #let para chamar uma  variável imutável, se quiser fazer ela mutavél tem que colocar o mut (let mut = )
+  x = 6; 
+  println!(“O valor de x é :{}” , x); 
+} # a variavel x só funciona a partir desse bloco em outro bloco ela não funciona
+
+const TIPO_DE_DADO: i8 = 2; #variaveldo tipo constante imutavel por naturaza, pode ser usado no escopo global ou local
+
+static # variavel do tipo estática ideia proxima a const só que a constante é imutavel ja estatica não. Usar a variavel mutavel static em mais de um escopo mudando mudança sem falar(unsafe{UMA_VARIAVEL_STATICA}), vai dar erro, informa o código inseguro na linguagem, resumindo da erro da mesma maneira mas um é documentado
+
+const TIPO_DE_DADO: i8 = 2;
+
+static mut UMA_VARIAVEL_STATICA : i8 = 3;
+
+fn main() {
+    unsafe {
+        UMA_VARIAVEL_STATICA = 4;
+    } // colocando de forma insegura, mas é possível alterar o valor de uma variável estática. 
+    let mut x = 5;
+
+    println!("Antes: {}", x);
+
+    x = 6;
+
+    println!("Depois: {}", x);
+    
+    println!("O tipo de dado é: {}", TIPO_DE_DADO);
+
+    println!("O valor da variável estática é: {}", unsafe { UMA_VARIAVEL_STATICA });
+}
+
+Tem como declarar variaveis iguais apagando em ordem a anterior e colocando a nova (Conceito de Shadowing)
+fn main () {
+    let x: i32 = 5;
+    println!("O valor de x é: {}", x);
+    let x = x + 1;
+    println!("O valor de x é: {}", x);
+    let x = x * 2;
+    println!("O valor de x é: {}", x);
+}
+
+Tipos inteiros em rust: 
+| Tipo              |        Bits |                Com sinal (`i`) |                    Sem sinal (`u`) |
+| ----------------- | ----------: | -----------------------------: | ---------------------------------: |
+| `i8` / `u8`       |           8 |                     -128 a 127 |                            0 a 255 |
+| `i16` / `u16`     |          16 |               -32.768 a 32.767 |                         0 a 65.535 |
+| `i32` / `u32`     |          32 | -2.147.483.648 a 2.147.483.647 |                  0 a 4.294.967.295 |
+| `i64` / `u64`     |          64 | cerca de ±9,22 **quintilhões** | até cerca de 18,44 **quintilhões** |
+| `i128` / `u128`   |         128 |                     gigantesco |                         gigantesco |
+| `isize` / `usize` | arquitetura |         depende da arquitetura |             depende da arquitetura |
+
+8 bits  → dezenas 2**8 
+16 bits → centenas 2**16
+32 bits → milhares 2**32
+64 bits → milhões 2**64
+i = signed (com sinal)
+u = unsigned (sem sinal)
+
+1. Ponto flutuante: f32 e f64
+
+Rust tem dois tipos principais para números decimais:
+
+f32 → 32 bits → cerca de 6 a 7 dígitos de precisão
+f64 → 64 bits → cerca de 15 a 16 dígitos de precisão
+
+O f64 é o padrão do Rust.
+
+Exemplo:
+
+fn main() {
+    let numero1: f32 = 3.14;
+    let numero2: f64 = 3.141592653589793;
+
+
+    println!("f32: {}", numero1);
+    println!("f64: {}", numero2);
+}
+
+Se você fizer:
+
+let valor = 3.14;
+
+Rust normalmente entende como:
+
+let valor: f64 = 3.14;
+
+Importante: números de ponto flutuante trabalham com aproximações.
+
+fn main() {
+    let resultado = 0.1 + 0.2;
+
+
+    println!("{}", resultado);
+}
+
+Isso pode não ser representado internamente como exatamente 0.3.
+
+2. Booleano: bool
+
+O tipo bool só aceita dois valores:
+
+true
+false
+
+Exemplo:
+
+fn main() {
+    let maior_de_idade: bool = true;
+
+
+    println!("Maior de idade: {}", maior_de_idade);
+}
+
+Também pode ser resultado de uma comparação:
+
+fn main() {
+    let idade = 24;
+
+
+    let maior_de_idade = idade >= 18;
+
+
+    println!("{}", maior_de_idade);
+}
+
+Resultado:
+
+true
+Operadores booleanos
+fn main() {
+    let a = true;
+    let b = false;
+
+
+    println!("{}", a && b); // AND
+    println!("{}", a || b); // OR
+    println!("{}", !a);     // NOT
+}
+
+Resumo:
+
+&& → E
+|| → OU
+!  → NÃO
+3. char
+
+char representa um caractere Unicode.
+
+Usa aspas simples:
+
+fn main() {
+    let letra: char = 'J';
+
+
+    println!("{}", letra);
+}
+
+Outros exemplos válidos:
+
+let letra = 'A';
+let numero = '7';
+let simbolo = '@';
+let emoji = '🦀';
+let caractere = 'ç';
+
+Importante:
+
+'7'
+
+é um caractere.
+
+Já:
+
+7
+
+é um número.
+
+char x texto
+let letra: char = 'A';
+let texto: &str = "A";
+
+Mesmo os dois mostrando A, os tipos são diferentes.
+
+'A' → char
+"A" → &str
+
+Um char ocupa 4 bytes em Rust.
+
+4. Caracteres especiais
+
+Rust também possui sequências de escape:
+
+fn main() {
+    println!("Primeira linha\nSegunda linha");
+}
+
+\n significa nova linha.
+
+Outros exemplos:
+
+'\n' // nova linha
+'\t' // tabulação
+'\\' // barra invertida
+'\'' // aspas simples
+
+Exemplo:
+
+fn main() {
+    println!("Nome:\tJhonata");
+}
+5. str e &str
+
+str representa uma sequência de texto UTF-8.
+
+Na prática, normalmente usamos:
+
+&str
+
+Exemplo:
+
+fn main() {
+    let nome: &str = "Jhonata";
+
+
+    println!("Olá, {}!", nome);
+}
+
+O & significa referência.
+
+Por enquanto, você pode pensar:
+
+&str → referência para um texto
+
+Mais para frente isso entra em:
+
+Ownership
+Borrowing
+References
+6. Aspas simples x aspas duplas
+
+Essa é uma regra importante:
+
+let letra = 'J';
+let nome = "Jhonata";
+
+Temos:
+
+'J'       → char
+"J"       → &str
+"Jhonata" → &str
+
+Mesmo:
+
+"A"
+
+sendo apenas uma letra, continua sendo texto porque está entre aspas duplas.
+
+7. String
+
+Além de &str, Rust possui:
+
+String
+
+Exemplo:
+
+fn main() {
+    let nome: String = String::from("Jhonata");
+
+
+    println!("{}", nome);
+}
+
+Uma diferença importante:
+
+&str
+→ referência para um texto
+
+
+String
+→ possui seus próprios dados
+→ pode crescer e ser alterada
+
+Exemplo de String mutável:
+
+fn main() {
+    let mut nome = String::from("Jhonata");
+
+
+    nome.push_str(" Fontoura");
+
+
+    println!("{}", nome);
+}
+
+Resultado:
+
+Jhonata Fontoura
+8. &str não funciona igual a String
+
+Isso funciona:
+
+let mut nome = String::from("Jhonata");
+
+
+nome.push_str(" Fontoura");
+
+Mas isso não:
+
+let nome: &str = "Jhonata";
+
+
+nome.push_str(" Fontoura");
+
+porque &str não possui o texto da mesma forma que String.
+
+9. Strings em Rust usam UTF-8
+
+Exemplo:
+
+fn main() {
+    let texto: &str = "Olá 🦀";
+
+
+    println!("{}", texto);
+}
+
+Rust trabalha com UTF-8.
+
+Por causa disso, você não pode acessar uma string diretamente assim:
+
+let nome = "Jhonata";
+
+
+let letra = nome[0]; // erro
+
+Isso acontece porque caracteres UTF-8 podem ocupar quantidades diferentes de bytes.
+
+Resumo geral
+f32
+→ número decimal
+→ 32 bits
+→ ~7 dígitos de precisão
+
+
+f64
+→ número decimal
+→ 64 bits
+→ ~15–16 dígitos
+→ padrão do Rust
+
+
+bool
+→ true ou false
+→ usado em condições
+
+
+char
+→ um caractere
+→ aspas simples
+→ 'A'
+→ 4 bytes
+
+
+&str
+→ texto
+→ referência para uma string
+→ aspas duplas
+→ "Jhonata"
+
+
+String
+→ texto que possui seus dados
+→ pode crescer e ser modificado
+
+Um exemplo juntando tudo:
+
+fn main() {
+    let altura: f64 = 1.69;
+    let estudando_rust: bool = true;
+    let inicial: char = 'J';
+    let nome: &str = "Jhonata";
+
+
+    let mut nome_completo = String::from("Jhonata");
+    nome_completo.push_str(" Fontoura");
+
+
+    println!("Altura: {}", altura);
+    println!("Estudando Rust: {}", estudando_rust);
+    println!("Inicial: {}", inicial);
+    println!("Nome: {}", nome);
+    println!("Nome completo: {}", nome_completo);
+}
+
+Exercícios práticos 
+// dado que eu tenha um ano de nascimento, e faço a subtração do ano atual, então eu consigo calcular a idade da pessoa.
+fn main() {
+    let name: &str = "Julio"
+    let ano_nascimento = 1990; // Exemplo de ano de nascimento
+    let ano_atual = 2024; // Ano atual
+
+    let idade = ano_atual - ano_nascimento; // Calcula a idade
+
+    println!("nome da pessoa é ({})a idade da pessoa é: {} anos", name, idade); // Exibe a idade
+}
+Para usar um imput no rust usamos o 'io'
+use std::io;
+
+fn main() {
+    let ano_atual = 2026;
+
+    let mut entrada = String::new();
+
+    println!("Digite seu ano de nascimento:");
+
+    io::stdin()
+        .read_line(&mut entrada)
+        .expect("Erro ao ler o ano");
+
+    let ano_nascimento: i32 = entrada
+        .trim()
+        .parse()
+        .expect("Digite um ano válido");
+
+    let idade = ano_atual - ano_nascimento;
+
+    println!("A idade da pessoa é: {} anos", idade);
+}
+
+if and else
+
+fn main() {
+    let name: &str = "Julio";
+
+    let ano_nascimento = 1990; // Exemplo de ano de nascimento
+    let ano_atual = 2024; // Ano atual
+
+    let mes_nascimento = 5; // Exemplo de mês de nascimento (maio)
+    let mes_atual = 6; // Mês atual (junho)
+
+    let dia_nascimento = 15; // Exemplo de dia de nascimento
+    let dia_atual = 10; // Dia atual
+
+    let mut  idade = ano_atual - ano_nascimento; // Calcula a idade
+
+     if mes_nascimento > mes_atual {
+    idade -= 1;
+}
+     else if mes_nascimento == mes_atual {
+        if dia_nascimento > dia_atual {
+        idade -= 1;
+        }
+        else{
+            println!("A pessoa já fez aniversário ou faz aniversário hoje.")
+        }
+
+}
+ 
+    if mes_nascimento > mes_atual || (mes_nascimento == mes_atual && dia_nascimento > dia_atual) {
+        idade -= 1; // Subtrai 1 se a pessoa ainda não fez aniversário este ano
+    }// mes_nascimento > mes_atual --> O mês do aniversário ainda está por vir
+     // mes_nascimento == mes_atual && dia_nascimento > dia_atual --> O mês do aniversário é o mesmo, mas o dia ainda não chegou
+    // Não precisa de else, pois a idade já foi calculada corretamente
+
+    println!("Nome da pessoa: {} | Idade da pessoa: {} anos", name, idade); // Exibe a idade
+}
+
+fn main(){
+    let numero: i32 =3; 
+
+    let resultado: i32 = if numero > 3 {
+        4
+    }
+    else {
+        5
+    };
+}
+fn main() {
+    let number: i8 = 3; 
+    math number{
+        1 => println!("um"),
+        2 => println!("dois"),
+        3 => println!("três");
+    }
+}
+
+Condições de repetição
+LOOP
+fn main(){
+    loop{
+        print!("novamente");
+        break;//finaliza o loop, se quiser que pule para o proximo ciclo, use continue
+    }
+}
+
+WHILE
+fn main(){
+    let mut x = 0;
+    while true {
+        x += 1;
+        print!("o valor é: {} ", x);
+
+        if (x == 2) || (x == 4){
+            x += 1; 
+            continue;
+        }        
+
+        if x > 5 {
+            break;
+        }
+    }
+}
+obs: para esse formato feito o melhor e usar loop, foi feito só para fim de explicação
+
+FOR 
+fn main() {
+    for number in 1..4 {
+        println!("Número: {}", number);
+    }
+}
+
+Laço for 
+
+fn main() {
+    let valor_tabuada: i32 = 5; // você pode alterar esse valor para qualquer número que desejar
+    println!("Tabuada do {}:", valor_tabuada);
+    for i in 1..=10 {
+        println!("{} x {} = {}", valor_tabuada, i, valor_tabuada * i);
+    }
+}
+Obs: para o formato de imput 
+use std::io;
+
+fn main() {
+    let mut entrada = String::new();
+
+    println!("Digite o número da tabuada:");
+
+    io::stdin()
+        .read_line(&mut entrada)
+        .expect("Erro ao ler o número");
+
+    let valor_tabuada: i32 = entrada
+        .trim()
+        .parse()
+        .expect("Digite um número válido");
+
+    println!("Tabuada do {}:", valor_tabuada);
+
+    for i in 1..=10 {
+        println!("{} x {} = {}", valor_tabuada, i, valor_tabuada * i);
+    }
+}
+Quebrando o código input 
+std é a biblioteca padrão do Rust.
+
+io significa Input/Output, ou seja:
+
+Input  = entrada de dados
+Output = saída de dados
+
+Nesse programa usamos io principalmente para receber o que o usuário digita no teclado.
+
+String::new()
+
+cria uma String vazia.
+
+Podemos imaginar assim:
+
+entrada = ""
+
+Portanto:
+
+let mut entrada = String::new();
+
+significa:
+
+Crie uma String vazia chamada entrada e permita que seu conteúdo seja alterado.
+
+io::stdin()
+io::stdin()
+
+stdin significa:
+
+Standard Input
+Entrada Padrão
+
+Em um programa de console, normalmente essa entrada vem do teclado.
+
+.read_line()
+.read_line()
+
+significa:
+
+Leia uma linha digitada pelo usuário.
+
+Quando o usuário digita:
+
+5
+
+e pressiona Enter, o Rust captura essa informação.
+
+&mut entrada
+&mut entrada
+
+Aqui estamos dizendo:
+
+Coloque o valor digitado dentro da variável entrada.
+
+O & representa uma referência.
+
+O &mut representa uma:
+
+referência mutável.
+
+Isso permite que read_line() altere o conteúdo da variável.
+
+Então:
+
+.read_line(&mut entrada)
+
+pode ser entendido como:
+
+Leia o teclado e armazene o resultado dentro de entrada.
+
+Depois que o usuário digita 5, aproximadamente temos:
+
+entrada = "5\n"
+
+O \n aparece porque o usuário pressionou Enter.
+
+6. Tratamento de erro com expect
+.expect("Erro ao capturar o valor");
+
+Algumas operações podem dar erro.
+
+Por exemplo, a leitura do teclado pode falhar.
+
+O expect() diz:
+
+Se acontecer algum erro, encerre o programa e mostre esta mensagem.
+
+Erro ao capturar o valor
+
+Portanto:
+
+io::stdin()
+    .read_line(&mut entrada)
+    .expect("Erro ao capturar o valor");
+
+significa:
+
+Leia o teclado, armazene em entrada e, se ocorrer um erro, mostre uma mensagem.
+
+Até agora, se o usuário digitou:
+
+5
+
+o Rust recebeu aproximadamente:
+
+"5\n"
+
+Isso ainda é texto, não é um número.
+
+Por isso fazemos:
+
+let valor_tabuada: i32 = entrada
+    .trim()
+    .parse()
+    .expect("Digite apenas números");
+let valor_tabuada
+let valor_tabuada
+
+Cria uma nova variável chamada:
+
+valor_tabuada
+: i32
+let valor_tabuada: i32
+
+Estamos dizendo que a variável deve guardar um número inteiro do tipo i32.
+
+Exemplos de i32:
+
+5
+10
+100
+-5
+-200
+8. .trim()
+entrada.trim()
+
+Lembra que o valor pode estar assim?
+
+"5\n"
+
+O .trim() remove espaços e quebras de linha do começo e do final.
+
+Então:
+
+"5\n"
+
+vira:
+
+"5"
+
+Ainda é uma String, mas agora está limpa.
+
+9. .parse()
+.parse()
+
+O parse() tenta converter um texto para outro tipo.
+
+Como definimos:
+
+let valor_tabuada: i32
+
+o Rust entende que queremos converter para i32.
+
+Então:
+
+"5"
+ ↓
+parse()
+ ↓
+5
+
+Agora temos um número de verdade.
+
+10. Segundo expect
+.expect("Digite apenas números");
+
+O parse() pode falhar.
+
+Se o usuário digitar:
+
+cinco
+
+não é possível converter "cinco" para i32.
+
+Então o programa mostra:
+
+Digite apenas números
+11. O processo completo do input
+
+Se o usuário digitar:
+
+5
+
+acontece:
+
+Teclado
+   ↓
+"5\n"
+   ↓
+read_line()
+   ↓
+entrada
+   ↓
+trim()
+   ↓
+"5"
+   ↓
+parse()
+   ↓
+5
+   ↓
+valor_tabuada: i32
