@@ -1,0 +1,726 @@
+        println!("Endereço da variável referência: {:p}", &referencia);
+        println!("Memória do valor: STACK");
+        println!("Tipo: empréstimo imutável (&numero)\n");
+
+        // =====================================================
+        // 3. DEREFERENCING
+        // =====================================================
+
+        println!("[DEREFERENCING]");
+        println!("Valor através de *referencia: {}", *referencia);
+        println!("Endereço do valor: {:p}", referencia);
+        println!("Operação: *referencia");
+        println!("Significado: acessar o valor apontado pela referência.\n");
+    }
+
+    // =========================================================
+    // 4. BORROWING MUTÁVEL
+    // =========================================================
+
+    {
+        let referencia_mut = &mut numero;
+
+        println!("[BORROWING MUTÁVEL]");
+        println!("Valor antes da alteração: {}", *referencia_mut);
+        println!("Endereço do valor: {:p}", referencia_mut);
+
+        *referencia_mut += 1;
+
+        println!("Valor depois da alteração: {}", *referencia_mut);
+        println!("Operação: *referencia_mut += 1");
+        println!("Memória do valor: STACK\n");
+
+        // =====================================================
+        // 5. REBORROWING
+        // =====================================================
+
+        {
+            let reborrow = &mut *referencia_mut;
+
+            println!("[REBORROWING]");
+            println!("Valor através do reborrow: {}", *reborrow);
+            println!("Endereço do valor: {:p}", reborrow);
+            println!("Operação: &mut *referencia_mut");
+            println!("Significado: novo empréstimo temporário");
+            println!("do mesmo valor já emprestado.\n");
+
+            *reborrow += 1;
+
+            println!("[REBORROWING - MODIFICAÇÃO]");
+            println!("Valor após modificar pelo reborrow: {}", *reborrow);
+            println!("Endereço continua: {:p}\n", reborrow);
+        }
+
+        println!("[APÓS REBORROW]");
+        println!("Valor pela referência original: {}", *referencia_mut);
+        println!("Endereço: {:p}", referencia_mut);
+        println!("O reborrow terminou, então a referência");
+        println!("original pode voltar a ser utilizada.\n");
+    }
+
+    println!("[ORIGINAL]");
+    println!("Valor final de numero: {}", numero);
+    println!("Endereço: {:p}", &numero);
+    println!("Memória: STACK\n");
+
+    // =========================================================
+    // 6. HEAP COM STRING
+    // =========================================================
+
+    let texto = String::from("Dado Heap");
+
+    println!("========================================");
+    println!("HEAP");
+    println!("========================================");
+
+    println!("[OWNERSHIP - STRING]");
+    println!("Valor: {}", texto);
+
+    println!("Endereço da variável String: {:p}", &texto);
+
+    println!(
+        "Endereço dos caracteres na Heap: {:p}",
+        texto.as_ptr()
+    );
+
+    println!("Memória:");
+    println!("- Estrutura String: normalmente STACK");
+    println!("- Caracteres da String: HEAP");
+
+    println!("Length: {}", texto.len());
+    println!("Capacity: {}\n", texto.capacity());
+
+    // =========================================================
+    // 7. BORROWING DE STRING
+    // =========================================================
+
+    let referencia_texto = &texto;
+
+    println!("[BORROWING - STRING]");
+    println!("Valor: {}", referencia_texto);
+    println!(
+        "Endereço dos caracteres: {:p}",
+        referencia_texto.as_ptr()
+    );
+    println!("Ownership continua com a variável texto.\n");
+
+    // =========================================================
+    // 8. STATIC
+    // =========================================================
+
+    println!("========================================");
+    println!("STATIC");
+    println!("========================================");
+
+    println!("[STATIC]");
+    println!("Valor: {}", TEXTO_STATIC);
+
+    println!(
+        "Endereço dos caracteres static: {:p}",
+        TEXTO_STATIC.as_ptr()
+    );
+
+    println!("Memória: STATIC");
+    println!("Esse dado existe durante toda a execução do programa.\n");
+
+    println!("========================================");
+    println!("            FIM DO TESTE");
+    println!("========================================");
+}
+
+TRATAMENTO DE STRINGS EM RUST
+
+==================================================
+1. &str — STRING SLICE
+==================================================
+
+&str é uma referência para uma sequência de caracteres UTF-8.
+
+Exemplo:
+
+let nome: &str = "Jhonata";
+
+"Jhonata" é um literal de string.
+
+nome é uma referência (&str) para esse texto.
+
+Normalmente usamos &str quando queremos apenas acessar/ler um texto
+sem precisar possuir ou modificar seu conteúdo.
+
+
+==================================================
+2. STRING
+==================================================
+
+String é um tipo de texto que possui seus dados e pode ser modificado.
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+
+Também podemos escrever:
+
+let nome = "Jhonata".to_string();
+
+Nos dois casos temos uma String.
+
+
+==================================================
+3. STRING MUTÁVEL
+==================================================
+
+Por padrão:
+
+let nome = String::from("Jhonata");
+
+não pode ser modificada.
+
+Para modificar:
+
+let mut nome = String::from("Jhonata");
+
+Agora podemos adicionar conteúdo.
+
+
+==================================================
+4. ADICIONANDO TEXTO — push_str()
+==================================================
+
+push_str() adiciona um &str ao final da String.
+
+Exemplo:
+
+let mut nome = String::from("Jhonata");
+
+nome.push_str(" Nunes");
+
+println!("{}", nome);
+
+Resultado:
+
+Jhonata Nunes
+
+
+==================================================
+5. ADICIONANDO UM CARACTERE — push()
+==================================================
+
+push() adiciona um único char.
+
+Exemplo:
+
+let mut texto = String::from("Rust");
+
+texto.push('!');
+
+println!("{}", texto);
+
+Resultado:
+
+Rust!
+
+IMPORTANTE:
+
+push_str() -> adiciona texto (&str)
+
+push() -> adiciona um caractere (char)
+
+
+==================================================
+6. TAMANHO — len()
+==================================================
+
+Podemos utilizar:
+
+.len()
+
+Exemplo:
+
+let texto = String::from("Rust");
+
+println!("{}", texto.len());
+
+Resultado:
+
+4
+
+ATENÇÃO:
+
+len() retorna o tamanho em BYTES.
+
+Rust utiliza UTF-8.
+
+Por isso, quantidade de bytes e quantidade de caracteres
+nem sempre são iguais.
+
+Exemplo:
+
+let texto = "Olá";
+
+println!("{}", texto.len());
+
+O resultado pode ser maior que 3 porque "á" ocupa mais de um byte
+em UTF-8.
+
+
+==================================================
+7. CONTANDO CARACTERES
+==================================================
+
+Para contar caracteres:
+
+let texto = String::from("Olá");
+
+let quantidade = texto.chars().count();
+
+println!("{}", quantidade);
+
+Resultado:
+
+3
+
+
+==================================================
+8. STRING VAZIA
+==================================================
+
+Podemos criar uma String vazia:
+
+let mut texto = String::new();
+
+Muito utilizado para input:
+
+let mut entrada = String::new();
+
+std::io::stdin()
+    .read_line(&mut entrada)
+    .expect("Erro ao ler entrada");
+
+
+==================================================
+9. trim()
+==================================================
+
+trim() remove espaços e quebras de linha das extremidades.
+
+Exemplo:
+
+let texto = "   Jhonata   ";
+
+println!("{}", texto.trim());
+
+Resultado:
+
+Jhonata
+
+
+É especialmente importante com input:
+
+let mut nome = String::new();
+
+std::io::stdin()
+    .read_line(&mut nome)
+    .unwrap();
+
+println!("{}", nome.trim());
+
+
+read_line() normalmente mantém a quebra de linha gerada pelo Enter.
+
+trim() remove essa quebra de linha.
+
+
+==================================================
+10. CONVERTER &str PARA String
+==================================================
+
+Podemos usar:
+
+String::from()
+
+Exemplo:
+
+let nome: &str = "Jhonata";
+
+let nome_string = String::from(nome);
+
+
+Também:
+
+.to_string()
+
+Exemplo:
+
+let nome: &str = "Jhonata";
+
+let nome_string = nome.to_string();
+
+
+==================================================
+11. CONVERTER String PARA &str
+==================================================
+
+Podemos pegar uma referência:
+
+let nome = String::from("Jhonata");
+
+let referencia: &str = &nome;
+
+Agora:
+
+nome        -> String
+referencia  -> &str
+
+
+Também podemos usar:
+
+nome.as_str()
+
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+
+let referencia = nome.as_str();
+
+
+==================================================
+12. CONCATENAÇÃO COM push_str()
+==================================================
+
+let mut nome = String::from("Jhonata");
+
+nome.push_str(" ");
+nome.push_str("Nunes");
+
+println!("{}", nome);
+
+Resultado:
+
+Jhonata Nunes
+
+
+==================================================
+13. CONCATENAÇÃO COM +
+==================================================
+
+Também podemos utilizar +.
+
+Exemplo:
+
+let nome = String::from("Jhonata");
+let sobrenome = " Nunes";
+
+let completo = nome + sobrenome;
+
+println!("{}", completo);
+
+Resultado:
+
+Jhonata Nunes
+
+
+ATENÇÃO:
+
+Depois dessa operação, nome não pode mais ser utilizado.
+
+Isso está relacionado ao OWNERSHIP.
+
+O operador + recebe ownership da primeira String.
+
+
+==================================================
+14. CONCATENAÇÃO COM format!()
+==================================================
+
+Uma forma muito útil é:
+
+format!()
+
+Exemplo:
+
+let nome = "Jhonata";
+let sobrenome = "Nunes";
+
+let completo = format!("{} {}", nome, sobrenome);
+
+println!("{}", completo);
+
+Resultado:
+
+Jhonata Nunes
+
+
+format!() cria uma nova String.
+
+É muito útil porque normalmente deixa o código mais legível.
+
+
+==================================================
+15. VERIFICAR SE CONTÉM UM TEXTO
+==================================================
+
+contains()
+
+Exemplo:
+
+let texto = String::from("Estou estudando Rust");
+
+if texto.contains("Rust") {
+    println!("Encontrou Rust!");
+}
+
+Resultado:
+
+Encontrou Rust!
+
+
+==================================================
+16. COMEÇA COM — starts_with()
+==================================================
+
+let texto = "Rust é legal";
+
+if texto.starts_with("Rust") {
+    println!("Começa com Rust");
+}
+
+
+==================================================
+17. TERMINA COM — ends_with()
+==================================================
+
+let arquivo = "programa.rs";
+
+if arquivo.ends_with(".rs") {
+    println!("Arquivo Rust");
+}
+
+
+==================================================
+18. SUBSTITUIR TEXTO — replace()
+==================================================
+
+let texto = "Eu estudo Python";
+
+let novo = texto.replace("Python", "Rust");
+
+println!("{}", novo);
+
+Resultado:
+
+Eu estudo Rust
+
+replace() retorna um novo texto.
+
+
+==================================================
+19. MAIÚSCULAS
+==================================================
+
+to_uppercase()
+
+Exemplo:
+
+let nome = "jhonata";
+
+let resultado = nome.to_uppercase();
+
+println!("{}", resultado);
+
+Resultado:
+
+JHONATA
+
+
+==================================================
+20. MINÚSCULAS
+==================================================
+
+to_lowercase()
+
+Exemplo:
+
+let nome = "JHONATA";
+
+let resultado = nome.to_lowercase();
+
+println!("{}", resultado);
+
+Resultado:
+
+jhonata
+
+
+==================================================
+21. DIVIDIR UMA STRING — split()
+==================================================
+
+Exemplo:
+
+let linguagens = "Rust,Python,JavaScript";
+
+for linguagem in linguagens.split(',') {
+    println!("{}", linguagem);
+}
+
+Resultado:
+
+Rust
+Python
+JavaScript
+
+
+==================================================
+22. PERCORRER CARACTERES
+==================================================
+
+Podemos utilizar:
+
+.chars()
+
+Exemplo:
+
+let nome = "Rust";
+
+for letra in nome.chars() {
+    println!("{}", letra);
+}
+
+Resultado:
+
+R
+u
+s
+t
+
+
+==================================================
+23. ACESSAR CARACTERES
+==================================================
+
+Em Rust você NÃO deve pensar em String como:
+
+texto[0]
+
+Rust utiliza UTF-8 e um caractere pode ocupar mais de um byte.
+
+Uma alternativa para estudo é:
+
+let nome = "Rust";
+
+let primeira = nome.chars().nth(0);
+
+match primeira {
+    Some(letra) => println!("{}", letra),
+    None => println!("Não existe caractere"),
+}
+
+Resultado:
+
+R
+
+
+==================================================
+24. STRING E UTF-8
+==================================================
+
+Strings em Rust utilizam UTF-8.
+
+Por exemplo:
+
+Rust
+
+possui caracteres simples.
+
+Mas:
+
+Olá
+
+possui "á".
+
+E:
+
+🚀
+
+também é um caractere Unicode.
+
+Por isso Rust não permite simplesmente acessar String através de:
+
+texto[0]
+
+como algumas outras linguagens fazem.
+
+Isso ajuda a evitar interpretações incorretas dos bytes de caracteres UTF-8.
+
+
+==================================================
+25. STRING E OWNERSHIP
+==================================================
+
+String possui ownership sobre seus dados.
+
+Exemplo:
+
+let nome1 = String::from("Jhonata");
+
+let nome2 = nome1;
+
+Aqui ocorre um MOVE.
+
+nome1 deixa de poder ser utilizado.
+
+nome2 passa a possuir os dados.
+
+
+==================================================
+26. STRING E BORROWING
+==================================================
+
+Podemos emprestar uma String:
+
+fn mostrar(texto: &String) {
+    println!("{}", texto);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar(&nome);
+
+    println!("{}", nome);
+}
+
+A função utiliza a String sem receber seu ownership.
+
+
+==================================================
+27. FORMA MAIS FLEXÍVEL: &str COMO PARÂMETRO
+==================================================
+
+Para funções que só precisam ler texto, geralmente é mais flexível
+receber &str.
+
+Exemplo:
+
+fn mostrar(texto: &str) {
+    println!("{}", texto);
+}
+
+fn main() {
+    let nome = String::from("Jhonata");
+
+    mostrar(&nome);
+    mostrar("Rust");
+}
+
+Isso permite trabalhar tanto com uma String emprestada quanto
+com um literal de string.
+
+
+==================================================
+28. STRING E MEMÓRIA
+==================================================
+
+Exemplo:
+
