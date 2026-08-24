@@ -1,0 +1,722 @@
+==================================================
+
+Compile:
+
+cargo build
+
+
+Depois:
+
+valgrind ./target/debug/nome_do_programa
+
+
+Para uma análise mais detalhada de leaks:
+
+valgrind --leak-check=full ./target/debug/nome_do_programa
+
+
+Fluxo:
+
+main.rs
+   ↓
+cargo build
+   ↓
+target/debug/programa
+   ↓
+valgrind
+   ↓
+programa executa
+   ↓
+Valgrind observa o comportamento da memória
+
+
+==================================================
+31. PERF E BUILD RELEASE
+==================================================
+
+Para analisar performance, normalmente faz mais sentido
+compilar uma versão otimizada:
+
+cargo build --release
+
+
+Isso gera:
+
+target/release/nome_do_programa
+
+
+Release utiliza otimizações do compilador.
+
+Por isso é mais representativo para testes de performance.
+
+
+==================================================
+32. PERF STAT
+==================================================
+
+Uma análise inicial pode ser feita com:
+
+perf stat ./target/release/nome_do_programa
+
+
+perf stat executa o programa e coleta estatísticas
+de performance.
+
+Dependendo do ambiente, pode apresentar informações como:
+
+- tempo
+- ciclos
+- instruções
+- eventos de CPU
+
+
+==================================================
+33. PERF RECORD
+==================================================
+
+Para registrar dados de performance:
+
+perf record ./target/release/nome_do_programa
+
+
+Isso normalmente cria:
+
+perf.data
+
+
+Depois podemos analisar:
+
+perf report
+
+
+Fluxo:
+
+programa
+   ↓
+perf record
+   ↓
+coleta informações
+   ↓
+perf.data
+   ↓
+perf report
+   ↓
+análise dos resultados
+
+
+==================================================
+34. VALGRIND E OWNERSHIP
+==================================================
+
+Isso se conecta diretamente ao que estudamos anteriormente.
+
+Rust:
+
+STACK
+HEAP
+STATIC
+   ↓
+Ownership
+   ↓
+Borrowing
+   ↓
+Dereferencing
+   ↓
+Reborrowing
+
+
+O compilador Rust verifica muitas regras antes do programa
+ser executado.
+
+Valgrind trabalha durante a EXECUÇÃO do programa.
+
+
+Então:
+
+Borrow Checker
+=
+verificação feita pelo Rust durante a compilação
+
+
+Valgrind
+=
+análise realizada durante a execução
+
+
+==================================================
+35. PERF E OTIMIZAÇÃO
+==================================================
+
+perf é especialmente útil quando queremos descobrir:
+
+"Qual parte do meu programa está lenta?"
+
+
+Por exemplo:
+
+Programa
+   ↓
+Função A = rápida
+Função B = rápida
+Função C = consome muita CPU
+
+
+perf pode ajudar a identificar que:
+
+Função C
+
+é um possível gargalo.
+
+
+Depois podemos analisar e otimizar essa parte do código.
+
+
+==================================================
+36. COMANDOS PRINCIPAIS DO POWERSHELL
+==================================================
+
+Instalar WSL:
+
+wsl --install
+
+
+Instalar Ubuntu:
+
+wsl --install -d Ubuntu
+
+
+Ver distribuições:
+
+wsl -l -v
+
+
+Ver distribuições disponíveis:
+
+wsl -l -o
+
+
+Entrar:
+
+wsl
+
+
+Entrar no Ubuntu:
+
+wsl -d Ubuntu
+
+
+Atualizar WSL:
+
+wsl --update
+
+
+Desligar WSL:
+
+wsl --shutdown
+
+
+Definir WSL 2:
+
+wsl --set-default-version 2
+
+
+Sair:
+
+exit
+
+
+==================================================
+37. COMANDOS PRINCIPAIS DENTRO DO WSL
+==================================================
+
+Atualizar pacotes:
+
+sudo apt update
+
+
+Atualizar sistema:
+
+sudo apt upgrade -y
+
+
+Instalar Valgrind:
+
+sudo apt install valgrind -y
+
+
+Verificar Valgrind:
+
+valgrind --version
+
+
+Instalar ferramentas para perf:
+
+sudo apt install linux-tools-common linux-tools-generic -y
+
+
+Verificar perf:
+
+perf --version
+
+
+Verificar Rust:
+
+rustc --version
+
+
+Verificar Cargo:
+
+cargo --version
+
+
+==================================================
+38. COMANDOS PARA ANALISAR RUST
+==================================================
+
+Compilar Debug:
+
+cargo build
+
+
+Executar:
+
+cargo run
+
+
+Valgrind:
+
+valgrind ./target/debug/programa
+
+
+Valgrind com análise de leaks:
+
+valgrind --leak-check=full ./target/debug/programa
+
+
+Compilar Release:
+
+cargo build --release
+
+
+Perf:
+
+perf stat ./target/release/programa
+
+
+Registrar análise:
+
+perf record ./target/release/programa
+
+
+Abrir relatório:
+
+perf report
+
+
+==================================================
+39. RESUMO PARA DECORAR
+==================================================
+
+WSL
+=
+Linux dentro do Windows.
+
+
+PowerShell:
+
+wsl
+
+=
+entrar no Linux.
+
+
+VALGRIND
+=
+ferramenta para análise relacionada principalmente à memória.
+
+
+Exemplo:
+
+valgrind --leak-check=full ./programa
+
+
+PERF
+=
+ferramenta para análise de performance.
+
+
+Exemplo:
+
+perf stat ./programa
+
+
+CARGO BUILD
+=
+compila o projeto.
+
+
+CARGO BUILD --RELEASE
+=
+compila com otimizações.
+
+
+==================================================
+40. FLUXO COMPLETO
+==================================================
+
+WINDOWS
+   ↓
+PowerShell
+   ↓
+wsl
+   ↓
+Ubuntu/Linux
+   ↓
+Rust + Cargo
+   ↓
+Código Rust
+   ↓
+cargo build
+   ↓
+Executável Linux
+   ↓
+   ├───────────────┐
+   ↓               ↓
+Valgrind           perf
+   ↓               ↓
+Memória         Performance
+
+
+==================================================
+FORMA SIMPLES DE LEMBRAR
+==================================================
+
+WSL:
+
+"Quero um ambiente Linux dentro do Windows."
+
+
+Cargo:
+
+"Quero compilar e gerenciar meu projeto Rust."
+
+
+Valgrind:
+
+"Quero observar problemas relacionados ao uso da memória."
+
+
+perf:
+
+"Quero descobrir onde meu programa está gastando processamento."
+
+
+E A RELAÇÃO COM RUST:
+
+Stack / Heap / Static
+        ↓
+Ownership
+        ↓
+Borrowing
+        ↓
+Rust controla segurança da memória
+        ↓
+Valgrind ajuda a analisar memória durante a execução
+
+
+Código executando
+        ↓
+CPU trabalhando
+        ↓
+perf analisa performance
+        ↓
+identificação de gargalos
+
+1. Criando um pacote/crate
+
+Um crate é uma unidade de compilação do Rust. Com Cargo, você pode criar um projeto binário:
+
+cargo new meu_projeto
+
+Estrutura:
+
+meu_projeto/
+├── Cargo.toml
+└── src/
+    └── main.rs
+
+Para criar especificamente uma biblioteca:
+
+cargo new minha_biblioteca --lib
+
+Que terá:
+
+minha_biblioteca/
+├── Cargo.toml
+└── src/
+    └── lib.rs
+
+A relação importante é:
+
+Package
+   ↓
+gerenciado pelo Cargo
+   ↓
+pode conter crates
+   ↓
+Binary Crate → main.rs
+Library Crate → lib.rs
+2. Buscando crate do GitHub
+
+Uma dependência pode vir diretamente de um repositório Git.
+
+No Cargo.toml:
+
+[dependencies]
+minha_lib = { git = "https://github.com/usuario/repositorio.git" }
+
+Depois:
+
+cargo build
+
+O Cargo obtém a dependência e a inclui na resolução do projeto.
+
+Também é possível especificar uma branch:
+
+[dependencies]
+minha_lib = {
+    git = "https://github.com/usuario/repositorio.git",
+    branch = "main"
+}
+3. Publicando no crates.io
+
+O crates.io é o registro público de crates usado pelo ecossistema Cargo.
+
+Um fluxo típico é:
+
+Criar biblioteca
+      ↓
+Configurar Cargo.toml
+      ↓
+cargo check
+      ↓
+cargo test
+      ↓
+cargo package
+      ↓
+cargo publish
+
+Antes de publicar, o Cargo.toml precisa ter os metadados necessários para publicação, e você precisa estar autenticado no serviço.
+
+4. Organização de código em Namespacing
+
+Rust organiza nomes principalmente através do sistema de módulos e caminhos.
+
+Exemplo:
+
+mod usuario {
+    pub fn cadastrar() {
+        println!("Cliente cadastrado!");
+    }
+}
+
+mod produto {
+    pub fn cadastrar() {
+        println!("Produto cadastrado!");
+    }
+}
+
+fn main() {
+    usuario::cadastrar();
+    produto::cadastrar();
+}
+
+Apesar de ambas as funções se chamarem:
+
+cadastrar
+
+elas possuem caminhos diferentes:
+
+crate
+├── usuario
+│   └── cadastrar()
+│
+└── produto
+    └── cadastrar()
+
+Portanto:
+
+usuario::cadastrar();
+produto::cadastrar();
+
+não entram em conflito.
+
+Resumo para copiar e colar
+CRATES, GITHUB, CRATES.IO E NAMESPACING — RUST
+
+CRATE
+→ unidade de compilação do Rust.
+
+Existem principalmente:
+
+Binary Crate
+→ normalmente possui main.rs
+→ gera um programa executável.
+
+Library Crate
+→ normalmente possui lib.rs
+→ fornece funcionalidades reutilizáveis.
+
+
+CRIANDO PROJETO:
+
+cargo new meu_projeto
+
+CRIANDO BIBLIOTECA:
+
+cargo new minha_biblioteca --lib
+
+
+ESTRUTURA:
+
+Package
+   ↓
+gerenciado pelo Cargo
+   ↓
+contém crates
+   ↓
+main.rs / lib.rs
+
+
+========================
+CRATE DO GITHUB
+========================
+
+Cargo pode usar uma dependência diretamente
+de um repositório Git.
+
+Cargo.toml:
+
+[dependencies]
+minha_lib = { git = "https://github.com/usuario/repositorio.git" }
+
+Depois:
+
+cargo build
+
+
+COM BRANCH:
+
+[dependencies]
+minha_lib = {
+    git = "https://github.com/usuario/repositorio.git",
+    branch = "main"
+}
+
+
+========================
+CRATES.IO
+========================
+
+crates.io
+→ registro público de crates do ecossistema Rust.
+
+Fluxo:
+
+Criar crate
+    ↓
+Configurar Cargo.toml
+    ↓
+cargo check
+    ↓
+cargo test
+    ↓
+cargo package
+    ↓
+cargo publish
+
+
+========================
+NAMESPACING
+========================
+
+Rust utiliza módulos e caminhos para
+organizar nomes.
+
+Exemplo:
+
+mod usuario {
+    pub fn cadastrar() {}
+}
+
+mod produto {
+    pub fn cadastrar() {}
+}
+
+As funções possuem o mesmo nome,
+mas caminhos diferentes:
+
+usuario::cadastrar();
+
+produto::cadastrar();
+
+
+HIERARQUIA:
+
+crate
+├── usuario
+│   └── cadastrar()
+│
+└── produto
+    └── cadastrar()
+
+
+RELAÇÃO COM O QUE JÁ ESTUDAMOS:
+
+crate
+↓
+módulos
+↓
+mod
+↓
+submódulos
+↓
+caminhos
+↓
+crate / self / super
+↓
+use
+↓
+organização e reutilização do código
+
+
+RESUMO RÁPIDO:
+
+Cargo
+→ ferramenta de build e gerenciamento
+  de pacotes/dependências.
+
+Package
+→ projeto/pacote gerenciado pelo Cargo.
+
+Crate
+→ unidade de compilação.
+
+main.rs
+→ raiz comum de um binary crate.
+
+lib.rs
+→ raiz comum de um library crate.
+
+Git
+→ pode ser fonte de uma dependência.
+
+crates.io
+→ registro público de crates.
+
+cargo publish
+→ publica um crate no registro.
+
+Namespacing
+→ organização dos nomes através
+  de módulos e caminhos.
