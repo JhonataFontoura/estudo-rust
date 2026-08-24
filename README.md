@@ -1,138 +1,140 @@
-# Estudo Rust
+# Estudo Rust — Rust Tutorial W3
 
-Repositório de estudos de **Rust**, organizado como um tutorial navegável inspirado na estrutura do W3Schools.
+Projeto pessoal de estudo de **Rust**, organizado como um tutorial navegável inspirado na estrutura do W3Schools, com interface em azul e preto, busca integrada e separação entre conteúdo da linguagem e ferramentas de desenvolvimento.
 
-O objetivo deste projeto é centralizar anotações, exemplos práticos, exercícios e ferramentas utilizadas durante o aprendizado da linguagem, mantendo o conteúdo fácil de consultar e preparado para futuras expansões.
+O material foi consolidado a partir das anotações de estudo e organizado em **34 seções**. Os arquivos extensos foram divididos em partes menores para manter o repositório fácil de versionar e navegar, sem perder o conteúdo original.
 
-## Tutorial web
+## O que existe no projeto
 
-O arquivo principal é:
+A trilha principal cobre fundamentos, tipos de dados, input e controle de fluxo, funções, memória, Ownership, Borrowing, Dereferencing, Reborrowing, Strings, operadores, tuplas, arrays, `Vec`, Structs, Enums, Pattern Matching, Destructuring, `HashMap`, módulos, Traits, polimorfismo, Generics, Lifetimes, tratamento de erros, macros, programação funcional, concorrência, persistência e desenvolvimento web/API com Rocket.
 
-```text
-index.html
-```
+A área **Ferramentas** fica separada da trilha da linguagem e inclui Cargo Watch, formatação, WSL, Valgrind, `perf`, crates, GitHub, crates.io e namespacing.
 
-Ele contém o material organizado em uma interface com:
-
-- menu lateral por assuntos;
-- busca em todo o conteúdo;
-- navegação por seções e subseções;
-- botão para copiar seções;
-- layout responsivo;
-- paleta azul e preta;
-- área exclusiva para ferramentas de desenvolvimento.
-
-## Conteúdo atual
-
-O tutorial reúne mais de **23 mil linhas de material de estudo**, incluindo:
-
-- fundamentos da linguagem;
-- tipos de dados;
-- input e controle de fluxo;
-- funções e recursividade;
-- memória, Stack, Heap e Static;
-- Ownership e Borrowing;
-- Dereferencing e Reborrowing;
-- Strings;
-- operadores;
-- tuplas, arrays e Vec;
-- Structs e Enums;
-- Pattern Matching e Destructuring;
-- HashMap;
-- módulos, `mod`, `use`, `crate`, `super` e namespaces;
-- Traits;
-- polimorfismo com `impl Trait` e `dyn Trait`;
-- Generics e `Display`;
-- Lifetimes e dangling pointers;
-- aplicações de console e CRUD em memória;
-- `Option`, `Result`, `?` e erros customizados;
-- macros declarativas e procedurais;
-- programação funcional e closures;
-- concorrência, Threads, Channels, `Arc`, `Mutex`, Rayon e Tokio;
-- persistência em JSON, MySQL, SQLite, Diesel e rusqlite;
-- APIs REST com Rocket;
-- aplicações web com Rocket, templates e formulários.
-
-## Ferramentas
-
-O material de ferramentas foi separado da trilha principal da linguagem e está disponível em:
-
-```text
-estudos/ferramentas.txt
-```
-
-Entre os assuntos estão:
-
-- Cargo Watch;
-- `rustfmt`;
-- WSL;
-- Valgrind;
-- perf;
-- Cargo e crates;
-- dependências pelo GitHub;
-- publicação no crates.io.
-
-## API de conteúdo
-
-O projeto também possui uma pequena **API JavaScript local** em:
-
-```text
-api/study-api.js
-```
-
-Ela serve como uma camada de acesso ao conteúdo do tutorial para futuras funcionalidades de busca, navegação, filtros ou integração com outras interfaces.
-
-Exemplo no navegador:
-
-```html
-<script src="api/study-api.js"></script>
-<script>
-  console.log(RustStudyAPI.listTopics());
-  console.log(RustStudyAPI.search('ownership'));
-</script>
-```
-
-Principais métodos:
-
-```text
-RustStudyAPI.listTopics()
-RustStudyAPI.getTopic(id)
-RustStudyAPI.search(term)
-RustStudyAPI.getStats()
-```
-
-## Estrutura do repositório
+## Estrutura
 
 ```text
 estudo-rust/
 ├── index.html
 ├── README.md
+├── manifest.json
+├── reconstruir.py
 ├── api/
 │   └── study-api.js
 └── estudos/
     ├── Codigo_base.txt
     ├── Codigo_novo.txt
-    └── ferramentas.txt
+    ├── ferramentas.txt
+    ├── base/
+    │   ├── parte-00.txt
+    │   └── ... parte-08.txt
+    ├── novo/
+    │   ├── parte-00.txt
+    │   └── ... parte-14.txt
+    └── ferramentas/
+        ├── parte-00.txt
+        └── parte-01.txt
 ```
 
-## Como usar
+## Como abrir o tutorial
 
-Clone o repositório:
+O `index.html` carrega os arquivos de estudo com `fetch()`. Por isso, abra o projeto por um servidor HTTP local em vez de usar apenas `file://`.
+
+Com Python:
 
 ```bash
-git clone https://github.com/JhonataFontoura/estudo-rust.git
+python -m http.server 8000
 ```
 
-Entre na pasta:
+Depois acesse no navegador:
+
+```text
+http://localhost:8000
+```
+
+Também é possível usar uma extensão como **Live Server** no VS Code.
+
+## GitHub Pages
+
+O projeto está preparado para publicação estática. No GitHub, abra **Settings → Pages**, escolha **Deploy from a branch**, selecione a branch `main` e a pasta `/ (root)`.
+
+## API do tutorial
+
+O arquivo `api/study-api.js` expõe uma API JavaScript no navegador através de `RustStudyAPI`:
+
+```javascript
+RustStudyAPI.listTopics();
+RustStudyAPI.getTopic("novo-generics");
+RustStudyAPI.search("ownership");
+RustStudyAPI.getStats();
+```
+
+### Métodos
+
+- `listTopics()` — lista todas as seções carregadas.
+- `getTopic(id)` — retorna uma seção pelo identificador.
+- `search(term)` — busca um termo no conteúdo carregado.
+- `getStats()` — retorna quantidade de tópicos e distribuição por origem.
+
+## Reconstruindo os TXT completos
+
+Os arquivos grandes foram divididos em partes. Para reconstruir os três arquivos completos localmente:
 
 ```bash
-cd estudo-rust
+python reconstruir.py
 ```
 
-Depois abra o arquivo `index.html` no navegador.
+O script lê `manifest.json` e gera:
 
-Não é necessário instalar dependências para consultar o tutorial.
+```text
+estudos/Codigo_base_completo.txt
+estudos/Codigo_novo_completo.txt
+estudos/ferramentas_completo.txt
+```
 
-## Objetivo do projeto
+## Organização do conteúdo
 
-Este repositório funciona como uma base de conhecimento pessoal e evolutiva sobre Rust. O conteúdo é atualizado à medida que novos assuntos são estudados, priorizando exemplos, explicações diretas e organização modular.
+```text
+BASE DO CURSO
+├── Fundamentos
+├── Tipos de Dados
+├── Input e Controle de Fluxo
+├── Funções
+├── Memória: Static, Stack e Heap
+├── Ownership e Borrowing
+├── Dereferencing
+├── Reborrowing
+├── Strings
+├── Operadores
+├── Tuplas
+├── Arrays e Vec
+└── Structs — Base
+
+CONTEÚDO NOVO
+├── Structs — Exemplos Práticos
+├── Enums
+├── Pattern Matching
+├── Destructuring
+├── HashMap
+├── Módulos, Arquivos e Namespaces
+├── Traits
+├── Polimorfismo: impl Trait vs dyn Trait
+├── Generics
+├── Lifetimes e Dangling Pointers
+├── Aplicação Console / CRUD em Memória
+├── Tratamento de Erros
+├── Macros
+├── Programação Funcional
+├── Concorrência e Paralelismo
+├── Persistência de Dados
+├── API REST com Rocket
+└── App Web com Rocket
+
+FERRAMENTAS
+├── Cargo Watch e Formatação
+├── Valgrind, perf e WSL
+└── Crates, GitHub, crates.io e Namespacing
+```
+
+## Objetivo
+
+Este repositório funciona como uma base de consulta e evolução contínua dos estudos em Rust. Novos conteúdos podem ser adicionados às partes de estudo e registrados no `manifest.json`, mantendo a interface navegável sem concentrar todo o material em um único arquivo gigantesco.
