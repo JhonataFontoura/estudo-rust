@@ -1,0 +1,990 @@
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!(
+        "Resultado: {}",
+        *contador.lock().unwrap()
+    );
+}
+
+Resultado:
+
+Resultado: 10
+
+Aqui:
+
+Arc
+↓
+permite compartilhar propriedade
+
+Mutex
+↓
+protege acesso mutável
+
+lock()
+↓
+obtém acesso ao valor
+
+Arc<Mutex<T>>
+↓
+estado mutável compartilhado entre threads
+8. Criando código paralelo com Rayon
+
+Rayon é uma crate externa muito utilizada para paralelismo de dados.
+
+No Cargo.toml:
+
+[dependencies]
+rayon = "1"
+
+Exemplo normal:
+
+let resultado: Vec<i32> = numeros
+    .iter()
+    .map(|x| x * 2)
+    .collect();
+
+Com Rayon:
+
+use rayon::prelude::*;
+
+fn main() {
+    let numeros = vec![1, 2, 3, 4, 5];
+
+    let resultado: Vec<i32> = numeros
+        .par_iter()
+        .map(|x| x * 2)
+        .collect();
+
+    println!("{:?}", resultado);
+}
+
+Observe a diferença:
+
+iter()
+↓
+iteração comum
+
+par_iter()
+↓
+iteração paralela
+
+Rayon abstrai boa parte do gerenciamento das threads.
+
+9. Paralelismo em migração
+
+Podemos aplicar Rayon a uma lista de registros:
+
+use rayon::prelude::*;
+
+fn migrar(id: &i32) {
+    println!("Migrando registro {}", id);
+}
+
+fn main() {
+    let registros = vec![
+        1, 2, 3, 4, 5,
+        6, 7, 8, 9, 10
+    ];
+
+    registros
+        .par_iter()
+        .for_each(|id| {
+            migrar(id);
+        });
+}
+
+Temos:
+
+Registros
+↓
+par_iter()
+↓
+Rayon
+↓
+divide trabalho
+↓
+múltiplas threads
+↓
+migração paralela
+
+Isso pode ser útil quando as operações são adequadas para paralelização. Não significa que par_iter() sempre será mais rápido; tarefas pequenas podem não compensar o custo do paralelismo.
+
+10. Utilizando Tokio para trabalhar de modo Async
+
+Tokio é um runtime assíncrono muito utilizado no ecossistema Rust.
+
+É especialmente comum para tarefas de I/O:
+
+→ APIs
+→ servidores
+→ sockets
+→ rede
+→ arquivos
+→ banco de dados
+
+No Cargo.toml:
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+
+Exemplo:
+
+use tokio::time::{
+    sleep,
+    Duration
+};
+
+#[tokio::main]
+async fn main() {
+    println!("Iniciando");
+
+    sleep(Duration::from_secs(2)).await;
+
+    println!("Finalizado");
+}
+
+Temos três conceitos importantes:
+
+async
+
+define código assíncrono.
+
+.await
+
+espera uma operação assíncrona sem tratar isso como uma espera bloqueante comum da thread.
+
+E:
+
+#[tokio::main]
+
+configura o runtime Tokio para executar o main assíncrono.
+
+11. async não significa automaticamente paralelismo
+
+Essa distinção é importante.
+
+THREAD
+→ unidade de execução do sistema
+
+CONCORRÊNCIA
+→ múltiplas tarefas progridem
+
+PARALELISMO
+→ múltiplas tarefas executam
+  simultaneamente
+
+ASYNC
+→ modelo eficiente para lidar
+  com tarefas que passam tempo esperando
+
+Por exemplo, imagine:
+
+Programa
+   ↓
+faz requisição
+   ↓
+espera servidor responder
+   ↓
+CPU não precisa ficar parada
+   ↓
+outra tarefa pode progredir
+   ↓
+resposta chega
+   ↓
+continua a primeira tarefa
+
+É aí que async/await é especialmente útil.
+
+Resumo para copiar e colar
+CONCORRÊNCIA E PARALELISMO — RUST
+
+
+========================
+CONCORRÊNCIA
+========================
+
+Concorrência
+→ capacidade de lidar com múltiplas
+  tarefas durante o mesmo período.
+
+As tarefas podem progredir de forma
+intercalada.
+
+
+========================
+PARALELISMO
+========================
+
+Paralelismo
+→ execução simultânea de tarefas.
+
+Pode utilizar múltiplos núcleos da CPU.
+
+Exemplo:
+
+Core 1 → tarefa A
+Core 2 → tarefa B
+
+
+IMPORTANTE:
+
+Concorrência != Paralelismo
+
+
+========================
+THREAD
+========================
+
+Thread
+→ linha de execução dentro de um processo.
+
+Criando:
+
+thread::spawn(|| {
+    // código
+});
+
+Esperando finalizar:
+
+handle.join().unwrap();
+
+
+Exemplo:
+
+use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        println!("Outra thread");
+    });
+
+    handle.join().unwrap();
+}
+
+
+========================
+MOVE
+========================
+
+move
+→ transfere a posse dos valores
+  capturados pela closure quando necessário.
+
+Exemplo:
+
+let nome = String::from("Rust");
+
+thread::spawn(move || {
+    println!("{}", nome);
+});
+
+
+========================
+CHANNEL
+========================
+
+Channel
+→ permite comunicação entre threads.
+
+std::sync::mpsc
+
+Criação:
+
+let (tx, rx) = mpsc::channel();
+
+tx
+→ transmitter
+→ envia dados
+
+rx
+→ receiver
+→ recebe dados
+
+Envio:
+
+tx.send(valor);
+
+Recebimento:
+
+rx.recv();
+
+
+Fluxo:
+
+Thread A
+   ↓
+  tx
+   ↓
+Channel
+   ↓
+  rx
+   ↓
+Thread B
+
+
+========================
+ARC
+========================
+
+Arc<T>
+→ Atomic Reference Counting.
+
+Permite compartilhar propriedade
+de um valor entre múltiplas threads.
+
+Exemplo:
+
+let dado = Arc::new(valor);
+
+let copia = Arc::clone(&dado);
+
+
+========================
+MUTEX
+========================
+
+Mutex<T>
+→ Mutual Exclusion.
+
+Protege dados compartilhados.
+
+Permite acesso protegido a uma thread
+por vez.
+
+Acesso:
+
+mutex.lock().unwrap();
+
+
+========================
+ARC + MUTEX
+========================
+
+Arc<Mutex<T>>
+
+Arc
+→ propriedade compartilhada.
+
+Mutex
+→ acesso mutável protegido.
+
+Juntos:
+
+Arc<Mutex<T>>
+→ padrão comum para estado mutável
+  compartilhado entre threads.
+
+
+========================
+RAYON
+========================
+
+Rayon
+→ crate para paralelismo de dados.
+
+Cargo.toml:
+
+[dependencies]
+rayon = "1"
+
+Importação:
+
+use rayon::prelude::*;
+
+
+Iteração normal:
+
+.iter()
+
+Iteração paralela:
+
+.par_iter()
+
+
+Exemplo:
+
+numeros
+    .par_iter()
+    .map(|x| x * 2)
+    .collect();
+
+
+Rayon
+↓
+divide trabalho
+↓
+gerencia threads
+↓
+processamento paralelo
+
+
+========================
+MIGRAÇÃO PARALELA
+========================
+
+registros
+    ↓
+par_iter()
+    ↓
+for_each()
+    ↓
+múltiplos registros podem
+ser processados em paralelo.
+
+
+========================
+TOKIO
+========================
+
+Tokio
+→ runtime assíncrono para Rust.
+
+Muito utilizado para:
+
+→ rede
+→ APIs
+→ servidores
+→ sockets
+→ operações de I/O
+→ aplicações assíncronas
+
+
+Cargo.toml:
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+
+
+========================
+ASYNC
+========================
+
+async
+→ define código assíncrono.
+
+Exemplo:
+
+async fn buscar_dados() {
+    // ...
+}
+
+
+========================
+AWAIT
+========================
+
+.await
+→ aguarda uma operação assíncrona
+  permitindo que o runtime gerencie
+  outras tarefas enquanto ela espera.
+
+Exemplo:
+
+buscar_dados().await;
+
+
+========================
+TOKIO MAIN
+========================
+
+#[tokio::main]
+async fn main() {
+    // código async
+}
+
+
+========================
+DIFERENÇAS
+========================
+
+CONCORRÊNCIA
+
+→ múltiplas tarefas podem progredir.
+
+
+PARALELISMO
+
+→ múltiplas tarefas executam
+  simultaneamente.
+
+
+THREAD
+
+→ linha de execução.
+
+
+CHANNEL
+
+→ comunicação entre threads.
+
+
+Arc
+
+→ propriedade compartilhada.
+
+
+Mutex
+
+→ acesso protegido a dados.
+
+
+Arc<Mutex<T>>
+
+→ estado mutável compartilhado
+  entre threads.
+
+
+Rayon
+
+→ paralelismo de dados.
+
+
+Tokio
+
+→ runtime assíncrono.
+
+
+async
+
+→ define operação assíncrona.
+
+
+.await
+
+→ aguarda operação assíncrona.
+
+
+========================
+FORMA PARA MEMORIZAR
+========================
+
+thread::spawn()
+= "Crie uma thread."
+
+join()
+= "Espere a thread terminar."
+
+Channel
+= "Threads precisam conversar."
+
+tx.send()
+= "Envie."
+
+rx.recv()
+= "Receba."
+
+Arc
+= "Compartilhe propriedade."
+
+Mutex
+= "Um acesso protegido por vez."
+
+Arc<Mutex<T>>
+= "Compartilhe e permita alteração
+   de forma sincronizada."
+
+Rayon
+= "Paralelize processamento de dados."
+
+par_iter()
+= "Itere em paralelo."
+
+Tokio
+= "Execute tarefas assíncronas."
+
+async
+= "Esta função/operação é assíncrona."
+
+.await
+= "Espere o resultado assíncrono."
+
+1. Persistência em JSON
+
+Persistência significa salvar dados para que eles continuem existindo depois que o programa terminar.
+
+JSON é uma opção simples para armazenar dados em arquivo.
+
+Em Rust, é comum usar:
+
+serde
+serde_json
+
+No Cargo.toml:
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+Exemplo:
+
+use serde::{Deserialize, Serialize};
+use std::fs;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Usuario {
+    nome: String,
+    idade: u32,
+}
+
+fn main() {
+    let usuario = Usuario {
+        nome: String::from("Jhonata"),
+        idade: 24,
+    };
+
+    let json = serde_json::to_string_pretty(&usuario).unwrap();
+
+    fs::write("usuario.json", json).unwrap();
+}
+
+O arquivo ficará parecido com:
+
+{
+  "nome": "Jhonata",
+  "idade": 24
+}
+
+Para ler:
+
+let json = fs::read_to_string("usuario.json").unwrap();
+
+let usuario: Usuario =
+    serde_json::from_str(&json).unwrap();
+
+println!("{:?}", usuario);
+
+Fluxo:
+
+Struct
+  ↓
+Serialize
+  ↓
+JSON
+  ↓
+Arquivo
+
+Arquivo
+  ↓
+JSON
+  ↓
+Deserialize
+  ↓
+Struct
+2. Conectando ao banco de dados MySQL
+
+Para trabalhar com MySQL, uma opção é usar a crate mysql.
+
+[dependencies]
+mysql = "26"
+
+Exemplo conceitual:
+
+use mysql::*;
+
+fn main() -> Result<()> {
+    let url =
+        "mysql://root:senha@localhost:3306/banco";
+
+    let pool = Pool::new(url)?;
+
+    let mut conn = pool.get_conn()?;
+
+    println!("Conectado!");
+
+    Ok(())
+}
+
+Aqui:
+
+Pool
+ ↓
+gerencia conexões
+
+get_conn()
+ ↓
+obtém uma conexão
+
+Em aplicações reais, credenciais não devem ficar diretamente no código-fonte.
+
+3. Persistência no MySQL
+
+Depois de conectado, podemos executar comandos SQL.
+
+Exemplo de inserção:
+
+use mysql::*;
+use mysql::prelude::*;
+
+fn main() -> Result<()> {
+    let url =
+        "mysql://root:senha@localhost:3306/banco";
+
+    let pool = Pool::new(url)?;
+    let mut conn = pool.get_conn()?;
+
+    conn.exec_drop(
+        "INSERT INTO usuarios (nome, idade)
+         VALUES (:nome, :idade)",
+        params! {
+            "nome" => "Jhonata",
+            "idade" => 24,
+        },
+    )?;
+
+    Ok(())
+}
+
+A persistência ocorre porque:
+
+Rust
+ ↓
+INSERT
+ ↓
+MySQL
+ ↓
+registro armazenado
+
+Mesmo depois que o programa terminar, o registro continua no banco.
+
+4. Criando repositório genérico ORM
+
+O padrão Repository separa a lógica de acesso aos dados do restante da aplicação.
+
+Podemos representar um repositório com uma trait:
+
+trait Repository<T> {
+    fn salvar(&self, item: T);
+    fn buscar(&self, id: i32) -> Option<T>;
+    fn remover(&self, id: i32);
+}
+
+Depois podemos ter:
+
+struct Usuario {
+    id: i32,
+    nome: String,
+}
+
+E criar uma implementação:
+
+struct UsuarioRepository;
+
+impl Repository<Usuario> for UsuarioRepository {
+    fn salvar(&self, usuario: Usuario) {
+        println!("Salvando {}", usuario.nome);
+    }
+
+    fn buscar(&self, id: i32) -> Option<Usuario> {
+        println!("Buscando {}", id);
+        None
+    }
+
+    fn remover(&self, id: i32) {
+        println!("Removendo {}", id);
+    }
+}
+
+A ideia é:
+
+Aplicação
+    ↓
+Repository
+    ↓
+Persistência
+    ↓
+Banco de dados
+
+Isso reduz o acoplamento entre regras da aplicação e banco de dados.
+
+5. Configurando Diesel ORM
+
+Diesel é um ORM/query builder bastante conhecido no ecossistema Rust.
+
+Para SQLite, por exemplo:
+
+[dependencies]
+diesel = {
+    version = "2",
+    features = ["sqlite"]
+}
+
+Para MySQL:
+
+[dependencies]
+diesel = {
+    version = "2",
+    features = ["mysql"]
+}
+
+O Diesel permite trabalhar com estruturas Rust relacionadas às tabelas do banco.
+
+Exemplo conceitual:
+
+#[derive(Queryable)]
+struct Usuario {
+    id: i32,
+    nome: String,
+}
+
+Assim temos:
+
+Tabela SQL
+    ↕
+Diesel
+    ↕
+Struct Rust
+6. Implementando Repository com Diesel
+
+Podemos combinar o padrão Repository com Diesel.
+
+struct UsuarioRepository<'a> {
+    conexao: &'a mut MysqlConnection,
+}
+
+E criar métodos responsáveis pela persistência:
+
+impl<'a> UsuarioRepository<'a> {
+    fn buscar_todos(&mut self) {
+        println!("Buscando usuários...");
+    }
+
+    fn salvar(&mut self) {
+        println!("Salvando usuário...");
+    }
+
+    fn remover(&mut self) {
+        println!("Removendo usuário...");
+    }
+}
+
+Em uma implementação real, esses métodos utilizariam as operações do Diesel.
+
+A arquitetura fica:
+
+Controller / Aplicação
+        ↓
+UsuarioRepository
+        ↓
+Diesel
+        ↓
+MySQL
+
+Uma vantagem importante é não espalhar consultas de banco pelo projeto inteiro.
+
+7. Gravando dados no SQLite com rusqlite
+
+Para aplicações locais menores, SQLite é muito útil porque o banco pode ficar armazenado em um arquivo local.
+
+Uma crate popular é rusqlite.
+
+[dependencies]
+rusqlite = { version = "0.37", features = ["bundled"] }
+
+Exemplo:
+
+use rusqlite::{params, Connection, Result};
+
+fn main() -> Result<()> {
+    let conn = Connection::open("banco.db")?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS usuarios (
+            id    INTEGER PRIMARY KEY,
+            nome  TEXT NOT NULL
+        )",
+        [],
+    )?;
+
+    conn.execute(
+        "INSERT INTO usuarios (nome)
+         VALUES (?1)",
+        params!["Jhonata"],
+    )?;
+
+    println!("Usuário salvo!");
+
+    Ok(())
+}
+
+Isso cria:
+
+banco.db
+   ↓
+usuarios
+   ↓
+┌────┬─────────┐
+│ id │ nome    │
+├────┼─────────┤
+│ 1  │ Jhonata │
+└────┴─────────┘
+Resumo para copiar e colar
+PERSISTÊNCIA DE DADOS — RUST
+
+Persistência
+→ armazenar dados de forma que eles
+  continuem existindo depois que o
+  programa terminar.
+
+
+========================
+JSON
+========================
+
+JSON
+→ formato textual para armazenar
+  e transportar dados.
+
+Crates comuns:
+
+serde
+serde_json
+
+Serialize
+→ Struct Rust → JSON
+
+Deserialize
+→ JSON → Struct Rust
+
+Exemplo:
+
+serde_json::to_string(&usuario)
+
+→ transforma Struct em JSON.
+
+serde_json::from_str(&json)
+
+→ transforma JSON em Struct.
+
+
+========================
+MYSQL
+========================
+
+MySQL
+→ banco de dados relacional.
+
+Uma opção de crate:
+
+mysql
+
+Pool::new()
+→ cria pool de conexões.
+
+get_conn()
+→ obtém uma conexão.
+
+Persistência:
+
+Rust
+ ↓
+SQL
+ ↓
+MySQL
+
+
+========================
+REPOSITORY
+========================
+
