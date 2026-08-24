@@ -13,9 +13,9 @@
     if (typeof document === 'undefined') return [];
 
     return Array.from(document.querySelectorAll('.lesson')).map(function (section) {
-      var titleNode = section.querySelector('.lesson-head h2');
-      var descriptionNode = section.querySelector('.lesson-head p');
-      var sourceNode = section.querySelector('.section-source');
+      var titleNode = section.querySelector('.head h2, .lesson-head h2');
+      var descriptionNode = section.querySelector('.head p, .lesson-head p');
+      var sourceNode = section.querySelector('.source, .section-source');
       var subheadings = Array.from(section.querySelectorAll('.subheading')).map(function (node) {
         return {
           id: node.id || null,
