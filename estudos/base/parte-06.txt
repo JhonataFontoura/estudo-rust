@@ -1,0 +1,1006 @@
+4. ACESSANDO OS VALORES
+==================================================
+
+Podemos acessar os elementos através da posição.
+
+Exemplo:
+
+let pessoa = ("Jhonata", 24, 1.68);
+
+println!("{}", pessoa.0);
+println!("{}", pessoa.1);
+println!("{}", pessoa.2);
+
+
+Resultado:
+
+Jhonata
+24
+1.68
+
+
+IMPORTANTE:
+
+A primeira posição é:
+
+.0
+
+e não:
+
+.1
+
+
+Então:
+
+pessoa.0 -> primeiro elemento
+
+pessoa.1 -> segundo elemento
+
+pessoa.2 -> terceiro elemento
+
+
+==================================================
+5. EXEMPLO
+==================================================
+
+fn main() {
+    let pessoa = ("Jhonata", 24, 1.68);
+
+    println!("Nome: {}", pessoa.0);
+    println!("Idade: {}", pessoa.1);
+    println!("Altura: {}", pessoa.2);
+}
+
+
+Resultado:
+
+Nome: Jhonata
+Idade: 24
+Altura: 1.68
+
+
+==================================================
+6. DESESTRUTURAÇÃO DE TUPLA
+==================================================
+
+Também podemos retirar os valores da tupla e colocá-los
+em variáveis separadas.
+
+Exemplo:
+
+let pessoa = ("Jhonata", 24, 1.68);
+
+let (nome, idade, altura) = pessoa;
+
+
+Agora:
+
+nome = "Jhonata"
+
+idade = 24
+
+altura = 1.68
+
+
+Isso é chamado de:
+
+DESESTRUTURAÇÃO (DESTRUCTURING)
+
+
+Exemplo completo:
+
+fn main() {
+    let pessoa = ("Jhonata", 24, 1.68);
+
+    let (nome, idade, altura) = pessoa;
+
+    println!("Nome: {}", nome);
+    println!("Idade: {}", idade);
+    println!("Altura: {}", altura);
+}
+
+
+==================================================
+7. TUPLA MUTÁVEL
+==================================================
+
+Podemos criar uma tupla mutável:
+
+let mut pessoa = ("Jhonata", 24);
+
+
+Depois podemos modificar:
+
+pessoa.1 = 25;
+
+
+Exemplo:
+
+fn main() {
+    let mut pessoa = ("Jhonata", 24);
+
+    println!("Idade antes: {}", pessoa.1);
+
+    pessoa.1 = 25;
+
+    println!("Idade depois: {}", pessoa.1);
+}
+
+
+Resultado:
+
+Idade antes: 24
+Idade depois: 25
+
+
+==================================================
+8. RETORNANDO UMA TUPLA EM UMA FUNÇÃO
+==================================================
+
+Tuplas são úteis quando queremos retornar mais de uma informação
+de uma função.
+
+Exemplo:
+
+fn obter_pessoa() -> (&'static str, i32) {
+    ("Jhonata", 24)
+}
+
+fn main() {
+    let pessoa = obter_pessoa();
+
+    println!("Nome: {}", pessoa.0);
+    println!("Idade: {}", pessoa.1);
+}
+
+
+A função retorna:
+
+(&'static str, i32)
+
+Ou seja, dois valores agrupados em uma tupla.
+
+
+==================================================
+9. RETORNO + DESESTRUTURAÇÃO
+==================================================
+
+Podemos combinar função e desestruturação:
+
+fn obter_dados() -> (i32, i32) {
+    (10, 20)
+}
+
+fn main() {
+    let (x, y) = obter_dados();
+
+    println!("X: {}", x);
+    println!("Y: {}", y);
+}
+
+
+A função retorna:
+
+(10, 20)
+
+Depois:
+
+let (x, y) = obter_dados();
+
+
+Temos:
+
+x = 10
+y = 20
+
+
+==================================================
+10. TUPLA VS ARRAY
+==================================================
+
+TUPLA:
+
+let pessoa = ("Jhonata", 24, true);
+
+Pode possuir tipos diferentes:
+
+&str
+i32
+bool
+
+
+ARRAY:
+
+let numeros = [10, 20, 30];
+
+Os elementos normalmente possuem o MESMO tipo:
+
+i32
+i32
+i32
+
+
+Acesso na tupla:
+
+pessoa.0
+pessoa.1
+
+
+Acesso no array:
+
+numeros[0]
+numeros[1]
+
+
+==================================================
+11. TUPLAS E MEMÓRIA
+==================================================
+
+Uma tupla possui tamanho conhecido quando seus componentes possuem
+tamanho conhecido.
+
+Uma tupla local simples pode ficar diretamente na Stack.
+
+Exemplo:
+
+let dados: (i32, bool, f64) = (24, true, 1.68);
+
+
+Simplificando:
+
+STACK
+
+dados
+----------------
+24
+true
+1.68
+
+
+Mas atenção:
+
+Uma tupla também pode possuir tipos que gerenciam dados na Heap.
+
+Exemplo:
+
+let pessoa = (
+    String::from("Jhonata"),
+    24
+);
+
+
+Nesse caso, simplificando:
+
+STACK
+
+pessoa
+------------------------
+String:
+  pointer ----------+
+  length            |
+  capacity          |
+                    |
+idade = 24          |
+                    |
+                    v
+
+HEAP
+
+"Jhonata"
+
+
+Então não devemos pensar:
+
+"Tupla sempre fica somente na Stack."
+
+Depende dos tipos armazenados nela.
+
+
+==================================================
+12. TUPLA VAZIA — UNIT
+==================================================
+
+Rust possui uma tupla especial:
+
+()
+
+
+Ela é chamada de:
+
+UNIT
+
+
+O tipo também é:
+
+()
+
+
+Exemplo:
+
+fn executar() {
+    println!("Executando...");
+}
+
+
+Uma função que não declara um valor de retorno explicitamente
+retorna ().
+
+
+Podemos pensar:
+
+fn executar() -> () {
+    println!("Executando...");
+}
+
+
+Normalmente não precisamos escrever -> ().
+
+
+==================================================
+13. EXEMPLO COMPLETO
+==================================================
+
+fn criar_usuario() -> (String, i32, bool) {
+    let nome = String::from("Jhonata");
+    let idade = 24;
+    let ativo = true;
+
+    (nome, idade, ativo)
+}
+
+fn main() {
+    let usuario = criar_usuario();
+
+    println!("Nome: {}", usuario.0);
+    println!("Idade: {}", usuario.1);
+    println!("Ativo: {}", usuario.2);
+}
+
+
+Ou usando desestruturação:
+
+fn main() {
+    let usuario = criar_usuario();
+
+    let (nome, idade, ativo) = usuario;
+
+    println!("Nome: {}", nome);
+    println!("Idade: {}", idade);
+    println!("Ativo: {}", ativo);
+}
+
+
+==================================================
+RESUMO — TUPLAS EM RUST
+==================================================
+
+TUPLA
+=
+Estrutura que agrupa vários valores.
+
+Os valores podem possuir tipos diferentes.
+
+
+CRIAR:
+
+let pessoa = ("Jhonata", 24, 1.68);
+
+
+DEFINIR OS TIPOS:
+
+let pessoa: (&str, i32, f64) =
+    ("Jhonata", 24, 1.68);
+
+
+ACESSAR:
+
+pessoa.0
+
+pessoa.1
+
+pessoa.2
+
+
+DESESTRUTURAR:
+
+let (nome, idade, altura) = pessoa;
+
+
+MODIFICAR:
+
+let mut pessoa = ("Jhonata", 24);
+
+pessoa.1 = 25;
+
+
+RETORNAR DE FUNÇÃO:
+
+fn dados() -> (i32, i32) {
+    (10, 20)
+}
+
+
+TUPLA:
+
+("Jhonata", 24, true)
+
+Pode possuir tipos diferentes.
+
+
+ARRAY:
+
+[10, 20, 30]
+
+Possui elementos do mesmo tipo.
+
+
+UNIT:
+
+()
+
+Representa a tupla vazia e também o retorno de funções que
+não retornam outro valor explicitamente.
+
+
+FORMA SIMPLES DE DECORAR:
+
+Tupla
+=
+"Quero agrupar informações diferentes."
+
+
+Exemplo:
+
+let pessoa = ("Jhonata", 24, 1.68, true);
+
+
+.0
+=
+primeiro valor
+
+
+.1
+=
+segundo valor
+
+
+.2
+=
+terceiro valor
+
+
+let (a, b, c) = tupla;
+
+=
+desestruturação
+
+
+IDEIA PRINCIPAL:
+
+Tuplas são úteis quando queremos AGRUPAR uma quantidade fixa
+de valores, inclusive de tipos diferentes, sem precisar criar
+uma estrutura mais complexa.
+
+Um ponto que vale memorizar é a diferença:
+
+let tupla = ("Jhonata", 24, true);
+let array = [10, 20, 30];
+
+Tupla: quantidade fixa e pode combinar tipos diferentes.
+Array: quantidade fixa e seus elementos têm o mesmo tipo.
+
+ARRAY E VEC EM RUST
+
+==================================================
+1. O QUE É UM ARRAY?
+==================================================
+
+Array é uma coleção de valores do MESMO TIPO e com TAMANHO FIXO.
+
+Exemplo:
+
+let numeros = [10, 20, 30, 40, 50];
+
+Nesse array temos:
+
+5 elementos
+todos do tipo inteiro
+
+
+Diferentemente de uma tupla:
+
+let pessoa = ("Jhonata", 24, true);
+
+uma tupla pode possuir tipos diferentes.
+
+Já um array normalmente possui elementos do mesmo tipo.
+
+
+==================================================
+2. DECLARANDO UM ARRAY
+==================================================
+
+Podemos deixar Rust inferir o tipo:
+
+let numeros = [10, 20, 30, 40, 50];
+
+
+Ou informar explicitamente:
+
+let numeros: [i32; 5] = [10, 20, 30, 40, 50];
+
+
+A sintaxe:
+
+[i32; 5]
+
+significa:
+
+i32 = tipo dos elementos
+
+5 = quantidade de elementos
+
+
+Então:
+
+let numeros: [i32; 5]
+
+significa:
+
+"Crie um array contendo exatamente 5 valores i32."
+
+
+==================================================
+3. TAMANHO DO ARRAY É FIXO
+==================================================
+
+Depois que o array é criado, sua quantidade de posições
+não pode aumentar ou diminuir.
+
+Exemplo:
+
+let numeros = [10, 20, 30];
+
+Ele possui exatamente:
+
+3 posições
+
+Não podemos simplesmente adicionar uma quarta posição.
+
+Para coleções que precisam crescer ou diminuir,
+normalmente utilizamos Vec.
+
+
+==================================================
+4. POSIÇÕES DO ARRAY
+==================================================
+
+As posições começam em:
+
+0
+
+Exemplo:
+
+let numeros = [10, 20, 30, 40];
+
+
+Posição:
+
+0 -> 10
+1 -> 20
+2 -> 30
+3 -> 40
+
+
+IMPORTANTE:
+
+O primeiro elemento está na posição 0.
+
+
+==================================================
+5. ACESSANDO UM ELEMENTO
+==================================================
+
+Utilizamos:
+
+array[indice]
+
+
+Exemplo:
+
+fn main() {
+    let numeros = [10, 20, 30];
+
+    println!("{}", numeros[0]);
+    println!("{}", numeros[1]);
+    println!("{}", numeros[2]);
+}
+
+
+Resultado:
+
+10
+20
+30
+
+
+==================================================
+6. ARRAY MUTÁVEL
+==================================================
+
+Podemos modificar elementos se o array for mutável.
+
+Exemplo:
+
+fn main() {
+    let mut numeros = [10, 20, 30];
+
+    numeros[0] = 100;
+
+    println!("{:?}", numeros);
+}
+
+
+Resultado:
+
+[100, 20, 30]
+
+
+O tamanho continua sendo 3.
+
+Mudamos apenas um elemento.
+
+
+==================================================
+7. CRIANDO VÁRIOS VALORES IGUAIS
+==================================================
+
+Rust possui uma sintaxe útil:
+
+let numeros = [0; 5];
+
+
+Isso cria:
+
+[0, 0, 0, 0, 0]
+
+
+A sintaxe:
+
+[valor; quantidade]
+
+
+Exemplo:
+
+let valores = [10; 3];
+
+
+Resultado:
+
+[10, 10, 10]
+
+
+==================================================
+8. TAMANHO DO ARRAY
+==================================================
+
+Podemos utilizar:
+
+.len()
+
+
+Exemplo:
+
+let numeros = [10, 20, 30];
+
+println!("{}", numeros.len());
+
+
+Resultado:
+
+3
+
+
+==================================================
+9. PERCORRENDO UM ARRAY COM FOR
+==================================================
+
+Exemplo:
+
+fn main() {
+    let numeros = [10, 20, 30, 40];
+
+    for numero in numeros {
+        println!("{}", numero);
+    }
+}
+
+
+Resultado:
+
+10
+20
+30
+40
+
+
+==================================================
+10. ACESSANDO COM get()
+==================================================
+
+Também podemos utilizar:
+
+.get()
+
+
+Exemplo:
+
+let numeros = [10, 20, 30];
+
+let numero = numeros.get(1);
+
+
+get() retorna um Option.
+
+
+Podemos tratar com match:
+
+match numeros.get(1) {
+    Some(valor) => println!("Valor: {}", valor),
+    None => println!("Posição não existe"),
+}
+
+
+Isso é útil porque evita tentar acessar diretamente
+uma posição inexistente.
+
+
+==================================================
+11. ARRAY E MEMÓRIA
+==================================================
+
+Um array possui tamanho fixo conhecido.
+
+Um array local simples pode ficar diretamente na Stack.
+
+Exemplo:
+
+let numeros: [i32; 4] = [10, 20, 30, 40];
+
+
+Simplificando:
+
+STACK
+
+numeros
+----------------
+10
+20
+30
+40
+
+
+Os elementos estão armazenados juntos.
+
+
+IMPORTANTE:
+
+Não devemos pensar que todo array obrigatoriamente
+estará sempre na Stack.
+
+Isso depende de onde o array está armazenado.
+
+Por exemplo, podemos colocar um array dentro de Box:
+
+let numeros = Box::new([10, 20, 30, 40]);
+
+Nesse caso o array possuído pelo Box fica na Heap.
+
+
+==================================================
+12. O QUE É VEC?
+==================================================
+
+Vec<T> significa:
+
+VECTOR
+
+
+É uma coleção dinâmica fornecida pela biblioteca padrão do Rust.
+
+Assim como Array, seus elementos são do MESMO TIPO.
+
+A principal diferença é:
+
+ARRAY
+=
+tamanho fixo
+
+
+VEC
+=
+tamanho pode aumentar ou diminuir
+
+
+==================================================
+13. CRIANDO UM VEC
+==================================================
+
+Uma forma muito comum é utilizar:
+
+vec![]
+
+
+Exemplo:
+
+let numeros = vec![10, 20, 30];
+
+
+Rust normalmente infere:
+
+Vec<i32>
+
+
+Também podemos escrever:
+
+let numeros: Vec<i32> = vec![10, 20, 30];
+
+
+==================================================
+14. CRIANDO UM VEC VAZIO
+==================================================
+
+Podemos criar:
+
+let numeros: Vec<i32> = Vec::new();
+
+
+Nesse momento:
+
+numeros = []
+
+
+Precisamos informar o tipo se Rust não tiver
+outra informação para inferi-lo.
+
+
+==================================================
+15. ADICIONANDO ELEMENTOS — push()
+==================================================
+
+Uma das maiores diferenças para Array é que Vec pode crescer.
+
+Exemplo:
+
+fn main() {
+    let mut numeros = Vec::new();
+
+    numeros.push(10);
+    numeros.push(20);
+    numeros.push(30);
+
+    println!("{:?}", numeros);
+}
+
+
+Resultado:
+
+[10, 20, 30]
+
+
+Precisamos de:
+
+mut
+
+porque estamos modificando o Vec.
+
+
+==================================================
+16. REMOVENDO O ÚLTIMO ELEMENTO — pop()
+==================================================
+
+Podemos utilizar:
+
+.pop()
+
+
+Exemplo:
+
+fn main() {
+    let mut numeros = vec![10, 20, 30];
+
+    numeros.pop();
+
+    println!("{:?}", numeros);
+}
+
+
+Resultado:
+
+[10, 20]
+
+
+pop() remove o último elemento.
+
+
+IMPORTANTE:
+
+pop() retorna:
+
+Option<T>
+
+porque um Vec pode estar vazio.
+
+
+==================================================
+17. ACESSANDO ELEMENTOS DO VEC
+==================================================
+
+Assim como Array:
+
+let numeros = vec![10, 20, 30];
+
+println!("{}", numeros[0]);
+
+
+Resultado:
+
+10
+
+
+Também podemos utilizar:
+
+.get()
+
+
+Exemplo:
+
+match numeros.get(1) {
+    Some(numero) => println!("{}", numero),
+    None => println!("Posição inexistente"),
+}
+
+
+==================================================
+18. POR QUE get() É INTERESSANTE?
+==================================================
+
+Imagine:
+
+let numeros = vec![10, 20, 30];
+
+
+E fazemos:
+
+numeros[10]
+
+
+A posição 10 não existe.
+
+Esse acesso pode causar panic durante a execução.
+
+
+Com:
+
+numeros.get(10)
+
+
+Rust retorna:
+
+None
+
+
+Então podemos tratar:
+
+match numeros.get(10) {
+    Some(valor) => println!("{}", valor),
+    None => println!("Essa posição não existe"),
+}
+
+
+==================================================
+19. MODIFICANDO ELEMENTOS
+==================================================
+
+Exemplo:
+
