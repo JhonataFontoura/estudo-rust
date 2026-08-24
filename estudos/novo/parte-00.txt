@@ -1,0 +1,698 @@
+STRUCT  exemplos 
+
+use std: :io;
+
+#[derive(Debug)]
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: String,
+}
+
+// Busca um funcionário pelo ID
+fn buscar_funcionario(
+    funcionarios: &[Funcionario],
+    id: u32,
+) -> Option<&Funcionario> {
+    funcionarios
+        .iter()
+        .find(|funcionario| funcionario.id == id)
+}
+
+fn main() {
+    // Criação da lista de funcionários
+    let lista_de_funcionarios: Vec<Funcionario> = vec![
+        Funcionario {
+            id: 1,
+            nome: "Alice".to_string(),
+            idade: 30,
+            cargo: "Desenvolvedor".to_string(),
+        },
+        Funcionario {
+            id: 2,
+            nome: "Bob".to_string(),
+            idade: 25,
+            cargo: "Designer".to_string(),
+        },
+        Funcionario {
+            id: 3,
+            nome: "Charlie".to_string(),
+            idade: 35,
+            cargo: "Gerente".to_string(),
+        },
+        Funcionario {
+            id: 4,
+            nome: "Diana".to_string(),
+            idade: 28,
+            cargo: "Analista".to_string(),
+        },
+    ];
+
+    // ID que queremos procurar
+    let id_procurado: u32 = 3;
+
+    // Procura o funcionário
+    match buscar_funcionario(&lista_de_funcionarios, id_procurado) {
+        Some(funcionario) => {
+            println!("Funcionário encontrado!");
+            println!("------------------------");
+
+            // Cada informação pode ser acessada individualmente
+            println!("ID: {}", funcionario.id);
+            println!("Nome: {}", funcionario.nome);
+            println!("Idade: {}", funcionario.idade);
+            println!("Cargo: {}", funcionario.cargo);
+        }
+
+        None => {
+            println!("Funcionário com ID {} não encontrado.", id_procurado);
+        }
+    }
+}
+
+Adicionando um sistema de imput e build de funcionário
+use std::io;
+
+#[derive(Debug)]
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: String,
+}
+
+// ======================================================
+// "BUILDER" / CONSTRUTOR DE FUNCIONÁRIO
+// ======================================================
+
+fn build_funcionario(
+    id: u32,
+    nome: &str,
+    idade: u32,
+    cargo: &str,
+) -> Funcionario {
+    Funcionario {
+        id,
+        nome: nome.to_string(),
+        idade,
+        cargo: cargo.to_string(),
+    }
+}
+
+// ======================================================
+// BUSCAR FUNCIONÁRIO
+// ======================================================
+
+fn buscar_funcionario(
+    funcionarios: &[Funcionario],
+    id: u32,
+) -> Option<&Funcionario> {
+    funcionarios
+        .iter()
+        .find(|funcionario| funcionario.id == id)
+}
+
+// ======================================================
+// MAIN
+// ======================================================
+
+fn main() {
+
+    let lista_de_funcionarios: Vec<Funcionario> = vec![
+        build_funcionario(
+            1,
+            "Alice",
+            30,
+            "Desenvolvedor",
+        ),
+
+        build_funcionario(
+            2,
+            "Bob",
+            25,
+            "Designer",
+        ),
+
+        build_funcionario(
+            3,
+            "Charlie",
+            35,
+            "Gerente",
+        ),
+
+        build_funcionario(
+            4,
+            "Diana",
+            28,
+            "Analista",
+        ),
+    ];
+
+    // ==================================================
+    // INPUT
+    // ==================================================
+
+    let mut entrada = String::new();
+
+    println!("==============================");
+    println!("     BUSCA DE FUNCIONÁRIO");
+    println!("==============================");
+
+    println!("Digite o ID do funcionário:");
+
+    io::stdin()
+        .read_line(&mut entrada)
+        .expect("Erro ao ler entrada");
+
+    let id_procurado: u32 = entrada
+        .trim()
+        .parse()
+        .expect("Digite um ID válido!");
+
+    // ==================================================
+    // BUSCA
+    // ==================================================
+
+    match buscar_funcionario(
+        &lista_de_funcionarios,
+        id_procurado,
+    ) {
+        Some(funcionario) => {
+            println!();
+            println!("Funcionário encontrado!");
+            println!("------------------------");
+
+            println!("ID: {}", funcionario.id);
+            println!("Nome: {}", funcionario.nome);
+            println!("Idade: {}", funcionario.idade);
+            println!("Cargo: {}", funcionario.cargo);
+        }
+
+        None => {
+            println!();
+            println!(
+                "Funcionário com ID {} não encontrado.",
+                id_procurado
+            );
+        }
+    }
+}
+
+um conceito de {:#?}
+use std::io;
+
+#[derive(Debug)]
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: String,
+}
+
+impl Funcionario {
+    fn novo(
+        id: u32,
+        nome: &str,
+        idade: u32,
+        cargo: &str,
+    ) -> Funcionario {
+        Funcionario {
+            id,
+            nome: nome.to_string(),
+            idade,
+            cargo: cargo.to_string(),
+        }
+    }
+}
+
+fn buscar_funcionario(
+    funcionarios: &[Funcionario],
+    id: u32,
+) -> Option<&Funcionario> {
+    funcionarios
+        .iter()
+        .find(|funcionario| funcionario.id == id)
+}
+
+fn main() {
+    let lista_de_funcionarios: Vec<Funcionario> = vec![
+        Funcionario::novo(1, "Alice", 30, "Desenvolvedor"),
+        Funcionario::novo(2, "Bob", 25, "Designer"),
+        Funcionario::novo(3, "Charlie", 35, "Gerente"),
+        Funcionario::novo(4, "Diana", 28, "Analista"),
+    ];
+
+    let mut entrada = String::new();
+
+    println!("Digite o ID do funcionário:");
+
+    io::stdin()
+        .read_line(&mut entrada)
+        .expect("Erro ao ler entrada");
+
+    let id_procurado: u32 = entrada
+        .trim()
+        .parse()
+        .expect("Digite um ID válido");
+
+    match buscar_funcionario(&lista_de_funcionarios, id_procurado) {
+        Some(funcionario) => {
+            println!("Funcionário encontrado:");
+
+            println!("{:#?}", funcionario);
+        }
+
+        None => {
+            println!("Funcionário não encontrado.");
+        }
+    }
+}
+
+use std::io;
+
+#[derive(Debug)]
+struct Cliente {
+    id: u32,
+    nome: String,
+    cpf: String,
+}
+
+impl Cliente {
+    fn cpf_valida(&self) -> bool {
+        let cpf = self.cpf.replace(".", "").replace("-", "");
+
+        if cpf.len() != 11 || !cpf.chars().all(|c| c.is_ascii_digit()) {
+            return false;
+        }
+
+        // Evita CPFs com todos os números iguais
+        // Exemplo: 111.111.111-11
+        let primeiro = cpf.chars().next().unwrap();
+
+        if cpf.chars().all(|c| c == primeiro) {
+            return false;
+        }
+
+        // Primeiro dígito verificador
+        let mut soma = 0;
+
+        for (i, c) in cpf.chars().take(9).enumerate() {
+            soma += c.to_digit(10).unwrap() * (10 - i as u32);
+        }
+
+        let resto = soma % 11;
+
+        let digito1 = if resto < 2 {
+            0
+        } else {
+            11 - resto
+        };
+
+        if digito1 != cpf.chars().nth(9).unwrap().to_digit(10).unwrap() {
+            return false;
+        }
+
+        // Segundo dígito verificador
+        soma = 0;
+
+        for (i, c) in cpf.chars().take(10).enumerate() {
+            soma += c.to_digit(10).unwrap() * (11 - i as u32);
+        }
+
+        let resto = soma % 11;
+
+        let digito2 = if resto < 2 {
+            0
+        } else {
+            11 - resto
+        };
+
+        digito2 == cpf.chars().nth(10).unwrap().to_digit(10).unwrap()
+    }
+}
+
+fn main() {
+    // Cria o cliente inicialmente com CPF vazio
+    let mut cliente = Cliente {
+        id: 1,
+        nome: "Jhonata".to_string(),
+        cpf: String::new(),
+    };
+
+    // Variável para receber o CPF digitado
+    let mut entrada = String::new();
+
+    println!("==============================");
+    println!("      VALIDADOR DE CPF");
+    println!("==============================");
+
+    println!("Digite o CPF:");
+
+    io::stdin()
+        .read_line(&mut entrada)
+        .expect("Erro ao ler o CPF");
+
+    // Remove o Enter (\n) e coloca o CPF no cliente
+    cliente.cpf = entrada.trim().to_string();
+
+    println!();
+
+    // Verifica o CPF
+    if cliente.cpf_valida() {
+        println!("CPF válido!");
+    } else {
+        println!("CPF inválido!");
+    }
+
+    println!();
+
+    // Mostra o cliente completo
+    println!("{:#?}", cliente);
+}
+
+
+use std::io;
+
+#[derive(Debug)]
+struct Cliente {
+    id: u32,
+    nome: String,
+    cpf: String,
+}
+
+impl Cliente {
+
+    // ==========================================
+    // CONSTRUTOR / BUILD DO CLIENTE
+    // ==========================================
+    fn novo(id: u32, nome: &str, cpf: &str) -> Cliente {
+        Cliente {
+            id,
+            nome: nome.to_string(),
+            cpf: cpf.to_string(),
+        }
+    }
+
+    // ==========================================
+    // VALIDAÇÃO DO CPF
+    // ==========================================
+    fn cpf_valida(&self) -> bool {
+        let cpf = self.cpf.replace(".", "").replace("-", "");
+
+        if cpf.len() != 11 || !cpf.chars().all(|c| c.is_ascii_digit()) {
+            return false;
+        }
+
+        // Impede CPFs com todos os números iguais
+        let primeiro = cpf.chars().next().unwrap();
+
+        if cpf.chars().all(|c| c == primeiro) {
+            return false;
+        }
+
+        // Primeiro dígito verificador
+        let mut soma = 0;
+
+        for (i, c) in cpf.chars().take(9).enumerate() {
+            soma += c.to_digit(10).unwrap() * (10 - i as u32);
+        }
+
+        let resto = soma % 11;
+
+        let digito1 = if resto < 2 {
+            0
+        } else {
+            11 - resto
+        };
+
+        if digito1 != cpf.chars().nth(9).unwrap().to_digit(10).unwrap() {
+            return false;
+        }
+
+        // Segundo dígito verificador
+        soma = 0;
+
+        for (i, c) in cpf.chars().take(10).enumerate() {
+            soma += c.to_digit(10).unwrap() * (11 - i as u32);
+        }
+
+        let resto = soma % 11;
+
+        let digito2 = if resto < 2 {
+            0
+        } else {
+            11 - resto
+        };
+
+        digito2 == cpf.chars().nth(10).unwrap().to_digit(10).unwrap()
+    }
+}
+
+fn main() {
+
+    // ==========================================
+    // INPUT DO NOME
+    // ==========================================
+
+    let mut entrada_nome = String::new();
+
+    println!("==============================");
+    println!("       CADASTRO DE CLIENTE");
+    println!("==============================");
+
+    println!("Digite o nome do cliente:");
+
+    io::stdin()
+        .read_line(&mut entrada_nome)
+        .expect("Erro ao ler o nome");
+
+    let nome = entrada_nome.trim();
+
+
+    // ==========================================
+    // INPUT DO CPF
+    // ==========================================
+
+    let mut entrada_cpf = String::new();
+
+    println!("Digite o CPF:");
+
+    io::stdin()
+        .read_line(&mut entrada_cpf)
+        .expect("Erro ao ler o CPF");
+
+    let cpf = entrada_cpf.trim();
+
+
+    // ==========================================
+    // CRIAÇÃO DO CLIENTE
+    // ==========================================
+
+    let cliente = Cliente::novo(
+        1,
+        nome,
+        cpf,
+    );
+
+
+    // ==========================================
+    // VALIDAÇÃO
+    // ==========================================
+
+    println!();
+
+    if cliente.cpf_valida() {
+        println!("CPF válido!");
+    } else {
+        println!("CPF inválido!");
+    }
+
+
+    // ==========================================
+    // MOSTRAR CLIENTE
+    // ==========================================
+
+    println!();
+    println!("Cliente cadastrado:");
+
+    println!("{:#?}", cliente);
+}
+//Esse exemplo junta muito bem os conceitos de structs -> impl -> função associativa -> string -> &str -> borrowing -> input -> métodos -> bool
+
+ENUM
+enum vem de enumeration (enumeração).
+
+Ele permite criar um tipo que pode assumir uma entre várias possibilidades definidas por você.
+
+Imagine que agora queremos adicionar ao seu sistema de clientes o tipo da conta:
+
+Conta pode ser:
+
+Corrente
+Poupança
+Salário
+
+Em vez de guardar isso como:
+
+let tipo_conta = "Corrente";
+
+podemos criar:
+
+enum TipoConta {
+    Corrente,
+    Poupanca,
+    Salario,
+}
+
+Agora TipoConta é um novo tipo criado por você.
+
+E ele só aceita essas possibilidades:
+
+TipoConta
+   │
+   ├── Corrente
+   ├── Poupanca
+   └── Salario
+1. Criando um enum
+
+A estrutura básica é:
+
+enum NomeDoEnum {
+    Opcao1,
+    Opcao2,
+    Opcao3,
+}
+
+Exemplo:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+    Analista,
+}
+
+Agora podemos fazer:
+
+let cargo = Cargo::Desenvolvedor;
+
+Observe o :::
+
+Cargo::Desenvolvedor
+
+Significa:
+
+Cargo
+  ↓
+Desenvolvedor
+
+Ou:
+
+Quero a variante Desenvolvedor pertencente ao enum Cargo.
+
+2. Por que usar enum em vez de String?
+
+No seu código anterior você tinha:
+
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: String,
+}
+
+Então alguém poderia colocar:
+
+cargo: "Desenvolvedor".to_string()
+
+Mas também poderia colocar:
+
+cargo: "Batata".to_string()
+
+Para Rust, continua sendo uma String válida.
+
+Com enum:
+
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+    Analista,
+}
+
+E:
+
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: Cargo,
+}
+
+Agora:
+
+cargo: Cargo::Desenvolvedor
+
+é válido.
+
+Mas:
+
+cargo: Cargo::Batata
+
+❌ não compila.
+
+Isso é uma grande vantagem.
+
+O compilador passa a conhecer quais estados são permitidos.
+
+3. Enum dentro de uma Struct
+
+Aplicando ao seu projeto:
+
+#[derive(Debug)]
+enum Cargo {
+    Desenvolvedor,
+    Designer,
+    Gerente,
+    Analista,
+}
+
+#[derive(Debug)]
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: Cargo,
+}
+
+fn main() {
+    let funcionario = Funcionario {
+        id: 1,
+        nome: "Alice".to_string(),
+        idade: 30,
+        cargo: Cargo::Desenvolvedor,
+    };
+
+    println!("{:#?}", funcionario);
+}
+
+Resultado:
+
+Funcionario {
+    id: 1,
+    nome: "Alice",
+    idade: 30,
+    cargo: Desenvolvedor,
+}
+
+Aqui você juntou:
+
+STRUCT
+Funcionario
+    │
+    ├── id: u32
+    ├── nome: String
+    ├── idade: u32
+    │
+    └── cargo: Cargo
