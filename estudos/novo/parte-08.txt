@@ -1,0 +1,1094 @@
+Portanto:
+
+Par<String, i32>
+5. Generic + impl
+
+Podemos implementar métodos para uma struct genérica.
+
+struct Caixa<T> {
+    valor: T,
+}
+
+impl<T> Caixa<T> {
+
+    fn pegar(&self) -> &T {
+        &self.valor
+    }
+
+}
+
+Uso:
+
+fn main() {
+    let caixa = Caixa {
+        valor: 10,
+    };
+
+    println!("{}", caixa.pegar());
+}
+
+Observe:
+
+impl<T> Caixa<T>
+
+O primeiro:
+
+<T>
+
+declara o parâmetro genérico.
+
+O segundo:
+
+Caixa<T>
+
+diz que estamos implementando métodos para Caixa<T>.
+
+6. Implementação apenas para um tipo específico
+
+Podemos ter uma struct genérica:
+
+struct Caixa<T> {
+    valor: T,
+}
+
+Mas criar um método somente para:
+
+Caixa<i32>
+
+Exemplo:
+
+impl Caixa<i32> {
+
+    fn dobrar(&self) -> i32 {
+        self.valor * 2
+    }
+
+}
+
+Agora:
+
+let caixa = Caixa {
+    valor: 10,
+};
+
+println!("{}", caixa.dobrar());
+
+funciona.
+
+Mas uma:
+
+let caixa = Caixa {
+    valor: String::from("Rust"),
+};
+
+não possui esse método específico.
+
+7. Generic em Enum
+
+Você já utiliza Generics sem perceber.
+
+Veja:
+
+Option<T>
+
+A definição conceitual é:
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+Isso permite:
+
+let numero: Option<i32> = Some(10);
+
+let texto: Option<String> =
+    Some(String::from("Rust"));
+
+Temos:
+
+Option<T>
+   │
+   ├── Option<i32>
+   │       └── Some(10)
+   │
+   └── Option<String>
+           └── Some("Rust")
+8. Result também usa Generics
+
+Outro exemplo extremamente importante:
+
+Result<T, E>
+
+Possui dois tipos genéricos:
+
+T = tipo do sucesso
+E = tipo do erro
+
+Conceitualmente:
+
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+Por exemplo:
+
+let resultado: Result<i32, String> = Ok(10);
+
+Aqui:
+
+T = i32
+E = String
+9. Vec também usa Generic
+
+Quando você escreve:
+
+Vec<i32>
+
+Vec é uma estrutura genérica.
+
+Conceitualmente:
+
+Vec<T>
+
+Você escolhe o T:
+
+Vec<i32>
+Vec<String>
+Vec<f64>
+
+Por isso:
+
+let numeros: Vec<i32> = vec![10, 20, 30];
+
+significa:
+
+Vec<T>
+   ↓
+T = i32
+   ↓
+Vec<i32>
+10. HashMap também usa Generics
+
+Você também acabou de estudar:
+
+HashMap<K, V>
+
+Aqui existem dois tipos genéricos:
+
+K = Key
+V = Value
+
+Exemplo:
+
+let mapa: HashMap<String, i32>;
+
+Então:
+
+K = String
+V = i32
+
+Isso mostra que Generics já estavam aparecendo em vários assuntos:
+
+Vec<T>
+
+Option<T>
+
+Result<T, E>
+
+HashMap<K, V>
+11. Generic + Trait Bound
+
+Essa combinação é uma das mais importantes.
+
+fn mostrar<T: Display>(valor: T)
+
+Temos:
+
+T
+↓
+Generic
+
+T: Display
+↓
+Trait Bound
+
+Generic diz:
+
+Pode ser um tipo genérico.
+
+Trait Bound diz:
+
+Mas esse tipo precisa possuir determinado comportamento.
+
+12. Várias Traits
+
+Podemos exigir mais de uma:
+
+use std::fmt::{Debug, Display};
+
+fn mostrar<T>(valor: T)
+where
+    T: Display + Debug,
+{
+    println!("{}", valor);
+    println!("{:?}", valor);
+}
+
+Temos:
+
+T
+│
+├── Display
+└── Debug
+13. Generics + Polimorfismo
+
+Isso conecta diretamente com impl Trait que você acabou de estudar.
+
+Esta função:
+
+fn falar<T: Falar>(item: &T) {
+    item.falar();
+}
+
+usa:
+
+Generic
++
+Trait Bound
+
+Outra sintaxe:
+
+fn falar(item: &impl Falar) {
+    item.falar();
+}
+
+Nos dois casos estamos trabalhando com polimorfismo estático.
+
+Generics
+    ↓
+Trait Bounds
+    ↓
+tipo concreto conhecido
+    ↓
+monomorfização
+    ↓
+Static Dispatch
+Resumo para copiar e colar
+GENERICS — RUST
+
+Generics permitem criar código que funciona
+com diferentes tipos sem duplicar código.
+
+
+SINTAXE:
+
+<T>
+
+T
+→ representa um tipo genérico.
+
+
+FUNÇÃO:
+
+fn mostrar<T>(valor: T) {
+}
+
+
+COM TRAIT BOUND:
+
+fn mostrar<T: Display>(valor: T) {
+    println!("{}", valor);
+}
+
+T: Display
+→ T deve implementar Display.
+
+
+MAIS DE UM GENERIC:
+
+fn exemplo<T, U>(a: T, b: U) {
+}
+
+T e U podem ser tipos diferentes.
+
+
+STRUCT:
+
+struct Caixa<T> {
+    valor: T,
+}
+
+Exemplos:
+
+Caixa<i32>
+Caixa<String>
+Caixa<f64>
+
+
+STRUCT COM DOIS TIPOS:
+
+struct Par<T, U> {
+    primeiro: T,
+    segundo: U,
+}
+
+
+GENERIC + IMPL:
+
+struct Caixa<T> {
+    valor: T,
+}
+
+impl<T> Caixa<T> {
+
+    fn pegar(&self) -> &T {
+        &self.valor
+    }
+
+}
+
+
+IMPLEMENTAÇÃO ESPECÍFICA:
+
+impl Caixa<i32> {
+
+    fn dobrar(&self) -> i32 {
+        self.valor * 2
+    }
+
+}
+
+
+ENUM:
+
+Option<T>
+
+Conceitualmente:
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+
+RESULT:
+
+Result<T, E>
+
+T
+→ tipo de sucesso
+
+E
+→ tipo de erro
+
+
+VEC:
+
+Vec<T>
+
+Exemplos:
+
+Vec<i32>
+Vec<String>
+Vec<f64>
+
+
+HASHMAP:
+
+HashMap<K, V>
+
+K
+→ tipo da chave
+
+V
+→ tipo do valor
+
+
+TRAIT BOUND:
+
+T: Trait
+
+Exemplo:
+
+T: Display
+
+
+VÁRIAS TRAITS:
+
+T: Display + Debug
+
+
+COM WHERE:
+
+fn mostrar<T>(valor: T)
+where
+    T: Display + Debug,
+{
+}
+
+
+GENERICS + POLIMORFISMO:
+
+fn executar<T: Falar>(item: &T) {
+    item.falar();
+}
+
+→ Generic
+→ Trait Bound
+→ Static Dispatch
+
+
+RELAÇÃO:
+
+Generics
+    ↓
+<T>
+    ↓
+tipos diferentes
+    ↓
+Trait Bounds
+    ↓
+restringem comportamentos permitidos
+    ↓
+Static Dispatch
+
+
+EXEMPLOS QUE JÁ USAMOS:
+
+Vec<T>
+
+Option<T>
+
+Result<T, E>
+
+HashMap<K, V>
+
+
+FORMA PARA MEMORIZAR:
+
+T
+→ Type
+
+K
+→ Key
+
+V
+→ Value
+
+E
+→ Error
+
+
+RESUMO FINAL:
+
+Generics
+→ reutilização de código para diferentes tipos.
+
+<T>
+→ declara um tipo genérico.
+
+<T, U>
+→ declara vários tipos genéricos.
+
+T: Trait
+→ T precisa implementar uma Trait.
+
+Generics + Trait Bounds
+→ permitem polimorfismo estático
+  com segurança de tipos.
+
+
+Generics usando a Trait Display em Rust
+
+A Display é uma trait usada para permitir que um valor seja exibido com:
+
+println!("{}", valor);
+
+Quando usamos Generics, o Rust não sabe automaticamente se o tipo genérico T pode ser mostrado com {}. Por isso usamos um Trait Bound com Display.
+
+Exemplo básico
+use std::fmt::Display;
+
+fn mostrar<T: Display>(valor: T) {
+    println!("{}", valor);
+}
+
+fn main() {
+    mostrar(10);
+    mostrar(3.14);
+    mostrar("Rust");
+}
+
+Aqui:
+
+T: Display
+
+significa:
+
+T pode ser qualquer tipo, desde que implemente a trait Display.
+
+Então:
+
+T
+↓
+tipo genérico
+
+Display
+↓
+comportamento exigido
+
+T: Display
+↓
+T precisa saber ser exibido com {}
+Por que isso é necessário?
+
+Se você fizer:
+
+fn mostrar<T>(valor: T) {
+    println!("{}", valor);
+}
+
+o compilador reclama.
+
+Porque T poderia ser qualquer tipo, e nem todo tipo implementa Display.
+
+O Rust precisa da garantia:
+
+T: Display
+
+para permitir:
+
+println!("{}", valor);
+Usando a sintaxe where
+
+A mesma função pode ser escrita assim:
+
+use std::fmt::Display;
+
+fn mostrar<T>(valor: T)
+where
+    T: Display,
+{
+    println!("{}", valor);
+}
+
+Isso é equivalente a:
+
+fn mostrar<T: Display>(valor: T)
+
+A forma com where costuma ficar melhor quando existem várias restrições.
+
+Exemplo com dois Generics
+use std::fmt::Display;
+
+fn mostrar<T: Display, U: Display>(a: T, b: U) {
+    println!("Primeiro: {}", a);
+    println!("Segundo: {}", b);
+}
+
+fn main() {
+    mostrar("Rust", 10);
+    mostrar(3.14, "Python");
+}
+
+Aqui:
+
+T = primeiro tipo
+U = segundo tipo
+
+E ambos precisam implementar:
+
+Display
+Com where
+use std::fmt::Display;
+
+fn mostrar<T, U>(a: T, b: U)
+where
+    T: Display,
+    U: Display,
+{
+    println!("{} {}", a, b);
+}
+
+Isso facilita quando a função começa a ter vários Generics.
+
+Generic Struct + Display
+
+Também podemos usar Display em métodos de uma struct genérica.
+
+use std::fmt::Display;
+
+struct Caixa<T> {
+    valor: T,
+}
+
+impl<T: Display> Caixa<T> {
+
+    fn mostrar(&self) {
+        println!("Valor: {}", self.valor);
+    }
+}
+
+fn main() {
+    let caixa1 = Caixa {
+        valor: 10,
+    };
+
+    let caixa2 = Caixa {
+        valor: "Rust",
+    };
+
+    caixa1.mostrar();
+    caixa2.mostrar();
+}
+
+O importante é:
+
+impl<T: Display> Caixa<T>
+
+Isso significa:
+
+Esses métodos estão disponíveis para Caixa<T> quando T implementa Display.
+
+Generic retornando valor
+use std::fmt::Display;
+
+fn mostrar_e_retornar<T: Display>(valor: T) -> T {
+    println!("Valor: {}", valor);
+
+    valor
+}
+
+Uso:
+
+fn main() {
+    let numero = mostrar_e_retornar(10);
+
+    println!("Retornado: {}", numero);
+}
+
+Aqui T entra:
+
+valor: T
+
+e também sai:
+
+-> T
+Display + outras Traits
+
+Podemos exigir mais de um comportamento:
+
+use std::fmt::{Display, Debug};
+
+fn mostrar<T>(valor: T)
+where
+    T: Display + Debug,
+{
+    println!("Display: {}", valor);
+    println!("Debug: {:?}", valor);
+}
+
+Agora T precisa implementar:
+
+Display
++
+Debug
+Display em uma Struct criada por você
+
+Por padrão, uma struct personalizada não implementa Display.
+
+Exemplo:
+
+struct Pessoa {
+    nome: String,
+}
+
+Isso não funciona:
+
+println!("{}", pessoa);
+
+Para funcionar, precisamos implementar Display.
+
+use std::fmt;
+
+struct Pessoa {
+    nome: String,
+}
+
+impl fmt::Display for Pessoa {
+
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+
+        write!(f, "Pessoa: {}", self.nome)
+    }
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+    };
+
+    println!("{}", pessoa);
+}
+
+Agora Pessoa implementa:
+
+Display
+
+Portanto pode ser passada para uma função:
+
+fn mostrar<T: Display>(valor: T)
+Juntando tudo
+use std::fmt;
+
+struct Pessoa {
+    nome: String,
+}
+
+impl fmt::Display for Pessoa {
+
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+
+        write!(f, "{}", self.nome)
+    }
+}
+
+fn mostrar<T: fmt::Display>(valor: T) {
+    println!("Valor recebido: {}", valor);
+}
+
+fn main() {
+
+    mostrar(10);
+
+    mostrar("Rust");
+
+    mostrar(3.14);
+
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+    };
+
+    mostrar(pessoa);
+}
+
+A relação fica:
+
+mostrar<T: Display>()
+        │
+        ├── i32
+        ├── f64
+        ├── &str
+        └── Pessoa
+              │
+              └── implementa Display
+Resumo para copiar e colar
+GENERICS + DISPLAY — RUST
+
+Display
+→ Trait usada para representar valores
+  de forma legível usando {}.
+
+Import:
+
+use std::fmt::Display;
+
+
+GENERIC COM DISPLAY:
+
+fn mostrar<T: Display>(valor: T) {
+    println!("{}", valor);
+}
+
+
+T
+→ tipo genérico.
+
+T: Display
+→ T pode ser qualquer tipo,
+  desde que implemente Display.
+
+
+SEM TRAIT BOUND:
+
+fn mostrar<T>(valor: T) {
+    println!("{}", valor);
+}
+
+→ ERRO
+
+Rust não sabe se T pode ser exibido com {}.
+
+
+COM WHERE:
+
+fn mostrar<T>(valor: T)
+where
+    T: Display,
+{
+    println!("{}", valor);
+}
+
+
+DOIS GENERICS:
+
+fn mostrar<T, U>(a: T, b: U)
+where
+    T: Display,
+    U: Display,
+{
+    println!("{}", a);
+    println!("{}", b);
+}
+
+
+STRUCT GENERIC:
+
+struct Caixa<T> {
+    valor: T,
+}
+
+impl<T: Display> Caixa<T> {
+
+    fn mostrar(&self) {
+        println!("{}", self.valor);
+    }
+}
+
+
+DISPLAY + OUTRA TRAIT:
+
+fn mostrar<T>(valor: T)
+where
+    T: Display + Debug,
+{
+    println!("{}", valor);
+    println!("{:?}", valor);
+}
+
+
+DISPLAY EM STRUCT PERSONALIZADA:
+
+use std::fmt;
+
+struct Pessoa {
+    nome: String,
+}
+
+impl fmt::Display for Pessoa {
+
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+
+        write!(f, "{}", self.nome)
+    }
+}
+
+
+RELAÇÃO:
+
+Generics
+    ↓
+<T>
+    ↓
+tipo genérico
+    ↓
+Trait Bound
+    ↓
+T: Display
+    ↓
+T pode ser exibido com {}
+
+
+FORMA PARA MEMORIZAR:
+
+T
+= qualquer tipo
+
+T: Display
+= qualquer tipo que saiba
+  ser mostrado com {}
+
+Display
+= comportamento necessário
+  para println!("{}", valor)
+
+
+RESUMO FINAL:
+
+Generics
+→ tornam o código reutilizável.
+
+Display
+→ define como um valor pode ser
+  representado com {}.
+
+T: Display
+→ combina Generics + Traits.
+
+Generics + Trait Bounds
+→ permitem reutilização com
+  restrições de comportamento.
+
+Lifetimes e Dangling Pointers em Rust
+
+Esses dois assuntos estão diretamente ligados.
+
+A ideia principal é:
+
+LIFETIME
+→ controla/representa por quanto tempo referências são válidas
+
+DANGLING POINTER
+→ referência/ponteiro que aponta para uma região de memória que já não é válida
+
+Rust usa regras de Borrowing + Lifetimes
+para impedir referências penduradas em código seguro.
+1. O que é um Dangling Pointer?
+
+Imagine:
+
+fn main() {
+    let referencia;
+
+    {
+        let numero = 10;
+
+        referencia = &numero;
+    }
+
+    println!("{}", referencia);
+}
+
+Esse código não compila.
+
+O problema está aqui:
+
+{
+    let numero = 10;
+
+    referencia = &numero;
+}
+
+Dentro do bloco:
+
+numero
+  ↓
+10
+
+referencia
+  ↓
+&numero
+
+Mas quando o bloco termina:
+
+{
+    let numero = 10;
+    referencia = &numero;
+}
+                    ↓
+              numero deixa
+              de ser válido
+
+Se Rust permitisse:
+
+println!("{}", referencia);
+
+teríamos conceitualmente:
+
+referencia
+    │
+    ▼
+ memória que não pertence mais
+ a um valor válido naquele escopo
+
+    ↓
+
+DANGLING REFERENCE
+
+O Borrow Checker detecta isso durante a compilação e rejeita o programa.
+
+2. O que é Lifetime?
+
+Lifetime significa literalmente:
+
+tempo de vida
+
+Em Rust, lifetimes descrevem a validade das referências.
+
+Exemplo:
+
+fn main() {
+    let numero = 10;
+
+    let referencia = &numero;
+
+    println!("{}", referencia);
+}
+
+Conceitualmente:
+
+numero
+│
+├─────────────── lifetime de numero
+│
+│   referencia
+│   ├─────────── lifetime de referencia
+│   │
+▼   ▼
+
+A referência não pode ser usada além do período em que o dado referenciado permanece válido.
+
+Regra mental:
+
+A REFERÊNCIA
+não pode ser válida por mais tempo
+do que o dado ao qual ela se refere.
+3. Lifetime não significa manter o objeto vivo
+
+Esse detalhe é muito importante.
+
+Lifetime não aumenta o tempo de vida de uma variável.
+
+Isso:
+
+'a
+
+não significa:
+
+Mantenha esse valor na memória durante 'a.
+
+Significa aproximadamente:
+
+Existe uma relação de validade entre essas referências que o compilador precisa verificar.
+
+Lifetimes são principalmente uma forma de expressar relações entre referências.
+
+4. Lifetimes normalmente são inferidos
+
+Você já utiliza lifetimes mesmo sem escrever:
+
+'a
+
+Por exemplo:
+
+fn tamanho(texto: &String) -> usize {
+    texto.len()
+}
+
+Existe um lifetime associado a:
+
+&String
+
+mas o compilador consegue inferi-lo.
+
