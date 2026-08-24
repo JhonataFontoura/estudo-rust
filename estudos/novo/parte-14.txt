@@ -1,0 +1,632 @@
+Imagens
+Ícones
+Fontes
+
+Estrutura:
+
+static/
+├── css/
+│   └── style.css
+├── js/
+│   └── app.js
+└── img/
+    └── logo.png
+
+Rocket pode servir esse diretório:
+
+use rocket::fs::FileServer;
+
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
+        .mount(
+            "/static",
+            FileServer::from("static"),
+        )
+}
+
+No HTML:
+
+<link
+    rel="stylesheet"
+    href="/static/css/style.css"
+>
+
+Fluxo:
+
+/static/css/style.css
+          ↓
+      FileServer
+          ↓
+      style.css
+          ↓
+      Navegador
+6. Criando formulário de cadastro
+
+Podemos criar um formulário HTML:
+
+<form action="/usuarios" method="post">
+
+    <input
+        type="text"
+        name="nome"
+        placeholder="Nome"
+    >
+
+    <input
+        type="email"
+        name="email"
+        placeholder="E-mail"
+    >
+
+    <button type="submit">
+        Cadastrar
+    </button>
+
+</form>
+
+No Rust, podemos representar os dados:
+
+use rocket::form::FromForm;
+
+#[derive(FromForm)]
+struct UsuarioForm {
+    nome: String,
+    email: String,
+}
+
+A rota recebe:
+
+use rocket::form::Form;
+
+#[post("/usuarios", data = "<form>")]
+fn cadastrar(
+    form: Form<UsuarioForm>
+) -> String {
+    format!(
+        "Usuário cadastrado: {}",
+        form.nome
+    )
+}
+
+Fluxo:
+
+Form HTML
+   ↓
+POST
+   ↓
+Form<UsuarioForm>
+   ↓
+Controller
+   ↓
+Cadastro
+7. Outra maneira de carregar módulos
+
+Além de declarar:
+
+mod controllers;
+
+e depois acessar caminhos completos, podemos importar itens para facilitar seu uso.
+
+Por exemplo:
+
+mod controllers;
+
+use controllers::usuario_controller;
+
+Depois:
+
+usuario_controller::index
+
+Ou importar diretamente:
+
+use controllers::usuario_controller::index;
+
+Permitindo:
+
+routes![index]
+
+Isso se conecta ao que você estudou anteriormente:
+
+mod
+→ declara/carrega módulo
+
+use
+→ traz um caminho para o escopo
+
+crate
+→ raiz da crate
+
+super
+→ módulo pai
+
+self
+→ módulo atual
+8. POST Form e FlashMessage
+
+Depois que um formulário é enviado, muitas aplicações precisam mostrar uma mensagem:
+
+Usuário cadastrado com sucesso!
+
+Uma abordagem comum é:
+
+POST
+ ↓
+processa formulário
+ ↓
+salva dados
+ ↓
+redirect
+ ↓
+GET
+ ↓
+mensagem de sucesso
+
+Isso também evita problemas de reenvio de formulário ao atualizar a página.
+
+Conceitualmente:
+
+#[post("/usuarios", data = "<form>")]
+fn cadastrar(form: Form<UsuarioForm>) {
+    // valida
+    // salva
+    // adiciona mensagem
+    // redireciona
+}
+
+As APIs exatas para mensagens flash dependem da abordagem/versão usada no projeto, mas o conceito central do tópico é associar uma mensagem temporária ao redirecionamento após uma operação.
+
+9. Fluxo de alteração de dados
+
+Para atualizar um usuário, normalmente temos duas etapas.
+
+Primeiro:
+
+GET /usuarios/10/editar
+
+Mostra o formulário preenchido.
+
+Depois:
+
+POST/PUT /usuarios/10
+
+envia os novos dados.
+
+Exemplo conceitual:
+
+#[get("/usuarios/<id>/editar")]
+fn editar(id: u32) -> Template {
+    // buscar usuário
+    // carregar formulário
+    todo!()
+}
+
+Depois:
+
+#[post("/usuarios/<id>", data = "<form>")]
+fn atualizar(
+    id: u32,
+    form: Form<UsuarioForm>,
+) {
+    // validar
+    // atualizar
+}
+
+Fluxo completo:
+
+Usuário
+   ↓
+Editar
+   ↓
+GET /usuarios/10/editar
+   ↓
+Busca usuário
+   ↓
+Mostra formulário
+   ↓
+Usuário altera dados
+   ↓
+POST
+   ↓
+Atualiza
+   ↓
+Redirect
+   ↓
+Página atualizada
+10. Fluxo de exclusão
+
+A exclusão normalmente recebe o identificador do recurso.
+
+Exemplo conceitual:
+
+#[post("/usuarios/<id>/deletar")]
+fn deletar(id: u32) {
+    // localizar usuário
+    // excluir usuário
+    // redirecionar
+}
+
+Fluxo:
+
+Usuário
+   ↓
+Excluir
+   ↓
+ID
+   ↓
+Controller
+   ↓
+Repository
+   ↓
+DELETE
+   ↓
+Banco
+   ↓
+Redirect
+
+Em uma aplicação real, também é comum pedir confirmação antes:
+
+Deseja realmente excluir?
+
+[Cancelar] [Excluir]
+Resumo para copiar e colar
+APP WEB COM ROCKET — RUST
+
+
+========================
+ROCKET WEB
+========================
+
+Rocket
+→ framework web para Rust.
+
+Pode trabalhar com:
+
+→ Rotas
+→ HTML
+→ Templates
+→ Formulários
+→ Arquivos estáticos
+→ CRUD
+
+
+========================
+TEMPLATES
+========================
+
+Templates
+→ páginas HTML que recebem
+  dados dinamicamente.
+
+Fluxo:
+
+Rust
+ ↓
+context!
+ ↓
+Template
+ ↓
+HTML
+ ↓
+Navegador
+
+
+Template::render()
+→ renderiza um template.
+
+
+========================
+CONTROLLERS
+========================
+
+Controller
+→ recebe requisições e controla
+  o fluxo da aplicação.
+
+Estrutura:
+
+src/
+├── main.rs
+├── controllers/
+├── models/
+└── repositories/
+
+
+Fluxo:
+
+Request
+ ↓
+Controller
+ ↓
+Repository
+ ↓
+Dados
+ ↓
+Template
+ ↓
+HTML
+
+
+========================
+APPLICATION LAYOUT
+========================
+
+Layout
+→ estrutura HTML compartilhada
+  entre várias páginas.
+
+Pode conter:
+
+→ head
+→ navbar
+→ menu
+→ footer
+→ estrutura principal
+
+
+Vantagem:
+
+→ evita repetição de HTML.
+
+
+========================
+STATIC
+========================
+
+Arquivos estáticos:
+
+→ CSS
+→ JavaScript
+→ imagens
+→ ícones
+
+
+Rocket:
+
+FileServer::from("static")
+
+
+Exemplo:
+
+.mount(
+    "/static",
+    FileServer::from("static")
+)
+
+
+========================
+FORM
+========================
+
+Formulário
+→ envia dados do navegador
+  para o servidor.
+
+HTML:
+
+<form method="post">
+
+
+Rust:
+
+#[derive(FromForm)]
+struct UsuarioForm {
+    nome: String,
+    email: String,
+}
+
+
+Recebimento:
+
+Form<UsuarioForm>
+
+
+========================
+MOD
+========================
+
+mod
+→ declara/carrega um módulo.
+
+Exemplo:
+
+mod controllers;
+
+
+========================
+USE
+========================
+
+use
+→ traz um caminho/item para
+  o escopo atual.
+
+Exemplo:
+
+use controllers::usuario_controller;
+
+
+========================
+POST FORM
+========================
+
+POST
+→ envia os dados do formulário.
+
+Fluxo:
+
+Form HTML
+ ↓
+POST
+ ↓
+Controller
+ ↓
+Validação
+ ↓
+Persistência
+ ↓
+Redirect
+
+
+========================
+FLASH MESSAGE
+========================
+
+Flash Message
+→ mensagem temporária associada
+  normalmente ao próximo request.
+
+Exemplos:
+
+"Usuário cadastrado com sucesso"
+
+"Dados atualizados"
+
+"Usuário excluído"
+
+
+Fluxo comum:
+
+POST
+ ↓
+Processamento
+ ↓
+Mensagem
+ ↓
+Redirect
+ ↓
+GET
+ ↓
+Exibição da mensagem
+
+
+========================
+ALTERAÇÃO
+========================
+
+Fluxo comum:
+
+GET /usuarios/10/editar
+ ↓
+Buscar usuário
+ ↓
+Mostrar formulário
+ ↓
+Alterar dados
+ ↓
+Enviar formulário
+ ↓
+Atualizar
+ ↓
+Redirect
+
+
+========================
+EXCLUSÃO
+========================
+
+Fluxo:
+
+Usuário
+ ↓
+Excluir
+ ↓
+ID
+ ↓
+Controller
+ ↓
+Repository
+ ↓
+Banco
+ ↓
+Exclusão
+ ↓
+Redirect
+
+
+========================
+CRUD WEB
+========================
+
+CREATE
+→ formulário de cadastro.
+
+READ
+→ página de listagem/detalhes.
+
+UPDATE
+→ formulário de edição.
+
+DELETE
+→ fluxo de exclusão.
+
+
+========================
+PARA MEMORIZAR
+========================
+
+Rocket
+= framework web.
+
+Template
+= HTML dinâmico.
+
+context!
+= envia dados ao template.
+
+Controller
+= controla requisição/resposta.
+
+Layout
+= estrutura HTML compartilhada.
+
+Static
+= CSS, JS e imagens.
+
+FileServer
+= serve arquivos estáticos.
+
+Form
+= dados enviados pelo formulário.
+
+FromForm
+= transforma dados do formulário
+  em uma struct.
+
+POST
+= envia dados.
+
+Flash Message
+= mensagem temporária.
+
+Redirect
+= redirecionamento.
+
+mod
+= declara módulo.
+
+use
+= traz item/caminho para o escopo.
+
+
+MAPA GERAL:
+
+NAVEGADOR
+    ↓
+ROCKET
+    ↓
+ROUTE
+    ↓
+CONTROLLER
+    ↓
+SERVICE / REPOSITORY
+    ↓
+BANCO DE DADOS
+    ↓
+CONTROLLER
+    ↓
+TEMPLATE
+    ↓
+HTML
+    ↓
+NAVEGADOR
