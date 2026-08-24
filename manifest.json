@@ -1,0 +1,38 @@
+{
+  "project": "rust-tutorial-w3",
+  "version": 2,
+  "sources": {
+    "base": [
+      "estudos/base/parte-00.txt",
+      "estudos/base/parte-01.txt",
+      "estudos/base/parte-02.txt",
+      "estudos/base/parte-03.txt",
+      "estudos/base/parte-04.txt",
+      "estudos/base/parte-05.txt",
+      "estudos/base/parte-06.txt",
+      "estudos/base/parte-07.txt",
+      "estudos/base/parte-08.txt"
+    ],
+    "novo": [
+      "estudos/novo/parte-00.txt",
+      "estudos/novo/parte-01.txt",
+      "estudos/novo/parte-02.txt",
+      "estudos/novo/parte-03.txt",
+      "estudos/novo/parte-04.txt",
+      "estudos/novo/parte-05.txt",
+      "estudos/novo/parte-06.txt",
+      "estudos/novo/parte-07.txt",
+      "estudos/novo/parte-08.txt",
+      "estudos/novo/parte-09.txt",
+      "estudos/novo/parte-10.txt",
+      "estudos/novo/parte-11.txt",
+      "estudos/novo/parte-12.txt",
+      "estudos/novo/parte-13.txt",
+      "estudos/novo/parte-14.txt"
+    ],
+    "tools": [
+      "estudos/ferramentas/parte-00.txt",
+      "estudos/ferramentas/parte-01.txt"
+    ]
+  }
+}
