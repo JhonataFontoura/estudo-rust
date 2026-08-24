@@ -1,0 +1,14 @@
+Índice da área de ferramentas do Rust Tutorial W3.
+
+O conteúdo completo está dividido em:
+
+estudos/ferramentas/parte-00.txt
+estudos/ferramentas/parte-01.txt
+
+Para reconstruir um único arquivo localmente, execute na raiz do projeto:
+
+python reconstruir.py
+
+O script irá gerar:
+
+estudos/ferramentas_completo.txt
