@@ -1,0 +1,1019 @@
+→ controla a visibilidade dos itens.
+
+use
+→ traz caminhos para o escopo atual.
+
+crate
+→ representa a raiz do crate atual.
+
+
+FORMA PARA MEMORIZAR:
+
+#[path = "ONDE ESTÁ O ARQUIVO"]
+mod NOME_DO_MODULO;
+
+Declaração de mod diretamente no main.rs
+
+Em Rust, você pode declarar um módulo diretamente dentro do main.rs, sem criar outro arquivo .rs.
+
+Nesse caso, usamos:
+
+mod nome_do_modulo {
+    // conteúdo do módulo
+}
+Exemplo básico
+mod usuario {
+    pub fn cadastrar() {
+        println!("Usuário cadastrado!");
+    }
+}
+
+fn main() {
+    usuario::cadastrar();
+}
+
+Aqui, o módulo inteiro está declarado dentro do próprio main.rs.
+
+A estrutura lógica é:
+
+main.rs
+│
+├── mod usuario
+│      │
+│      └── cadastrar()
+│
+└── fn main()
+       │
+       └── usuario::cadastrar()
+mod diretamente + use
+
+Também podemos trazer a função para o escopo:
+
+mod usuario {
+    pub fn cadastrar() {
+        println!("Usuário cadastrado!");
+    }
+}
+
+use crate::usuario::cadastrar;
+
+fn main() {
+    cadastrar();
+}
+
+Observe a diferença.
+
+Sem use:
+
+usuario::cadastrar();
+
+Com use:
+
+use crate::usuario::cadastrar;
+
+cadastrar();
+Vários módulos dentro do main.rs
+mod usuario {
+    pub fn cadastrar() {
+        println!("Usuário cadastrado!");
+    }
+}
+
+mod produto {
+    pub fn cadastrar() {
+        println!("Produto cadastrado!");
+    }
+}
+
+mod banco {
+    pub fn conectar() {
+        println!("Banco conectado!");
+    }
+}
+
+fn main() {
+    usuario::cadastrar();
+    produto::cadastrar();
+    banco::conectar();
+}
+
+Temos:
+
+crate
+│
+├── usuario
+│      └── cadastrar()
+│
+├── produto
+│      └── cadastrar()
+│
+└── banco
+       └── conectar()
+Submódulo diretamente no main.rs
+
+Também podemos colocar um mod dentro de outro:
+
+mod usuario {
+
+    pub mod cadastro {
+        pub fn cadastrar() {
+            println!("Usuário cadastrado!");
+        }
+    }
+
+    pub mod login {
+        pub fn entrar() {
+            println!("Login realizado!");
+        }
+    }
+}
+
+fn main() {
+    usuario::cadastro::cadastrar();
+    usuario::login::entrar();
+}
+
+Hierarquia:
+
+crate
+│
+└── usuario
+    │
+    ├── cadastro
+    │      └── cadastrar()
+    │
+    └── login
+           └── entrar()
+Diferença importante
+
+Declarando diretamente:
+
+mod usuario {
+    pub fn cadastrar() {}
+}
+
+O código do módulo está no próprio arquivo.
+
+Declarando somente:
+
+mod usuario;
+
+O código do módulo fica fora desse bloco, normalmente em um arquivo associado, como usuario.rs.
+
+Portanto:
+
+mod usuario {
+    ...
+}
+
+→ módulo definido diretamente aqui
+
+
+mod usuario;
+
+→ declaração de módulo cujo conteúdo
+  está separado segundo a estrutura
+  de módulos/arquivos
+Resumo para copiar e colar
+MOD DECLARADO DIRETAMENTE NO MAIN.RS — RUST
+
+É possível criar um módulo diretamente
+dentro do arquivo main.rs.
+
+SINTAXE:
+
+mod nome {
+    // código
+}
+
+
+EXEMPLO:
+
+mod usuario {
+
+    pub fn cadastrar() {
+        println!("Usuário cadastrado!");
+    }
+
+}
+
+fn main() {
+    usuario::cadastrar();
+}
+
+
+ESTRUTURA:
+
+main.rs
+│
+├── mod usuario
+│      └── cadastrar()
+│
+└── fn main()
+       └── usuario::cadastrar()
+
+
+COM USE:
+
+mod usuario {
+
+    pub fn cadastrar() {
+        println!("Usuário cadastrado!");
+    }
+
+}
+
+use crate::usuario::cadastrar;
+
+fn main() {
+    cadastrar();
+}
+
+
+SUBMÓDULOS:
+
+mod usuario {
+
+    pub mod cadastro {
+
+        pub fn cadastrar() {
+            println!("Usuário cadastrado!");
+        }
+
+    }
+
+    pub mod login {
+
+        pub fn entrar() {
+            println!("Login realizado!");
+        }
+
+    }
+
+}
+
+fn main() {
+    usuario::cadastro::cadastrar();
+    usuario::login::entrar();
+}
+
+
+DIFERENÇA:
+
+mod usuario {
+    ...
+}
+
+→ define o módulo diretamente
+  no arquivo atual.
+
+
+mod usuario;
+
+→ declara o módulo sem colocar
+  seu conteúdo diretamente no bloco.
+
+
+RESUMO:
+
+mod usuario { ... }
+→ módulo definido diretamente.
+
+mod usuario;
+→ módulo declarado separadamente.
+
+pub
+→ controla a visibilidade.
+
+use
+→ traz um caminho para o escopo atual.
+
+crate
+→ raiz do crate atual.
+
+
+FORMA PARA MEMORIZAR:
+
+mod nome {
+    // módulo está aqui
+}
+
+mod nome;
+// módulo está separado
+
+super para acessar funções de módulos superiores em Rust
+
+Em Rust, super é usado para acessar itens que estão no módulo pai do módulo atual.
+
+Pense em:
+
+super
+  ↓
+subir um nível na hierarquia de módulos
+Exemplo básico
+mod usuario {
+
+    pub fn mostrar_usuario() {
+        println!("Usuário carregado!");
+    }
+
+    pub mod cadastro {
+
+        pub fn cadastrar() {
+            super::mostrar_usuario();
+
+            println!("Cadastro realizado!");
+        }
+    }
+}
+
+fn main() {
+    usuario::cadastro::cadastrar();
+}
+
+Observe:
+
+super::mostrar_usuario();
+
+A função cadastrar() está dentro de:
+
+usuario
+   ↓
+cadastro
+
+Quando usamos:
+
+super::
+
+subimos de:
+
+cadastro
+   ↑
+usuario
+
+Então encontramos:
+
+mostrar_usuario()
+
+A hierarquia é:
+
+crate
+│
+└── usuario
+    │
+    ├── mostrar_usuario()
+    │
+    └── cadastro
+           │
+           └── cadastrar()
+                  │
+                  └── super::mostrar_usuario()
+                         ↑
+                         │
+                     usuario
+super com use
+
+Você também pode importar a função do módulo pai:
+
+mod usuario {
+
+    pub fn mostrar_usuario() {
+        println!("Usuário carregado!");
+    }
+
+    pub mod cadastro {
+
+        use super::mostrar_usuario;
+
+        pub fn cadastrar() {
+            mostrar_usuario();
+
+            println!("Cadastro realizado!");
+        }
+    }
+}
+
+Aqui:
+
+use super::mostrar_usuario;
+
+traz a função do módulo pai para o escopo de cadastro.
+
+Depois podemos simplesmente usar:
+
+mostrar_usuario();
+
+em vez de:
+
+super::mostrar_usuario();
+Subindo mais de um nível
+
+Também podemos encadear super.
+
+super::super::
+
+Cada super sobe um nível.
+
+Por exemplo:
+
+crate
+│
+└── sistema
+    │
+    ├── iniciar()
+    │
+    └── usuario
+        │
+        └── cadastro
+
+Dentro de cadastro:
+
+super::
+
+vai para:
+
+usuario
+
+Enquanto:
+
+super::super::
+
+vai para:
+
+sistema
+
+Exemplo:
+
+mod sistema {
+
+    pub fn iniciar() {
+        println!("Sistema iniciado!");
+    }
+
+    pub mod usuario {
+
+        pub mod cadastro {
+
+            pub fn cadastrar() {
+                super::super::iniciar();
+
+                println!("Usuário cadastrado!");
+            }
+        }
+    }
+}
+
+fn main() {
+    sistema::usuario::cadastro::cadastrar();
+}
+Resumo para copiar e colar
+SUPER EM RUST
+
+super
+→ permite acessar itens do módulo pai.
+
+Pense:
+
+super
+↓
+subir um nível na hierarquia de módulos.
+
+
+EXEMPLO:
+
+mod usuario {
+
+    pub fn mostrar_usuario() {
+        println!("Usuário carregado!");
+    }
+
+    pub mod cadastro {
+
+        pub fn cadastrar() {
+
+            super::mostrar_usuario();
+
+            println!("Cadastro realizado!");
+        }
+    }
+}
+
+
+fn main() {
+    usuario::cadastro::cadastrar();
+}
+
+
+HIERARQUIA:
+
+crate
+│
+└── usuario
+    │
+    ├── mostrar_usuario()
+    │
+    └── cadastro
+           │
+           └── cadastrar()
+                  │
+                  └── super::mostrar_usuario()
+
+
+super::mostrar_usuario();
+
+→ sai de cadastro
+→ sobe para usuario
+→ encontra mostrar_usuario()
+
+
+COM USE:
+
+use super::mostrar_usuario;
+
+Depois:
+
+mostrar_usuario();
+
+
+SUBINDO MAIS DE UM NÍVEL:
+
+super::
+→ sobe 1 nível
+
+super::super::
+→ sobe 2 níveis
+
+
+EXEMPLO:
+
+crate
+│
+└── sistema
+    │
+    ├── iniciar()
+    │
+    └── usuario
+        │
+        └── cadastro
+               │
+               └── super::super::iniciar()
+
+
+COMPARAÇÃO:
+
+crate::
+→ começa pela raiz do crate
+
+self::
+→ começa pelo módulo atual
+
+super::
+→ começa pelo módulo pai
+
+
+FORMA PARA MEMORIZAR:
+
+crate = raiz
+
+self = aqui
+
+super = pai
+
+
+IMPORTANTE:
+
+super não "carrega" o arquivo.
+
+super cria um caminho relativo começando
+pelo módulo pai.
+
+mod
+→ declara/define módulos
+
+use
+→ traz um caminho para o escopo
+
+super
+→ acessa o módulo pai
+
+pub
+→ controla a visibilidade dos itens
+
+Traits em Rust
+
+trait em Rust é uma forma de definir comportamentos que diferentes tipos podem compartilhar.
+
+Uma trait diz:
+
+Um tipo que implementar este trait deve possuir determinados comportamentos.
+
+Pense assim:
+
+Trait
+  ↓
+define um comportamento
+  ↓
+Struct A ── implementa
+Struct B ── implementa
+Struct C ── pode não implementar
+
+É parecido com o conceito de interface em outras linguagens, embora traits em Rust tenham recursos próprios.
+
+1. Criando uma Trait
+
+Usamos:
+
+trait NomeTrait {
+    fn metodo(&self);
+}
+
+Exemplo:
+
+trait Falar {
+    fn falar(&self);
+}
+
+Aqui estamos dizendo:
+
+Qualquer tipo que implementar Falar precisa fornecer o comportamento falar().
+
+A trait ainda não diz necessariamente como cada tipo vai falar.
+
+2. Implementando Trait em uma Struct
+
+Vamos criar:
+
+struct Pessoa {
+    nome: String,
+}
+
+E implementar Falar:
+
+trait Falar {
+    fn falar(&self);
+}
+
+struct Pessoa {
+    nome: String,
+}
+
+impl Falar for Pessoa {
+
+    fn falar(&self) {
+        println!("Olá, meu nome é {}", self.nome);
+    }
+}
+
+A sintaxe importante é:
+
+impl Falar for Pessoa
+
+Leia como:
+
+Implemente o trait Falar para o tipo Pessoa.
+
+Agora:
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+    };
+
+    pessoa.falar();
+}
+3. Várias Structs implementando a mesma Trait
+
+Esse é um dos principais motivos para usar traits.
+
+trait Falar {
+    fn falar(&self);
+}
+
+struct Pessoa {
+    nome: String,
+}
+
+struct Robo {
+    modelo: String,
+}
+
+Podemos implementar para Pessoa:
+
+impl Falar for Pessoa {
+
+    fn falar(&self) {
+        println!("Olá, sou {}", self.nome);
+    }
+}
+
+E para Robo:
+
+impl Falar for Robo {
+
+    fn falar(&self) {
+        println!("Sistema {} inicializado.", self.modelo);
+    }
+}
+
+Agora os dois possuem:
+
+falar()
+
+mas cada um tem sua própria implementação.
+
+             trait Falar
+                  │
+             fn falar()
+              /       \
+             /         \
+            ↓           ↓
+         Pessoa        Robo
+            │           │
+            ↓           ↓
+     "Olá, sou..."   "Sistema..."
+4. Trait com implementação padrão
+
+Uma trait também pode fornecer um comportamento padrão.
+
+trait Informacao {
+
+    fn mostrar(&self) {
+        println!("Informação não disponível.");
+    }
+
+}
+
+Uma struct pode implementar a trait sem substituir o método:
+
+struct Usuario;
+
+impl Informacao for Usuario {}
+
+Agora:
+
+fn main() {
+    let usuario = Usuario;
+
+    usuario.mostrar();
+}
+
+Resultado:
+
+Informação não disponível.
+
+Porque usamos a implementação padrão.
+
+5. Sobrescrevendo a implementação padrão
+
+Também podemos substituir o comportamento:
+
+trait Informacao {
+
+    fn mostrar(&self) {
+        println!("Informação não disponível.");
+    }
+
+}
+
+struct Usuario {
+    nome: String,
+}
+
+impl Informacao for Usuario {
+
+    fn mostrar(&self) {
+        println!("Usuário: {}", self.nome);
+    }
+
+}
+
+Agora:
+
+usuario.mostrar();
+
+usa a implementação específica de Usuario.
+
+6. Trait como parâmetro
+
+Agora começa uma das partes mais importantes.
+
+Imagine:
+
+trait Falar {
+    fn falar(&self);
+}
+
+Podemos criar uma função que aceita qualquer tipo que implemente Falar.
+
+fn executar_fala(item: &impl Falar) {
+    item.falar();
+}
+
+Isso significa:
+
+executar_fala()
+       ↓
+aceita qualquer tipo
+       ↓
+desde que implemente Falar
+
+Exemplo:
+
+trait Falar {
+    fn falar(&self);
+}
+
+struct Pessoa {
+    nome: String,
+}
+
+struct Robo {
+    modelo: String,
+}
+
+impl Falar for Pessoa {
+    fn falar(&self) {
+        println!("Olá, sou {}", self.nome);
+    }
+}
+
+impl Falar for Robo {
+    fn falar(&self) {
+        println!("Robô {} ativo.", self.modelo);
+    }
+}
+
+fn executar_fala(item: &impl Falar) {
+    item.falar();
+}
+
+fn main() {
+    let pessoa = Pessoa {
+        nome: String::from("Jhonata"),
+    };
+
+    let robo = Robo {
+        modelo: String::from("RX-01"),
+    };
+
+    executar_fala(&pessoa);
+    executar_fala(&robo);
+}
+
+A mesma função aceita tipos diferentes porque ambos implementam Falar.
+
+7. Trait Bound
+
+Existe outra forma muito comum:
+
+fn executar_fala<T: Falar>(item: &T) {
+    item.falar();
+}
+
+Isso é chamado de Trait Bound.
+
+Leia:
+
+T: Falar
+
+como:
+
+T pode ser qualquer tipo que implemente Falar.
+
+Portanto:
+
+T
+↓
+tipo genérico
+
+:
+
+↓
+deve implementar
+
+Falar
+↓
+trait
+8. where
+
+Quando existem várias restrições, podemos usar where.
+
+Em vez de:
+
+fn executar<T: Falar + Mostrar>(item: &T) {
+}
+
+podemos escrever:
+
+fn executar<T>(item: &T)
+where
+    T: Falar + Mostrar,
+{
+}
+
+Isso costuma melhorar a leitura quando os tipos genéricos ficam mais complexos.
+
+9. Mais de uma Trait
+
+Um tipo pode implementar várias traits.
+
+trait Falar {
+    fn falar(&self);
+}
+
+trait Identificar {
+    fn identificar(&self);
+}
+
+Uma struct:
+
+struct Robo {
+    modelo: String,
+}
+
+Pode implementar ambas:
+
+impl Falar for Robo {
+
+    fn falar(&self) {
+        println!("Olá!");
+    }
+
+}
+
+impl Identificar for Robo {
+
+    fn identificar(&self) {
+        println!("Modelo: {}", self.modelo);
+    }
+
+}
+
+Então:
+
+robo.falar();
+robo.identificar();
+
+Temos:
+
+            Robo
+          /      \
+         ↓        ↓
+      Falar    Identificar
+        ↓          ↓
+     falar()  identificar()
+10. Trait + Generics
+
+Traits aparecem muito junto de Generics.
+
+fn mostrar<T: std::fmt::Display>(valor: T) {
+    println!("{}", valor);
+}
+
+Aqui:
+
+T
+
+é um tipo genérico.
+
+Mas:
+
+T: std::fmt::Display
+
+coloca uma restrição:
+
+T precisa implementar Display.
+
+Por isso podemos usar:
+
+println!("{}", valor);
+11. Traits que você já usa sem perceber
+
+Quando você escreve:
+
+#[derive(Debug)]
+
+está trabalhando com o trait:
+
+Debug
+
+Por isso:
+
+println!("{:?}", pessoa);
+
+funciona.
+
+Outros traits muito comuns incluem:
+
+Debug
+Display
+Clone
+Copy
+Default
+Iterator
+Into
+From
+PartialEq
+Eq
+
+Por exemplo:
