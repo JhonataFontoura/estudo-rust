@@ -1,0 +1,1192 @@
+let nome = String::from("Jhonata");
+
+De forma simplificada:
+
+STACK
+
+nome
+----------------
+pointer
+length
+capacity
+   |
+   |
+   v
+
+HEAP
+
+J h o n a t a
+
+
+A estrutura String contém informações como:
+
+pointer  -> endereço dos dados
+length   -> quantidade de bytes utilizados
+capacity -> espaço disponível na alocação
+
+Os caracteres pertencentes à String ficam na Heap.
+
+
+==================================================
+RESUMO — STRINGS EM RUST
+==================================================
+
+&str
+=
+Referência para uma sequência de caracteres UTF-8.
+
+String
+=
+Tipo que possui seus dados e pode ser modificável quando declarado
+com mut.
+
+
+String::new()
+=
+Cria uma String vazia.
+
+
+String::from("texto")
+=
+Cria uma String a partir de um texto.
+
+
+.to_string()
+=
+Converte para String.
+
+
+.as_str()
+=
+Obtém &str de uma String.
+
+
+push_str()
+=
+Adiciona texto.
+
+
+push()
+=
+Adiciona um char.
+
+
+trim()
+=
+Remove espaços/quebras de linha das extremidades.
+
+
+len()
+=
+Retorna tamanho em bytes.
+
+
+chars().count()
+=
+Conta caracteres Unicode.
+
+
+chars()
+=
+Percorre os caracteres.
+
+
+contains()
+=
+Verifica se contém determinado texto.
+
+
+starts_with()
+=
+Verifica o início.
+
+
+ends_with()
+=
+Verifica o final.
+
+
+replace()
+=
+Substitui partes do texto.
+
+
+to_uppercase()
+=
+Converte para maiúsculas.
+
+
+to_lowercase()
+=
+Converte para minúsculas.
+
+
+split()
+=
+Divide o texto.
+
+
+format!()
+=
+Cria uma String formatada.
+
+
+RELAÇÃO COM O QUE JÁ FOI ESTUDADO:
+
+String
+   ↓
+possui seus dados
+   ↓
+Ownership
+   ↓
+estrutura String + alocação na Heap
+
+&String / &str
+   ↓
+Borrowing
+   ↓
+referência sem transferência de ownership
+
+
+FORMA SIMPLES DE DECORAR:
+
+String = "Eu possuo o texto."
+
+&str = "Estou olhando/emprestando uma sequência de texto."
+
+push_str() = adicionar texto
+
+push() = adicionar caractere
+
+trim() = limpar extremidades
+
+split() = separar
+
+replace() = substituir
+
+chars() = trabalhar com caracteres
+
+len() = tamanho em bytes
+
+format!() = montar uma nova String
+
+OPERADORES EM RUST
+
+Os operadores permitem realizar operações com valores e variáveis.
+
+Exemplos:
+
+10 + 5
+idade >= 18
+x == y
+true && false
+
+Os principais grupos são:
+
+1. Operadores aritméticos
+2. Operadores de atribuição
+3. Operadores de comparação
+4. Operadores lógicos
+5. Operadores de intervalo (Range)
+6. Operadores de bits (Bitwise)
+7. Operadores relacionados a referências
+
+
+==================================================
+1. OPERADORES ARITMÉTICOS
+==================================================
+
+São utilizados para realizar cálculos matemáticos.
+
++  -> adição
+-  -> subtração
+*  -> multiplicação
+/  -> divisão
+%  -> resto da divisão (módulo)
+
+
+EXEMPLO:
+
+fn main() {
+    let x = 10;
+    let y = 3;
+
+    println!("Soma: {}", x + y);
+    println!("Subtração: {}", x - y);
+    println!("Multiplicação: {}", x * y);
+    println!("Divisão: {}", x / y);
+    println!("Resto: {}", x % y);
+}
+
+
+RESULTADO:
+
+Soma: 13
+Subtração: 7
+Multiplicação: 30
+Divisão: 3
+Resto: 1
+
+
+IMPORTANTE:
+
+Como x e y são números inteiros:
+
+10 / 3
+
+resulta em:
+
+3
+
+e não:
+
+3.333...
+
+
+Para divisão com casas decimais:
+
+let x: f64 = 10.0;
+let y: f64 = 3.0;
+
+println!("{}", x / y);
+
+
+==================================================
+2. OPERADOR %
+==================================================
+
+% retorna o RESTO de uma divisão.
+
+Exemplo:
+
+10 % 3
+
+10 / 3 = 3
+resto = 1
+
+Então:
+
+10 % 3 = 1
+
+
+É muito utilizado para descobrir se um número é par.
+
+fn main() {
+    let numero = 10;
+
+    if numero % 2 == 0 {
+        println!("Número par");
+    } else {
+        println!("Número ímpar");
+    }
+}
+
+
+Se:
+
+10 % 2 = 0
+
+então 10 é divisível por 2.
+
+
+==================================================
+3. OPERADORES DE ATRIBUIÇÃO
+==================================================
+
+O operador básico de atribuição é:
+
+=
+
+Exemplo:
+
+let x = 10;
+
+Estamos atribuindo o valor 10 para x.
+
+
+Com variáveis mutáveis:
+
+let mut x = 10;
+
+x = 20;
+
+
+Também existem operadores de atribuição combinados:
+
++=
+-=
+*=
+/=
+%=
+
+
+EXEMPLO:
+
+let mut x = 10;
+
+x += 5;
+
+É equivalente a:
+
+x = x + 5;
+
+Resultado:
+
+15
+
+
+OUTROS EXEMPLOS:
+
+x -= 5;
+
+equivale a:
+
+x = x - 5;
+
+
+x *= 2;
+
+equivale a:
+
+x = x * 2;
+
+
+x /= 2;
+
+equivale a:
+
+x = x / 2;
+
+
+x %= 3;
+
+equivale a:
+
+x = x % 3;
+
+
+==================================================
+4. OPERADORES DE COMPARAÇÃO
+==================================================
+
+Servem para comparar dois valores.
+
+O resultado de uma comparação é:
+
+true
+
+ou
+
+false
+
+
+OPERADORES:
+
+==  -> igual a
+!=  -> diferente de
+>   -> maior que
+<   -> menor que
+>=  -> maior ou igual
+<=  -> menor ou igual
+
+
+EXEMPLO:
+
+fn main() {
+    let idade = 24;
+
+    println!("{}", idade == 24);
+    println!("{}", idade != 24);
+    println!("{}", idade > 18);
+    println!("{}", idade < 18);
+    println!("{}", idade >= 18);
+    println!("{}", idade <= 18);
+}
+
+
+==================================================
+5. == NÃO É A MESMA COISA QUE =
+==================================================
+
+Isso é muito importante.
+
+=
+
+significa:
+
+ATRIBUIÇÃO
+
+
+Exemplo:
+
+let idade = 24;
+
+
+Já:
+
+==
+
+significa:
+
+COMPARAÇÃO
+
+
+Exemplo:
+
+idade == 24
+
+
+Podemos pensar:
+
+=
+
+"Receba esse valor."
+
+
+==
+
+"Esses dois valores são iguais?"
+
+
+==================================================
+6. OPERADORES LÓGICOS
+==================================================
+
+Os principais são:
+
+&& -> AND (E)
+
+|| -> OR (OU)
+
+!  -> NOT (NÃO)
+
+
+==================================================
+7. OPERADOR && — E
+==================================================
+
+&& significa:
+
+As DUAS condições precisam ser verdadeiras.
+
+
+Exemplo:
+
+let idade = 24;
+let possui_carteira = true;
+
+if idade >= 18 && possui_carteira {
+    println!("Pode dirigir");
+}
+
+
+Temos:
+
+idade >= 18
+      E
+possui_carteira == true
+
+
+Se ambos forem verdadeiros:
+
+true && true
+
+resultado:
+
+true
+
+
+TABELA:
+
+true  && true  = true
+true  && false = false
+false && true  = false
+false && false = false
+
+
+==================================================
+8. OPERADOR || — OU
+==================================================
+
+|| significa:
+
+Pelo menos UMA condição precisa ser verdadeira.
+
+
+Exemplo:
+
+let sabado = true;
+let domingo = false;
+
+if sabado || domingo {
+    println!("É final de semana");
+}
+
+
+Tabela:
+
+true  || true  = true
+true  || false = true
+false || true  = true
+false || false = false
+
+
+==================================================
+9. OPERADOR ! — NÃO
+==================================================
+
+! inverte um valor booleano.
+
+Exemplo:
+
+let ligado = true;
+
+println!("{}", !ligado);
+
+Resultado:
+
+false
+
+
+Outro exemplo:
+
+let bloqueado = false;
+
+if !bloqueado {
+    println!("Acesso permitido");
+}
+
+
+!false
+
+vira:
+
+true
+
+
+==================================================
+10. EXEMPLO COM && E ||
+==================================================
+
+Um exemplo que você já utilizou no cálculo de idade:
+
+if mes_nascimento > mes_atual
+    || (mes_nascimento == mes_atual && dia_nascimento > dia_atual)
+{
+    idade -= 1;
+}
+
+
+Aqui temos:
+
+||
+
+OU
+
+
+e:
+
+&&
+
+E
+
+
+Podemos ler:
+
+SE
+
+o mês de nascimento for maior que o mês atual
+
+OU
+
+o mês for igual ao atual
+E
+o dia do nascimento ainda não chegou
+
+ENTÃO
+
+a pessoa ainda não fez aniversário.
+
+
+==================================================
+11. OPERADORES DE INTERVALO — RANGE
+==================================================
+
+Rust possui operadores para criar intervalos.
+
+..
+
+e
+
+..=
+
+
+EXEMPLO:
+
+for numero in 1..5 {
+    println!("{}", numero);
+}
+
+
+Resultado:
+
+1
+2
+3
+4
+
+
+O 5 NÃO é incluído.
+
+
+Já:
+
+for numero in 1..=5 {
+    println!("{}", numero);
+}
+
+
+Resultado:
+
+1
+2
+3
+4
+5
+
+
+Então:
+
+1..5
+
+significa:
+
+1 até antes de 5.
+
+
+1..=5
+
+significa:
+
+1 até 5, incluindo o 5.
+
+
+==================================================
+12. OPERADORES BITWISE
+==================================================
+
+Esses operadores trabalham diretamente com os bits dos números.
+
+&   -> AND bit a bit
+|   -> OR bit a bit
+^   -> XOR bit a bit
+!   -> NOT bit a bit em contextos numéricos
+<<  -> deslocamento para esquerda
+>>  -> deslocamento para direita
+
+
+Exemplo:
+
+let x: u8 = 5;
+let y: u8 = 3;
+
+println!("{}", x & y);
+
+
+Em binário:
+
+5 = 0101
+3 = 0011
+
+AND:
+
+0101
+0011
+----
+0001
+
+Resultado:
+
+1
+
+
+==================================================
+13. & PODE TER SIGNIFICADOS DIFERENTES
+==================================================
+
+Você já estudou:
+
+let referencia = &numero;
+
+Nesse contexto:
+
+&
+
+cria uma REFERÊNCIA.
+
+
+Mas:
+
+x & y
+
+com números inteiros significa:
+
+AND bit a bit.
+
+
+O significado depende do contexto.
+
+
+==================================================
+14. * TAMBÉM POSSUI SIGNIFICADOS DIFERENTES
+==================================================
+
+Multiplicação:
+
+let resultado = 5 * 2;
+
+Aqui:
+
+*
+
+significa multiplicação.
+
+
+Mas você também estudou:
+
+let referencia = &numero;
+
+println!("{}", *referencia);
+
+
+Nesse contexto:
+
+*
+
+significa:
+
+DEREFERENCIAMENTO
+
+
+Então:
+
+5 * 2
+
+-> multiplicação
+
+
+*referencia
+
+-> desreferenciamento
+
+
+==================================================
+15. OPERADORES E REFERÊNCIAS
+==================================================
+
+Alguns símbolos que você já encontrou:
+
+&valor
+
+Cria uma referência imutável.
+
+
+&mut valor
+
+Cria uma referência mutável.
+
+
+*referencia
+
+Desreferencia.
+
+Acessa o valor referenciado.
+
+
+EXEMPLO:
+
+fn main() {
+    let mut numero = 10;
+
+    let referencia = &mut numero;
+
+    *referencia += 5;
+
+    println!("{}", numero);
+}
+
+
+Resultado:
+
+15
+
+
+Aqui temos:
+
+&mut numero
+-> borrowing mutável
+
+*referencia
+-> dereferencing
+
++=
+-> atribuição com soma
+
+
+==================================================
+16. PRECEDÊNCIA DE OPERADORES
+==================================================
+
+Assim como na matemática, algumas operações acontecem antes de outras.
+
+Exemplo:
+
+let resultado = 2 + 3 * 4;
+
+
+Primeiro:
+
+3 * 4 = 12
+
+Depois:
+
+2 + 12 = 14
+
+
+Resultado:
+
+14
+
+
+Se quisermos alterar a ordem:
+
+let resultado = (2 + 3) * 4;
+
+
+Primeiro:
+
+2 + 3 = 5
+
+Depois:
+
+5 * 4 = 20
+
+
+Resultado:
+
+20
+
+
+Parênteses ajudam a deixar a intenção clara.
+
+
+==================================================
+17. EXEMPLO COMPLETO
+==================================================
+
+fn main() {
+    let mut numero = 10;
+
+    numero += 5;
+
+    println!("Número: {}", numero);
+
+    if numero >= 10 && numero <= 20 {
+        println!("O número está entre 10 e 20");
+    }
+
+    if numero % 2 == 0 {
+        println!("Número par");
+    } else {
+        println!("Número ímpar");
+    }
+}
+
+
+Passo a passo:
+
+numero = 10
+
+numero += 5
+
+numero = 15
+
+
+Depois:
+
+15 >= 10
+
+true
+
+
+15 <= 20
+
+true
+
+
+true && true
+
+true
+
+
+Então:
+
+"O número está entre 10 e 20"
+
+
+Depois:
+
+15 % 2
+
+resto = 1
+
+
+1 == 0
+
+false
+
+
+Então:
+
+"Número ímpar"
+
+
+==================================================
+RESUMO — OPERADORES EM RUST
+==================================================
+
+ARITMÉTICOS:
+
++   soma
+
+-   subtração
+
+*   multiplicação
+
+/   divisão
+
+%   resto da divisão
+
+
+ATRIBUIÇÃO:
+
+=   atribuição
+
++=  soma e atribui
+
+-=  subtrai e atribui
+
+*=  multiplica e atribui
+
+/=  divide e atribui
+
+%=  calcula o resto e atribui
+
+
+COMPARAÇÃO:
+
+==  igual
+
+!=  diferente
+
+>   maior
+
+<   menor
+
+>=  maior ou igual
+
+<=  menor ou igual
+
+
+LÓGICOS:
+
+&&  E
+
+||  OU
+
+!   NÃO
+
+
+INTERVALOS:
+
+1..5
+
+1, 2, 3, 4
+
+
+1..=5
+
+1, 2, 3, 4, 5
+
+
+REFERÊNCIAS:
+
+&valor
+
+cria uma referência
+
+
+&mut valor
+
+cria uma referência mutável
+
+
+*referencia
+
+desreferencia e acessa o valor
+
+
+BITWISE:
+
+&   AND
+
+|   OR
+
+^   XOR
+
+!   NOT
+
+<<  deslocamento para esquerda
+
+>>  deslocamento para direita
+
+
+==================================================
+FORMA RÁPIDA DE DECORAR
+==================================================
+
++  = somar
+
+-  = subtrair
+
+*  = multiplicar
+
+/  = dividir
+
+%  = pegar o resto
+
+
+=  = atribuir
+
+== = comparar igualdade
+
+!= = diferente
+
+
+>  = maior
+
+<  = menor
+
+>= = maior ou igual
+
+<= = menor ou igual
+
+
+&& = E
+
+|| = OU
+
+!  = NÃO
+
+
++= = somar e guardar
+
+-= = subtrair e guardar
+
+
+..  = intervalo sem incluir o final
+
+..= = intervalo incluindo o final
+
+
+&valor = referência
+
+&mut valor = referência mutável
+
+*referencia = desreferenciamento
+
+Tuplas em Rust
+
+Uma tupla (tuple) é uma estrutura que permite agrupar vários valores em uma única variável, e esses valores podem ter tipos diferentes.
+
+Por exemplo:
+
+let pessoa = ("Jhonata", 24, 1.68, true);
+
+Essa única variável contém:
+
+"Jhonata" → &str
+24        → i32
+1.68      → f64
+true      → bool
+
+Para suas anotações:
+
+TUPLAS (TUPLES) EM RUST
+
+==================================================
+1. O QUE É UMA TUPLA?
+==================================================
+
+Uma tupla permite armazenar vários valores dentro de uma única
+estrutura.
+
+Os valores de uma tupla podem possuir TIPOS DIFERENTES.
+
+Exemplo:
+
+let pessoa = ("Jhonata", 24, 1.68);
+
+Essa tupla possui:
+
+"Jhonata" -> &str
+24        -> número inteiro
+1.68      -> número de ponto flutuante
+
+
+==================================================
+2. DECLARANDO UMA TUPLA
+==================================================
+
+Podemos criar:
+
+let pessoa = ("Jhonata", 24, 1.68);
+
+Rust consegue inferir os tipos automaticamente.
+
+
+Também podemos informar os tipos:
+
+let pessoa: (&str, i32, f64) = ("Jhonata", 24, 1.68);
+
+
+A estrutura do tipo é:
+
+(&str, i32, f64)
+
+E os valores são:
+
+("Jhonata", 24, 1.68)
+
+
+==================================================
+3. UMA TUPLA PODE TER TIPOS DIFERENTES
+==================================================
+
+Exemplo:
+
+let dados = ("Rust", 10, 5.5, true);
+
+Temos:
+
+posição 0 -> "Rust" -> &str
+posição 1 -> 10     -> inteiro
+posição 2 -> 5.5    -> ponto flutuante
+posição 3 -> true   -> boolean
+
+
+Diferentemente de um array, os elementos de uma tupla podem
+possuir tipos diferentes.
+
+
+==================================================
