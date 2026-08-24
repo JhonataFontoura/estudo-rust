@@ -1,0 +1,72 @@
+STRUCT  exemplos 
+
+use std: :io;
+
+#[derive(Debug)]
+struct Funcionario {
+    id: u32,
+    nome: String,
+    idade: u32,
+    cargo: String,
+}
+
+// Busca um funcionário pelo ID
+fn buscar_funcionario(
+    funcionarios: &[Funcionario],
+    id: u32,
+) -> Option<&Funcionario> {
+    funcionarios
+        .iter()
+        .find(|funcionario| funcionario.id == id)
+}
+
+fn main() {
+    // Criação da lista de funcionários
+    let lista_de_funcionarios: Vec<Funcionario> = vec![
+        Funcionario {
+            id: 1,
+            nome: "Alice".to_string(),
+            idade: 30,
+            cargo: "Desenvolvedor".to_string(),
+        },
+        Funcionario {
+            id: 2,
+            nome: "Bob".to_string(),
+            idade: 25,
+            cargo: "Designer".to_string(),
+        },
+        Funcionario {
+            id: 3,
+            nome: "Charlie".to_string(),
+            idade: 35,
+            cargo: "Gerente".to_string(),
+        },
+        Funcionario {
+            id: 4,
+            nome: "Diana".to_string(),
+            idade: 28,
+            cargo: "Analista".to_string(),
+        },
+    ];
+
+    // ID que queremos procurar
+    let id_procurado: u32 = 3;
+
+    // Procura o funcionário
+    match buscar_funcionario(&lista_de_funcionarios, id_procurado) {
+        Some(funcionario) => {
+            println!("Funcionário encontrado!");
+            println!("------------------------");
+
+            // Cada informação pode ser acessada individualmente
+            println!("ID: {}", funcionario.id);
+            println!("Nome: {}", funcionario.nome);
+            println!("Idade: {}", funcionario.idade);
+            println!("Cargo: {}", funcionario.cargo);
+        }
+
+        None => {
+            println!("Funcionário com ID {} não encontrado.", id_procurado);
+        }
+    }
+}
